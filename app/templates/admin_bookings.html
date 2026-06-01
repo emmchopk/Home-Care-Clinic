@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}All Bookings | Home Care Clinic{% endblock %}
+
+{% block content %}
+
+<section class="admin-page">
+  <div class="admin-head">
+    <div>
+      <p class="eyebrow">Back Office</p>
+      <h1>All Bookings</h1>
+      <p>รายการจองทั้งหมดจากลูกค้าที่จองผ่านหน้าเว็บไซต์</p>
+    </div>
+
+    <a href="/admin/dashboard" class="btn-outline">Back Dashboard</a>
+  </div>
+
+  <div class="admin-panel">
+    <div class="panel-head">
+      <h2>Booking List</h2>
+      <span>{{ bookings|length }} bookings</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Package</th>
+            <th>Doctor</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Note</th>
+            <th>Email</th>
+            <th>LINE</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for booking in bookings %}
+          <tr>
+            <td>#{{ booking.id }}</td>
+            <td>{{ booking.full_name }}</td>
+            <td>{{ booking.email }}</td>
+            <td>{{ booking.customer_phone or booking.phone or "-" }}</td>
+            <td>{{ booking.package_name }}</td>
+            <td>{{ booking.doctor_name or "-" }}</td>
+            <td>{{ booking.appointment_date }}</td>
+            <td>{{ booking.appointment_time }}</td>
+            <td>{{ booking.note or "-" }}</td>
+
+            <td>
+              {% if booking.email_sent %}
+                <span class="status ok">Sent</span>
+              {% else %}
+                <span class="status bad">Fail</span>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if booking.line_sent %}
+                <span class="status ok">Sent</span>
+              {% else %}
+                <span class="status bad">Fail</span>
+              {% endif %}
+            </td>
+
+            <td>
+              <span class="status pending">{{ booking.status }}</span>
+            </td>
+
+            <td>
+              <a class="mini-btn" href="/admin/bookings/{{ booking.id }}/edit">Edit</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

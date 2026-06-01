@@ -1,0 +1,3145 @@
+import os
+import re
+import json
+import sqlite3
+import smtplib
+import hashlib
+import requests
+import shutil
+from datetime import datetime
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.utils import parseaddr
+from urllib.parse import urlencode
+
+from dotenv import load_dotenv
+from authlib.integrations.starlette_client import OAuth
+from openai import OpenAI
+
+from fastapi import FastAPI, Request, Form, UploadFile, File
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
+
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(BASE_DIR, "clinic.db")
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+
+STATIC_IMAGE_DIR = os.path.join(BASE_DIR, "app", "static", "images")
+PACKAGE_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "packages")
+PROMOTION_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "promotions")
+REVIEW_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "reviews")
+DOCTOR_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "doctors")
+
+os.makedirs(PACKAGE_IMAGE_DIR, exist_ok=True)
+os.makedirs(PROMOTION_IMAGE_DIR, exist_ok=True)
+os.makedirs(REVIEW_IMAGE_DIR, exist_ok=True)
+os.makedirs(DOCTOR_IMAGE_DIR, exist_ok=True)
+
+load_dotenv(ENV_PATH, override=True)
+
+
+def force_load_env():
+    if not os.path.exists(ENV_PATH):
+        print("========== ENV ERROR ==========")
+        print(".env not found:", ENV_PATH)
+        print("===============================")
+        return
+
+    with open(ENV_PATH, "r", encoding="utf-8-sig") as f:
+        for line in f:
+            line = line.strip()
+
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+
+            key, value = line.split("=", 1)
+            os.environ[key.strip()] = value.strip().strip('"').strip("'")
+
+
+force_load_env()
+
+app = FastAPI(title="Home Care Clinic")
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SESSION_SECRET", "home-care-clinic-secret-key"),
+)
+
+app.mount(
+    "/static",
+    StaticFiles(directory=os.path.join(BASE_DIR, "app", "static")),
+    name="static",
+)
+
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "app", "templates"))
+
+_original_template_response = templates.TemplateResponse
+
+
+def fixed_template_response(*args, **kwargs):
+    if args and isinstance(args[0], str):
+        template_name = args[0]
+        context = args[1] if len(args) > 1 else kwargs.pop("context", {})
+
+        if context is None:
+            context = {}
+
+        request = context.get("request")
+
+        if request is None:
+            raise RuntimeError(
+                "TemplateResponse แบบเก่าต้องมี {'request': request} ใน context"
+            )
+
+        return _original_template_response(request, template_name, context, **kwargs)
+
+    return _original_template_response(*args, **kwargs)
+
+
+templates.TemplateResponse = fixed_template_response
+
+
+oauth = OAuth()
+oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    client_kwargs={"scope": "openid email profile"},
+)
+
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+
+def clean_email_address(value: str) -> str:
+    if not value:
+        return ""
+
+    name, email = parseaddr(value)
+    return email or value.strip()
+
+
+def normalize_slug(value: str):
+    value = (value or "").strip().lower()
+    value = re.sub(r"[^a-z0-9\-]+", "-", value)
+    value = re.sub(r"-+", "-", value).strip("-")
+    return value
+
+
+def safe_filename(value: str) -> str:
+    value = (value or "").lower().strip()
+    value = re.sub(r"[^a-z0-9\-]+", "-", value)
+    value = re.sub(r"-+", "-", value).strip("-")
+    return value or "file"
+
+
+def save_uploaded_image(folder_path: str, prefix: str, image_file: UploadFile | None):
+    if not image_file or not image_file.filename:
+        return None
+
+    original_name = image_file.filename.lower()
+    allowed = (".jpg", ".jpeg", ".png", ".webp")
+
+    if not original_name.endswith(allowed):
+        return None
+
+    ext = os.path.splitext(original_name)[1].lower()
+    safe_prefix = safe_filename(prefix)
+
+    filename = f"{safe_prefix}-{datetime.now().strftime('%Y%m%d%H%M%S%f')}{ext}"
+    file_path = os.path.join(folder_path, filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(image_file.file, buffer)
+
+    return filename
+
+
+def admin_redirect_with_message(path: str, success: str = "", error: str = ""):
+    params = {}
+
+    if success:
+        params["success"] = success
+
+    if error:
+        params["error"] = error
+
+    if params:
+        return RedirectResponse(f"{path}?{urlencode(params)}", status_code=303)
+
+    return RedirectResponse(path, status_code=303)
+
+
+def get_admin_messages(request: Request):
+    return {
+        "success": request.query_params.get("success", ""),
+        "error": request.query_params.get("error", ""),
+    }
+
+
+def ai_translate_5_languages(th_text: str = "", en_text: str = ""):
+    th_text = (th_text or "").strip()
+    en_text = (en_text or "").strip()
+
+    empty_result = {
+        "th": "",
+        "en": "",
+        "zh": "",
+        "ja": "",
+        "ko": "",
+    }
+
+    if not th_text and not en_text:
+        return empty_result
+
+    fallback = {
+        "th": th_text or en_text,
+        "en": en_text or th_text,
+        "zh": th_text or en_text,
+        "ja": th_text or en_text,
+        "ko": th_text or en_text,
+    }
+
+    force_load_env()
+
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    model = os.getenv("OPENAI_TRANSLATE_MODEL", "gpt-4o-mini").strip()
+
+    if not api_key:
+        print("AI TRANSLATE SKIPPED: Missing OPENAI_API_KEY")
+        return fallback
+
+    try:
+        client = OpenAI(api_key=api_key)
+
+        prompt = f"""
+You are a professional translator for an aesthetic clinic website.
+
+Translate the content naturally and professionally into:
+- Thai
+- English
+- Simplified Chinese
+- Japanese
+- Korean
+
+Rules:
+- Keep meaning suitable for a beauty clinic / aesthetic clinic.
+- Keep text concise and marketing-friendly.
+- Do not add new medical claims.
+- Return ONLY valid JSON.
+- JSON keys must be exactly: th, en, zh, ja, ko.
+
+Input Thai:
+{th_text}
+
+Input English:
+{en_text}
+
+Return format:
+{{
+  "th": "...",
+  "en": "...",
+  "zh": "...",
+  "ja": "...",
+  "ko": "..."
+}}
+"""
+
+        response = client.responses.create(
+            model=model,
+            input=prompt,
+            text={
+                "format": {
+                    "type": "json_object"
+                }
+            },
+        )
+
+        raw = response.output_text.strip()
+        data = json.loads(raw)
+
+        return {
+            "th": data.get("th") or fallback["th"],
+            "en": data.get("en") or fallback["en"],
+            "zh": data.get("zh") or fallback["zh"],
+            "ja": data.get("ja") or fallback["ja"],
+            "ko": data.get("ko") or fallback["ko"],
+        }
+
+    except Exception as e:
+        print("AI TRANSLATE ERROR:", repr(e))
+        return fallback
+
+
+def init_db():
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            full_name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            phone TEXT,
+            password_hash TEXT NOT NULL,
+            provider TEXT DEFAULT 'local',
+            google_id TEXT,
+            role TEXT DEFAULT 'USER',
+            created_at TEXT NOT NULL
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS bookings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            customer_phone TEXT,
+            doctor_id INTEGER,
+            package_name TEXT NOT NULL,
+            appointment_date TEXT NOT NULL,
+            appointment_time TEXT NOT NULL,
+            note TEXT,
+            status TEXT NOT NULL DEFAULT 'PENDING',
+            revenue_amount REAL DEFAULT 0,
+            email_sent INTEGER DEFAULT 0,
+            line_sent INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS packages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            slug TEXT NOT NULL UNIQUE,
+            description TEXT,
+            price TEXT,
+            price_amount REAL DEFAULT 0,
+            badge TEXT,
+            image_file TEXT,
+            image_file_1 TEXT,
+            image_file_2 TEXT,
+            image_file_3 TEXT,
+            image_file_4 TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL,
+
+            name_th TEXT,
+            name_en TEXT,
+            name_zh TEXT,
+            name_ja TEXT,
+            name_ko TEXT,
+
+            description_th TEXT,
+            description_en TEXT,
+            description_zh TEXT,
+            description_ja TEXT,
+            description_ko TEXT
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS promotions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            slug TEXT NOT NULL UNIQUE,
+            description TEXT,
+            price TEXT,
+            badge TEXT,
+            image_file_1 TEXT,
+            image_file_2 TEXT,
+            image_file_3 TEXT,
+            image_file_4 TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL,
+
+            title_th TEXT,
+            title_en TEXT,
+            title_zh TEXT,
+            title_ja TEXT,
+            title_ko TEXT,
+
+            description_th TEXT,
+            description_en TEXT,
+            description_zh TEXT,
+            description_ja TEXT,
+            description_ko TEXT
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS reviews (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            customer_name TEXT NOT NULL,
+            review_text TEXT NOT NULL,
+            rating INTEGER DEFAULT 5,
+            image_file TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS doctors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            specialty TEXT,
+            expertise TEXT,
+            phone TEXT,
+            image_file TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL,
+
+            name_th TEXT,
+            name_en TEXT,
+            name_zh TEXT,
+            name_ja TEXT,
+            name_ko TEXT,
+
+            specialty_th TEXT,
+            specialty_en TEXT,
+            specialty_zh TEXT,
+            specialty_ja TEXT,
+            specialty_ko TEXT,
+
+            expertise_th TEXT,
+            expertise_en TEXT,
+            expertise_zh TEXT,
+            expertise_ja TEXT,
+            expertise_ko TEXT
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS doctor_schedules (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            doctor_id INTEGER NOT NULL,
+            work_date TEXT NOT NULL,
+            start_time TEXT NOT NULL,
+            end_time TEXT NOT NULL,
+            note TEXT,
+            is_available INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(doctor_id) REFERENCES doctors(id)
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS line_leads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            line_user_id TEXT,
+            display_name TEXT,
+            message_text TEXT,
+            customer_name TEXT,
+            phone TEXT,
+            package_name TEXT,
+            appointment_date TEXT,
+            appointment_time TEXT,
+            status TEXT DEFAULT 'NEW',
+            note TEXT,
+            created_at TEXT NOT NULL
+        )
+        """
+    )
+
+    def add_column_if_missing(table_name: str, column_name: str, column_sql: str):
+        columns = [
+            row["name"]
+            for row in cur.execute(f"PRAGMA table_info({table_name})").fetchall()
+        ]
+
+        if column_name not in columns:
+            cur.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_sql}")
+
+    add_column_if_missing("users", "provider", "provider TEXT DEFAULT 'local'")
+    add_column_if_missing("users", "google_id", "google_id TEXT")
+    add_column_if_missing("users", "role", "role TEXT DEFAULT 'USER'")
+
+    add_column_if_missing("bookings", "customer_phone", "customer_phone TEXT")
+    add_column_if_missing("bookings", "doctor_id", "doctor_id INTEGER")
+    add_column_if_missing("bookings", "revenue_amount", "revenue_amount REAL DEFAULT 0")
+    add_column_if_missing("bookings", "email_sent", "email_sent INTEGER DEFAULT 0")
+    add_column_if_missing("bookings", "line_sent", "line_sent INTEGER DEFAULT 0")
+
+    add_column_if_missing("packages", "price_amount", "price_amount REAL DEFAULT 0")
+    add_column_if_missing("packages", "image_file", "image_file TEXT")
+    add_column_if_missing("packages", "image_file_1", "image_file_1 TEXT")
+    add_column_if_missing("packages", "image_file_2", "image_file_2 TEXT")
+    add_column_if_missing("packages", "image_file_3", "image_file_3 TEXT")
+    add_column_if_missing("packages", "image_file_4", "image_file_4 TEXT")
+
+    add_column_if_missing("packages", "name_th", "name_th TEXT")
+    add_column_if_missing("packages", "name_en", "name_en TEXT")
+    add_column_if_missing("packages", "name_zh", "name_zh TEXT")
+    add_column_if_missing("packages", "name_ja", "name_ja TEXT")
+    add_column_if_missing("packages", "name_ko", "name_ko TEXT")
+    add_column_if_missing("packages", "description_th", "description_th TEXT")
+    add_column_if_missing("packages", "description_en", "description_en TEXT")
+    add_column_if_missing("packages", "description_zh", "description_zh TEXT")
+    add_column_if_missing("packages", "description_ja", "description_ja TEXT")
+    add_column_if_missing("packages", "description_ko", "description_ko TEXT")
+
+    add_column_if_missing("promotions", "title_th", "title_th TEXT")
+    add_column_if_missing("promotions", "title_en", "title_en TEXT")
+    add_column_if_missing("promotions", "title_zh", "title_zh TEXT")
+    add_column_if_missing("promotions", "title_ja", "title_ja TEXT")
+    add_column_if_missing("promotions", "title_ko", "title_ko TEXT")
+    add_column_if_missing("promotions", "description_th", "description_th TEXT")
+    add_column_if_missing("promotions", "description_en", "description_en TEXT")
+    add_column_if_missing("promotions", "description_zh", "description_zh TEXT")
+    add_column_if_missing("promotions", "description_ja", "description_ja TEXT")
+    add_column_if_missing("promotions", "description_ko", "description_ko TEXT")
+
+    add_column_if_missing("doctors", "specialty", "specialty TEXT")
+    add_column_if_missing("doctors", "expertise", "expertise TEXT")
+    add_column_if_missing("doctors", "phone", "phone TEXT")
+    add_column_if_missing("doctors", "image_file", "image_file TEXT")
+    add_column_if_missing("doctors", "is_active", "is_active INTEGER DEFAULT 1")
+
+    add_column_if_missing("doctors", "name_th", "name_th TEXT")
+    add_column_if_missing("doctors", "name_en", "name_en TEXT")
+    add_column_if_missing("doctors", "name_zh", "name_zh TEXT")
+    add_column_if_missing("doctors", "name_ja", "name_ja TEXT")
+    add_column_if_missing("doctors", "name_ko", "name_ko TEXT")
+    add_column_if_missing("doctors", "specialty_th", "specialty_th TEXT")
+    add_column_if_missing("doctors", "specialty_en", "specialty_en TEXT")
+    add_column_if_missing("doctors", "specialty_zh", "specialty_zh TEXT")
+    add_column_if_missing("doctors", "specialty_ja", "specialty_ja TEXT")
+    add_column_if_missing("doctors", "specialty_ko", "specialty_ko TEXT")
+    add_column_if_missing("doctors", "expertise_th", "expertise_th TEXT")
+    add_column_if_missing("doctors", "expertise_en", "expertise_en TEXT")
+    add_column_if_missing("doctors", "expertise_zh", "expertise_zh TEXT")
+    add_column_if_missing("doctors", "expertise_ja", "expertise_ja TEXT")
+    add_column_if_missing("doctors", "expertise_ko", "expertise_ko TEXT")
+
+    add_column_if_missing("line_leads", "display_name", "display_name TEXT")
+    add_column_if_missing("line_leads", "message_text", "message_text TEXT")
+    add_column_if_missing("line_leads", "customer_name", "customer_name TEXT")
+    add_column_if_missing("line_leads", "phone", "phone TEXT")
+    add_column_if_missing("line_leads", "package_name", "package_name TEXT")
+    add_column_if_missing("line_leads", "appointment_date", "appointment_date TEXT")
+    add_column_if_missing("line_leads", "appointment_time", "appointment_time TEXT")
+    add_column_if_missing("line_leads", "status", "status TEXT DEFAULT 'NEW'")
+    add_column_if_missing("line_leads", "note", "note TEXT")
+
+    conn.commit()
+    conn.close()
+
+
+def seed_admin_user():
+    force_load_env()
+
+    admin_email = os.getenv("ADMIN_EMAIL", "").strip().lower()
+    admin_password = os.getenv("ADMIN_PASSWORD", "").strip()
+
+    if not admin_email or not admin_password:
+        print("========== ADMIN SEED SKIPPED ==========")
+        print("Please set ADMIN_EMAIL and ADMIN_PASSWORD in .env")
+        print("========================================")
+        return
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    existing = cur.execute(
+        "SELECT * FROM users WHERE email = ?",
+        (admin_email,),
+    ).fetchone()
+
+    if existing:
+        cur.execute(
+            """
+            UPDATE users
+            SET full_name = ?, password_hash = ?, provider = ?, role = ?
+            WHERE email = ?
+            """,
+            (
+                "Home Care Admin",
+                hash_password(admin_password),
+                "local",
+                "ADMIN",
+                admin_email,
+            ),
+        )
+    else:
+        cur.execute(
+            """
+            INSERT INTO users (
+                full_name,
+                email,
+                phone,
+                password_hash,
+                provider,
+                google_id,
+                role,
+                created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                "Home Care Admin",
+                admin_email,
+                "",
+                hash_password(admin_password),
+                "local",
+                None,
+                "ADMIN",
+                datetime.now().isoformat(timespec="seconds"),
+            ),
+        )
+
+    conn.commit()
+    conn.close()
+
+    print("========== ADMIN READY ==========")
+    print("ADMIN_EMAIL:", admin_email)
+    print("=================================")
+
+
+def seed_default_clinic_data():
+    conn = get_db()
+    cur = conn.cursor()
+
+    default_packages = [
+        (
+            "Facial Radiance Package",
+            "facial-radiance",
+            "ทำความสะอาดผิว เติมความชุ่มชื้น และเพิ่มความกระจ่างใส",
+            "฿2,890",
+            2890,
+            "POPULAR",
+            "facial-radiance.jpg",
+        ),
+        (
+            "Acne Care Package",
+            "acne-care",
+            "ดูแลปัญหาสิว ลดการอุดตัน และฟื้นฟูผิวให้เรียบเนียน",
+            "฿3,690",
+            3690,
+            "BEST SELLER",
+            "acne-care.jpg",
+        ),
+        (
+            "Laser Glow Package",
+            "laser-glow",
+            "ปรับสีผิว ลดรอย และช่วยให้ผิวดูละเอียดขึ้น",
+            "฿4,990",
+            4990,
+            "LIMITED",
+            "laser-glow.jpg",
+        ),
+    ]
+
+    for package in default_packages:
+        exists = cur.execute(
+            "SELECT id FROM packages WHERE slug = ?",
+            (package[1],),
+        ).fetchone()
+
+        if not exists:
+            cur.execute(
+                """
+                INSERT INTO packages (
+                    name,
+                    slug,
+                    description,
+                    price,
+                    price_amount,
+                    badge,
+                    image_file,
+                    image_file_1,
+                    is_active,
+                    created_at,
+                    name_th,
+                    name_en,
+                    description_th,
+                    description_en
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+                """,
+                (
+                    package[0],
+                    package[1],
+                    package[2],
+                    package[3],
+                    package[4],
+                    package[5],
+                    package[6],
+                    package[6],
+                    datetime.now().isoformat(timespec="seconds"),
+                    package[0],
+                    package[0],
+                    package[2],
+                    package[2],
+                ),
+            )
+
+    default_promotions = [
+        (
+            "Facial Radiance Package",
+            "promo-facial-radiance",
+            "ทำความสะอาดผิว เติมความชุ่มชื้น และเพิ่มความกระจ่างใส",
+            "฿2,890",
+            "POPULAR",
+            "facial-radiance.jpg",
+        ),
+        (
+            "Acne Care Package",
+            "promo-acne-care",
+            "ดูแลปัญหาสิว ลดการอุดตัน และฟื้นฟูผิวให้เรียบเนียน",
+            "฿3,690",
+            "BEST SELLER",
+            "acne-care.jpg",
+        ),
+        (
+            "Laser Glow Package",
+            "promo-laser-glow",
+            "ปรับสีผิว ลดรอย และช่วยให้ผิวดูละเอียดขึ้น",
+            "฿4,990",
+            "LIMITED",
+            "laser-glow.jpg",
+        ),
+    ]
+
+    for promo in default_promotions:
+        exists = cur.execute(
+            "SELECT id FROM promotions WHERE slug = ?",
+            (promo[1],),
+        ).fetchone()
+
+        if not exists:
+            cur.execute(
+                """
+                INSERT INTO promotions (
+                    title,
+                    slug,
+                    description,
+                    price,
+                    badge,
+                    image_file_1,
+                    is_active,
+                    created_at,
+                    title_th,
+                    title_en,
+                    description_th,
+                    description_en
+                )
+                VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+                """,
+                (
+                    promo[0],
+                    promo[1],
+                    promo[2],
+                    promo[3],
+                    promo[4],
+                    promo[5],
+                    datetime.now().isoformat(timespec="seconds"),
+                    promo[0],
+                    promo[0],
+                    promo[2],
+                    promo[2],
+                ),
+            )
+
+    default_reviews = [
+        ("Clean & Friendly", "คลินิกสะอาด บริการเป็นกันเอง และมีระบบจองที่ชัดเจน", 5),
+        ("Easy Booking", "เลือกแพ็กเกจได้ง่าย มีรายละเอียดครบ และได้รับการดูแลรวดเร็ว", 5),
+        ("Personalized Care", "ดูแลแบบเฉพาะบุคคล เหมาะกับลูกค้าที่ต้องการความน่าเชื่อถือ", 5),
+    ]
+
+    for review in default_reviews:
+        exists = cur.execute(
+            "SELECT id FROM reviews WHERE customer_name = ?",
+            (review[0],),
+        ).fetchone()
+
+        if not exists:
+            cur.execute(
+                """
+                INSERT INTO reviews (
+                    customer_name,
+                    review_text,
+                    rating,
+                    image_file,
+                    is_active,
+                    created_at
+                )
+                VALUES (?, ?, ?, NULL, 1, ?)
+                """,
+                (
+                    review[0],
+                    review[1],
+                    review[2],
+                    datetime.now().isoformat(timespec="seconds"),
+                ),
+            )
+
+    default_doctors = [
+        (
+            "Dr. Ploy",
+            "Aesthetic Doctor",
+            "ดูแลสิว ผิวแพ้ง่าย เติมความชุ่มชื้น และวางแผนดูแลผิวเฉพาะบุคคล",
+            "",
+            1,
+        ),
+        (
+            "Dr. Mint",
+            "Skin Specialist",
+            "เลเซอร์ผิวหน้า ลดรอยสิว ปรับผิวกระจ่างใส และฟื้นฟูผิวโทรม",
+            "",
+            1,
+        ),
+        (
+            "Dr. Nicha",
+            "Laser Specialist",
+            "เลเซอร์ ฝ้า กระ จุดด่างดำ และปรับสภาพผิวให้เรียบเนียน",
+            "",
+            1,
+        ),
+    ]
+
+    for doctor in default_doctors:
+        exists = cur.execute(
+            "SELECT id FROM doctors WHERE name = ?",
+            (doctor[0],),
+        ).fetchone()
+
+        if not exists:
+            cur.execute(
+                """
+                INSERT INTO doctors (
+                    name,
+                    specialty,
+                    expertise,
+                    phone,
+                    image_file,
+                    is_active,
+                    created_at,
+                    name_th,
+                    name_en,
+                    specialty_th,
+                    specialty_en,
+                    expertise_th,
+                    expertise_en
+                )
+                VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    doctor[0],
+                    doctor[1],
+                    doctor[2],
+                    doctor[3],
+                    doctor[4],
+                    datetime.now().isoformat(timespec="seconds"),
+                    doctor[0],
+                    doctor[0],
+                    doctor[1],
+                    doctor[1],
+                    doctor[2],
+                    doctor[2],
+                ),
+            )
+
+    conn.commit()
+    conn.close()
+
+
+@app.on_event("startup")
+def startup_event():
+    init_db()
+    seed_admin_user()
+    seed_default_clinic_data()
+
+
+def current_user(request: Request):
+    user_id = request.session.get("user_id")
+
+    if not user_id:
+        return None
+
+    conn = get_db()
+    user = conn.execute(
+        "SELECT * FROM users WHERE id = ?",
+        (user_id,),
+    ).fetchone()
+    conn.close()
+
+    return user
+
+
+def user_role(user) -> str:
+    if not user:
+        return "GUEST"
+
+    try:
+        return user["role"] or "USER"
+    except Exception:
+        return "USER"
+
+
+def require_admin(request: Request):
+    user = current_user(request)
+
+    if not user:
+        return None
+
+    if user_role(user) != "ADMIN":
+        return None
+
+    return user
+
+
+def get_active_packages():
+    conn = get_db()
+    rows = conn.execute(
+        """
+        SELECT * FROM packages
+        WHERE is_active = 1
+        ORDER BY id ASC
+        """
+    ).fetchall()
+    conn.close()
+    return rows
+
+
+def get_active_promotions():
+    conn = get_db()
+    rows = conn.execute(
+        """
+        SELECT * FROM promotions
+        WHERE is_active = 1
+        ORDER BY id ASC
+        """
+    ).fetchall()
+    conn.close()
+    return rows
+
+
+def get_active_reviews():
+    conn = get_db()
+    rows = conn.execute(
+        """
+        SELECT * FROM reviews
+        WHERE is_active = 1
+        ORDER BY id DESC
+        """
+    ).fetchall()
+    conn.close()
+    return rows
+
+
+def get_active_doctors():
+    conn = get_db()
+    rows = conn.execute(
+        """
+        SELECT * FROM doctors
+        WHERE is_active = 1
+        ORDER BY id ASC
+        """
+    ).fetchall()
+    conn.close()
+    return rows
+
+
+def get_package_by_slug(slug: str):
+    conn = get_db()
+    row = conn.execute(
+        """
+        SELECT * FROM packages
+        WHERE slug = ? AND is_active = 1
+        """,
+        (slug,),
+    ).fetchone()
+    conn.close()
+    return row
+
+
+def get_package_price_amount(package_name: str) -> float:
+    conn = get_db()
+    row = conn.execute(
+        "SELECT price_amount FROM packages WHERE name = ? OR name_th = ? OR name_en = ?",
+        (package_name, package_name, package_name),
+    ).fetchone()
+    conn.close()
+
+    if not row:
+        return 0
+
+    return float(row["price_amount"] or 0)
+
+
+def get_doctor_name(doctor_id):
+    if not doctor_id:
+        return "-"
+
+    conn = get_db()
+    row = conn.execute(
+        "SELECT name FROM doctors WHERE id = ?",
+        (doctor_id,),
+    ).fetchone()
+    conn.close()
+
+    return row["name"] if row else "-"
+
+
+def get_revenue_stats():
+    today = datetime.now().strftime("%Y-%m-%d")
+    month = datetime.now().strftime("%Y-%m")
+    year = datetime.now().strftime("%Y")
+
+    conn = get_db()
+
+    daily = conn.execute(
+        """
+        SELECT COALESCE(SUM(revenue_amount), 0) AS total
+        FROM bookings
+        WHERE appointment_date = ?
+          AND status != 'CANCELLED'
+        """,
+        (today,),
+    ).fetchone()["total"]
+
+    monthly = conn.execute(
+        """
+        SELECT COALESCE(SUM(revenue_amount), 0) AS total
+        FROM bookings
+        WHERE substr(appointment_date, 1, 7) = ?
+          AND status != 'CANCELLED'
+        """,
+        (month,),
+    ).fetchone()["total"]
+
+    yearly = conn.execute(
+        """
+        SELECT COALESCE(SUM(revenue_amount), 0) AS total
+        FROM bookings
+        WHERE substr(appointment_date, 1, 4) = ?
+          AND status != 'CANCELLED'
+        """,
+        (year,),
+    ).fetchone()["total"]
+
+    conn.close()
+
+    return {
+        "daily": float(daily or 0),
+        "monthly": float(monthly or 0),
+        "yearly": float(yearly or 0),
+    }
+
+
+def send_booking_email(
+    to_email: str,
+    full_name: str,
+    package_name: str,
+    appointment_date: str,
+    appointment_time: str,
+    doctor_name: str = "-",
+    customer_phone: str = "-",
+    subject_prefix: str = "ยืนยันการจองคิว",
+):
+    force_load_env()
+
+    smtp_host = os.getenv("SMTP_HOST", "").strip() or "smtp.gmail.com"
+    smtp_port = int(os.getenv("SMTP_PORT", "587").strip() or "587")
+    smtp_user = clean_email_address(os.getenv("SMTP_USER", "").strip())
+    smtp_pass = os.getenv("SMTP_PASS", "").strip().replace(" ", "")
+    smtp_from_raw = os.getenv("SMTP_FROM", "").strip()
+    smtp_from = clean_email_address(smtp_from_raw) or smtp_user
+
+    to_email = clean_email_address(to_email)
+    subject = f"{subject_prefix} Home Care Clinic"
+
+    text = f"""
+Home Care Clinic
+
+เรียนคุณ {full_name}
+
+{subject_prefix}ของคุณเรียบร้อยแล้ว
+
+เบอร์โทร: {customer_phone}
+คุณหมอ: {doctor_name}
+Package: {package_name}
+Appointment Date: {appointment_date}
+Appointment Time: {appointment_time}
+Status: Pending Confirmation
+
+กรุณามาถึงก่อนเวลานัดประมาณ 10-15 นาที
+
+ขอบคุณที่ไว้วางใจ Home Care Clinic
+"""
+
+    html = f"""
+    <div style="font-family:Arial,sans-serif;background:#fff3f4;padding:30px;">
+      <div style="max-width:620px;margin:auto;background:#fffaf3;border-radius:18px;padding:28px;border:1px solid #f0d8bd;">
+        <h2 style="color:#c7a46b;margin-top:0;">Home Care Clinic</h2>
+        <p>เรียนคุณ <b>{full_name}</b>,</p>
+        <p>{subject_prefix}ของคุณเรียบร้อยแล้ว</p>
+
+        <div style="background:#f8d8dc;padding:18px;border-radius:14px;margin:20px 0;">
+          <p><b>Phone:</b> {customer_phone}</p>
+          <p><b>Doctor:</b> {doctor_name}</p>
+          <p><b>Package:</b> {package_name}</p>
+          <p><b>Appointment Date:</b> {appointment_date}</p>
+          <p><b>Appointment Time:</b> {appointment_time}</p>
+          <p><b>Status:</b> Pending Confirmation</p>
+        </div>
+
+        <p>กรุณามาถึงก่อนเวลานัดประมาณ 10-15 นาที</p>
+        <p style="color:#66785f;">ขอบคุณที่ไว้วางใจ Home Care Clinic</p>
+      </div>
+    </div>
+    """
+
+    if not smtp_host or not smtp_user or not smtp_pass:
+        print("========== EMAIL NOT SENT ==========")
+        print("SMTP config missing. Please check .env")
+        print("====================================")
+        return False
+
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["From"] = smtp_from
+        msg["To"] = to_email
+        msg["Subject"] = subject
+        msg.attach(MIMEText(text, "plain", "utf-8"))
+        msg.attach(MIMEText(html, "html", "utf-8"))
+
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=30) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(smtp_user, smtp_pass)
+            server.sendmail(smtp_user, [to_email], msg.as_string())
+
+        print("========== EMAIL SENT ==========")
+        print(f"Booking email sent to: {to_email}")
+        print("================================")
+        return True
+
+    except Exception as e:
+        print("========== EMAIL ERROR ==========")
+        print(repr(e))
+        print("=================================")
+        return False
+
+
+def send_line_booking_alert(
+    full_name: str,
+    email: str,
+    package_name: str,
+    appointment_date: str,
+    appointment_time: str,
+    note: str = "",
+    doctor_name: str = "-",
+    customer_phone: str = "-",
+):
+    force_load_env()
+
+    line_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "").strip()
+    line_user_id = os.getenv("LINE_ADMIN_USER_ID", "").strip()
+
+    if not line_token or not line_user_id:
+        print("========== LINE NOT SENT ==========")
+        print("Missing LINE_CHANNEL_ACCESS_TOKEN or LINE_ADMIN_USER_ID in .env")
+        print("===================================")
+        return False
+
+    message = f"""🔔 มีการจองคิวใหม่ Home Care Clinic
+
+👤 ลูกค้า: {full_name}
+📞 เบอร์โทร: {customer_phone}
+📧 Email: {email}
+👩‍⚕️ คุณหมอ: {doctor_name}
+💆 Package: {package_name}
+📅 วันที่: {appointment_date}
+⏰ เวลา: {appointment_time}
+📝 หมายเหตุ: {note or "-"}
+
+สถานะ: PENDING"""
+
+    try:
+        response = requests.post(
+            "https://api.line.me/v2/bot/message/push",
+            headers={
+                "Authorization": f"Bearer {line_token}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "to": line_user_id,
+                "messages": [{"type": "text", "text": message}],
+            },
+            timeout=20,
+        )
+
+        print("========== LINE RESPONSE ==========")
+        print("STATUS:", response.status_code)
+        print("BODY:", response.text)
+        print("===================================")
+
+        return response.status_code == 200
+
+    except Exception as e:
+        print("========== LINE ERROR ==========")
+        print(repr(e))
+        print("================================")
+        return False
+
+
+def get_line_profile(line_user_id: str):
+    force_load_env()
+
+    line_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "").strip()
+
+    if not line_token or not line_user_id:
+        return ""
+
+    try:
+        response = requests.get(
+            f"https://api.line.me/v2/bot/profile/{line_user_id}",
+            headers={"Authorization": f"Bearer {line_token}"},
+            timeout=15,
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            return data.get("displayName", "")
+
+        print("LINE PROFILE ERROR:", response.status_code, response.text)
+        return ""
+
+    except Exception as e:
+        print("LINE PROFILE EXCEPTION:", repr(e))
+        return ""
+
+
+def parse_line_booking_message(message_text: str):
+    data = {
+        "customer_name": "",
+        "phone": "",
+        "package_name": "",
+        "appointment_date": "",
+        "appointment_time": "",
+        "note": "",
+        "status": "NEW",
+    }
+
+    if not message_text:
+        return data
+
+    text = message_text.strip()
+
+    if "จอง" in text:
+        data["status"] = "BOOKING_REQUEST"
+
+    lines = text.splitlines()
+
+    for line in lines:
+        clean = line.strip()
+
+        if ":" not in clean:
+            continue
+
+        key, value = clean.split(":", 1)
+        key = key.strip().lower()
+        value = value.strip()
+
+        if key in ["ชื่อ", "name", "customer", "ลูกค้า"]:
+            data["customer_name"] = value
+
+        elif key in ["เบอร์", "เบอร์โทร", "phone", "tel", "โทร"]:
+            data["phone"] = value
+
+        elif key in ["แพ็กเกจ", "แพคเกจ", "package", "บริการ"]:
+            data["package_name"] = value
+
+        elif key in ["วันที่", "date", "วัน"]:
+            data["appointment_date"] = value
+
+        elif key in ["เวลา", "time"]:
+            data["appointment_time"] = value
+
+        elif key in ["หมายเหตุ", "note", "เพิ่มเติม"]:
+            data["note"] = value
+
+    return data
+
+
+def save_line_lead(
+    line_user_id: str,
+    display_name: str,
+    message_text: str,
+):
+    parsed = parse_line_booking_message(message_text)
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        INSERT INTO line_leads (
+            line_user_id,
+            display_name,
+            message_text,
+            customer_name,
+            phone,
+            package_name,
+            appointment_date,
+            appointment_time,
+            status,
+            note,
+            created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            line_user_id,
+            display_name,
+            message_text,
+            parsed["customer_name"],
+            parsed["phone"],
+            parsed["package_name"],
+            parsed["appointment_date"],
+            parsed["appointment_time"],
+            parsed["status"],
+            parsed["note"],
+            datetime.now().isoformat(timespec="seconds"),
+        ),
+    )
+
+    conn.commit()
+    lead_id = cur.lastrowid
+    conn.close()
+
+    return lead_id
+
+
+def reply_line_message(reply_token: str, text: str):
+    force_load_env()
+
+    line_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", "").strip()
+
+    if not line_token or not reply_token:
+        return False
+
+    try:
+        response = requests.post(
+            "https://api.line.me/v2/bot/message/reply",
+            headers={
+                "Authorization": f"Bearer {line_token}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "replyToken": reply_token,
+                "messages": [{"type": "text", "text": text}],
+            },
+            timeout=15,
+        )
+
+        print("LINE REPLY:", response.status_code, response.text)
+        return response.status_code == 200
+
+    except Exception as e:
+        print("LINE REPLY ERROR:", repr(e))
+        return False
+
+
+@app.get("/")
+def root():
+    return RedirectResponse("/home", status_code=303)
+
+
+@app.get("/home")
+def home(request: Request):
+    force_load_env()
+
+    return templates.TemplateResponse(
+        "home.html",
+        {
+            "request": request,
+            "user": current_user(request),
+            "packages": get_active_packages(),
+            "promotions": get_active_promotions(),
+            "reviews": get_active_reviews(),
+            "doctors": get_active_doctors(),
+            "clinic_location_name": os.getenv(
+                "CLINIC_LOCATION_NAME",
+                "Home Care Clinic, Bangkok",
+            ),
+            "clinic_google_map_url": os.getenv(
+                "CLINIC_GOOGLE_MAP_URL",
+                "https://maps.google.com/?q=Home+Care+Clinic+Bangkok",
+            ),
+        },
+    )
+
+
+@app.get("/register")
+def register_page(request: Request):
+    return templates.TemplateResponse(
+        "register.html",
+        {
+            "request": request,
+            "user": current_user(request),
+            "error": None,
+        },
+    )
+
+
+@app.post("/register")
+def register(
+    request: Request,
+    full_name: str = Form(...),
+    email: str = Form(...),
+    phone: str = Form(""),
+    password: str = Form(...),
+):
+    email = email.strip().lower()
+
+    conn = get_db()
+    exists = conn.execute(
+        "SELECT id FROM users WHERE email = ?",
+        (email,),
+    ).fetchone()
+
+    if exists:
+        conn.close()
+        return templates.TemplateResponse(
+            "register.html",
+            {
+                "request": request,
+                "user": current_user(request),
+                "error": "Email นี้ถูกใช้งานแล้ว กรุณา Login",
+            },
+        )
+
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO users (
+            full_name,
+            email,
+            phone,
+            password_hash,
+            provider,
+            google_id,
+            role,
+            created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            full_name.strip(),
+            email,
+            phone.strip(),
+            hash_password(password),
+            "local",
+            None,
+            "USER",
+            datetime.now().isoformat(timespec="seconds"),
+        ),
+    )
+
+    conn.commit()
+    user_id = cur.lastrowid
+    conn.close()
+
+    request.session["user_id"] = user_id
+    return RedirectResponse("/booking", status_code=303)
+
+
+@app.get("/login")
+def login_page(request: Request):
+    return templates.TemplateResponse(
+        "login.html",
+        {
+            "request": request,
+            "user": current_user(request),
+            "error": None,
+            "next_url": request.query_params.get("next", "/booking"),
+        },
+    )
+
+
+@app.post("/login")
+def login(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    next_url: str = Form("/booking"),
+):
+    email = email.strip().lower()
+
+    conn = get_db()
+    user = conn.execute(
+        "SELECT * FROM users WHERE email = ?",
+        (email,),
+    ).fetchone()
+    conn.close()
+
+    if not user:
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "user": None,
+                "error": "Email หรือ Password ไม่ถูกต้อง",
+                "next_url": next_url,
+            },
+        )
+
+    if user["provider"] == "google" and not user["password_hash"]:
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "user": None,
+                "error": "บัญชีนี้สมัครผ่าน Google กรุณากด Login with Google",
+                "next_url": next_url,
+            },
+        )
+
+    if user["password_hash"] != hash_password(password):
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "user": None,
+                "error": "Email หรือ Password ไม่ถูกต้อง",
+                "next_url": next_url,
+            },
+        )
+
+    request.session["user_id"] = user["id"]
+
+    if user_role(user) == "ADMIN":
+        return RedirectResponse("/admin/dashboard", status_code=303)
+
+    return RedirectResponse(next_url or "/booking", status_code=303)
+
+
+@app.get("/logout")
+def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse("/home", status_code=303)
+
+
+@app.get("/auth/google")
+async def auth_google(request: Request):
+    if not os.getenv("GOOGLE_CLIENT_ID") or not os.getenv("GOOGLE_CLIENT_SECRET"):
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "user": current_user(request),
+                "error": "ยังไม่ได้ตั้งค่า GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET ในไฟล์ .env",
+                "next_url": "/booking",
+            },
+        )
+
+    redirect_uri = request.url_for("auth_google_callback")
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+
+@app.get("/auth/google/callback")
+async def auth_google_callback(request: Request):
+    try:
+        token = await oauth.google.authorize_access_token(request)
+        user_info = token.get("userinfo")
+
+        if not user_info:
+            user_info = await oauth.google.userinfo(token=token)
+
+        google_id = user_info.get("sub")
+        email = user_info.get("email")
+        full_name = user_info.get("name") or email
+
+        if not email:
+            return RedirectResponse("/login", status_code=303)
+
+        email = email.strip().lower()
+
+        conn = get_db()
+        user = conn.execute(
+            "SELECT * FROM users WHERE email = ?",
+            (email,),
+        ).fetchone()
+
+        if user:
+            conn.execute(
+                """
+                UPDATE users
+                SET provider = ?, google_id = ?
+                WHERE id = ?
+                """,
+                ("google", google_id, user["id"]),
+            )
+            conn.commit()
+            user_id = user["id"]
+        else:
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO users (
+                    full_name,
+                    email,
+                    phone,
+                    password_hash,
+                    provider,
+                    google_id,
+                    role,
+                    created_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    full_name,
+                    email,
+                    "",
+                    "",
+                    "google",
+                    google_id,
+                    "USER",
+                    datetime.now().isoformat(timespec="seconds"),
+                ),
+            )
+            conn.commit()
+            user_id = cur.lastrowid
+
+        conn.close()
+        request.session["user_id"] = user_id
+
+        return RedirectResponse("/booking", status_code=303)
+
+    except Exception as e:
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "user": current_user(request),
+                "error": f"Google Login ไม่สำเร็จ: {str(e)}",
+                "next_url": "/booking",
+            },
+        )
+
+
+@app.get("/line/webhook")
+def line_webhook_check():
+    return {"ok": True, "message": "LINE webhook endpoint is ready"}
+
+
+@app.post("/line/webhook")
+async def line_webhook(request: Request):
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    print("")
+    print("========== LINE WEBHOOK ==========")
+    print(body)
+    print("==================================")
+    print("")
+
+    events = body.get("events", [])
+
+    for event in events:
+        event_type = event.get("type")
+        source = event.get("source", {})
+        message = event.get("message", {})
+        reply_token = event.get("replyToken")
+
+        line_user_id = source.get("userId", "")
+        message_type = message.get("type", "")
+        message_text = message.get("text", "")
+
+        if event_type == "message" and message_type == "text":
+            display_name = get_line_profile(line_user_id)
+
+            lead_id = save_line_lead(
+                line_user_id=line_user_id,
+                display_name=display_name,
+                message_text=message_text,
+            )
+
+            print("========== LINE LEAD SAVED ==========")
+            print("LEAD ID:", lead_id)
+            print("LINE USER:", line_user_id)
+            print("DISPLAY NAME:", display_name)
+            print("MESSAGE:", message_text)
+            print("=====================================")
+
+            if "จอง" in message_text:
+                reply_line_message(
+                    reply_token,
+                    "ขอบคุณค่ะ Home Care Clinic ได้รับข้อมูลการจองแล้วค่ะ ทีมงานจะตรวจสอบและติดต่อกลับเพื่อยืนยันวันนัดอีกครั้งนะคะ",
+                )
+            else:
+                reply_line_message(
+                    reply_token,
+                    "ขอบคุณที่ติดต่อ Home Care Clinic ค่ะ หากต้องการจองคิว กรุณาพิมพ์ตามรูปแบบนี้:\n\nจองคิว\nชื่อ:\nเบอร์โทร:\nแพ็กเกจ:\nวันที่:\nเวลา:\nหมายเหตุ:",
+                )
+
+    return {"ok": True}
+
+
+@app.get("/booking")
+def booking_page(request: Request):
+    user = current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/booking", status_code=303)
+
+    if user_role(user) == "ADMIN":
+        return RedirectResponse("/admin/dashboard", status_code=303)
+
+    return templates.TemplateResponse(
+        "booking.html",
+        {
+            "request": request,
+            "user": user,
+            "packages": get_active_packages(),
+        },
+    )
+
+
+@app.get("/api/doctors/available")
+def available_doctors(date: str = ""):
+    rows = get_active_doctors()
+
+    return {
+        "doctors": [
+            {
+                "doctor_id": row["id"],
+                "name": row["name"],
+                "specialty": row["specialty"],
+                "expertise": row["expertise"],
+                "start_time": "",
+                "end_time": "",
+            }
+            for row in rows
+        ]
+    }
+
+
+@app.post("/booking")
+def create_booking(
+    request: Request,
+    customer_phone: str = Form(...),
+    doctor_id: int = Form(...),
+    package_name: str = Form(...),
+    appointment_date: str = Form(...),
+    appointment_time: str = Form(...),
+    note: str = Form(""),
+):
+    user = current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/booking", status_code=303)
+
+    if user_role(user) == "ADMIN":
+        return RedirectResponse("/admin/dashboard", status_code=303)
+
+    doctor_name = get_doctor_name(doctor_id)
+    revenue_amount = get_package_price_amount(package_name)
+
+    email_sent = send_booking_email(
+        to_email=user["email"],
+        full_name=user["full_name"],
+        package_name=package_name,
+        appointment_date=appointment_date,
+        appointment_time=appointment_time,
+        doctor_name=doctor_name,
+        customer_phone=customer_phone,
+    )
+
+    line_sent = send_line_booking_alert(
+        full_name=user["full_name"],
+        email=user["email"],
+        package_name=package_name,
+        appointment_date=appointment_date,
+        appointment_time=appointment_time,
+        note=note,
+        doctor_name=doctor_name,
+        customer_phone=customer_phone,
+    )
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        INSERT INTO bookings (
+            user_id,
+            customer_phone,
+            doctor_id,
+            package_name,
+            appointment_date,
+            appointment_time,
+            note,
+            status,
+            revenue_amount,
+            email_sent,
+            line_sent,
+            created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            user["id"],
+            customer_phone,
+            doctor_id,
+            package_name,
+            appointment_date,
+            appointment_time,
+            note,
+            "PENDING",
+            revenue_amount,
+            1 if email_sent else 0,
+            1 if line_sent else 0,
+            datetime.now().isoformat(timespec="seconds"),
+        ),
+    )
+
+    booking_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse(f"/booking-success/{booking_id}", status_code=303)
+
+
+@app.get("/booking-success/{booking_id}")
+def booking_success(request: Request, booking_id: int):
+    user = current_user(request)
+
+    if not user:
+        return RedirectResponse("/login?next=/booking", status_code=303)
+
+    conn = get_db()
+    booking = conn.execute(
+        """
+        SELECT
+            bookings.*,
+            doctors.name AS doctor_name
+        FROM bookings
+        LEFT JOIN doctors ON doctors.id = bookings.doctor_id
+        WHERE bookings.id = ? AND bookings.user_id = ?
+        """,
+        (booking_id, user["id"]),
+    ).fetchone()
+    conn.close()
+
+    if not booking:
+        return RedirectResponse("/home", status_code=303)
+
+    return templates.TemplateResponse(
+        "booking_success.html",
+        {
+            "request": request,
+            "user": user,
+            "booking": booking,
+        },
+    )
+
+
+@app.get("/admin/login")
+def admin_login_redirect():
+    return RedirectResponse("/login", status_code=303)
+
+
+@app.get("/admin")
+def admin_root():
+    return RedirectResponse("/admin/dashboard", status_code=303)
+
+
+@app.get("/admin/dashboard")
+def admin_dashboard(request: Request):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/dashboard", status_code=303)
+
+    conn = get_db()
+
+    stats = {
+        "total_bookings": conn.execute(
+            "SELECT COUNT(*) AS count FROM bookings"
+        ).fetchone()["count"],
+        "pending_bookings": conn.execute(
+            "SELECT COUNT(*) AS count FROM bookings WHERE status = 'PENDING'"
+        ).fetchone()["count"],
+        "email_sent": conn.execute(
+            "SELECT COUNT(*) AS count FROM bookings WHERE email_sent = 1"
+        ).fetchone()["count"],
+        "line_sent": conn.execute(
+            "SELECT COUNT(*) AS count FROM bookings WHERE line_sent = 1"
+        ).fetchone()["count"],
+        "line_leads": conn.execute(
+            "SELECT COUNT(*) AS count FROM line_leads"
+        ).fetchone()["count"],
+        "promotions": conn.execute(
+            "SELECT COUNT(*) AS count FROM promotions"
+        ).fetchone()["count"],
+        "reviews": conn.execute(
+            "SELECT COUNT(*) AS count FROM reviews"
+        ).fetchone()["count"],
+        "doctors": conn.execute(
+            "SELECT COUNT(*) AS count FROM doctors"
+        ).fetchone()["count"],
+    }
+
+    revenue_stats = get_revenue_stats()
+
+    latest_bookings = conn.execute(
+        """
+        SELECT
+            bookings.*,
+            users.full_name,
+            users.email,
+            users.phone,
+            doctors.name AS doctor_name
+        FROM bookings
+        JOIN users ON users.id = bookings.user_id
+        LEFT JOIN doctors ON doctors.id = bookings.doctor_id
+        ORDER BY bookings.created_at DESC
+        LIMIT 10
+        """
+    ).fetchall()
+
+    latest_line_leads = conn.execute(
+        """
+        SELECT *
+        FROM line_leads
+        ORDER BY created_at DESC
+        LIMIT 10
+        """
+    ).fetchall()
+
+    conn.close()
+
+    return templates.TemplateResponse(
+        "admin_dashboard.html",
+        {
+            "request": request,
+            "user": admin,
+            "stats": stats,
+            "revenue_stats": revenue_stats,
+            "bookings": latest_bookings,
+            "line_leads": latest_line_leads,
+        },
+    )
+
+
+@app.get("/admin/bookings")
+def admin_bookings(request: Request):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/bookings", status_code=303)
+
+    conn = get_db()
+    bookings = conn.execute(
+        """
+        SELECT
+            bookings.*,
+            users.full_name,
+            users.email,
+            users.phone,
+            doctors.name AS doctor_name
+        FROM bookings
+        JOIN users ON users.id = bookings.user_id
+        LEFT JOIN doctors ON doctors.id = bookings.doctor_id
+        ORDER BY bookings.appointment_date DESC, bookings.appointment_time DESC
+        """
+    ).fetchall()
+    conn.close()
+
+    return templates.TemplateResponse(
+        "admin_bookings.html",
+        {
+            "request": request,
+            "user": admin,
+            "bookings": bookings,
+        },
+    )
+
+
+@app.get("/admin/line-leads")
+def admin_line_leads(request: Request):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/line-leads", status_code=303)
+
+    conn = get_db()
+    leads = conn.execute(
+        """
+        SELECT *
+        FROM line_leads
+        ORDER BY created_at DESC
+        """
+    ).fetchall()
+    conn.close()
+
+    return templates.TemplateResponse(
+        "admin_line_leads.html",
+        {
+            "request": request,
+            "user": admin,
+            "leads": leads,
+        },
+    )
+
+
+@app.post("/admin/line-leads/{lead_id}/update")
+def admin_update_line_lead(
+    request: Request,
+    lead_id: int,
+    customer_name: str = Form(""),
+    phone: str = Form(""),
+    package_name: str = Form(""),
+    appointment_date: str = Form(""),
+    appointment_time: str = Form(""),
+    status: str = Form("NEW"),
+    note: str = Form(""),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/line-leads", status_code=303)
+
+    conn = get_db()
+    conn.execute(
+        """
+        UPDATE line_leads
+        SET customer_name = ?,
+            phone = ?,
+            package_name = ?,
+            appointment_date = ?,
+            appointment_time = ?,
+            status = ?,
+            note = ?
+        WHERE id = ?
+        """,
+        (
+            customer_name,
+            phone,
+            package_name,
+            appointment_date,
+            appointment_time,
+            status,
+            note,
+            lead_id,
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse("/admin/line-leads", status_code=303)
+
+
+@app.get("/admin/packages")
+def admin_packages(request: Request):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/packages", status_code=303)
+
+    conn = get_db()
+    packages = conn.execute(
+        "SELECT * FROM packages ORDER BY id DESC"
+    ).fetchall()
+    conn.close()
+
+    messages = get_admin_messages(request)
+
+    return templates.TemplateResponse(
+        "admin_packages.html",
+        {
+            "request": request,
+            "user": admin,
+            "packages": packages,
+            "success": messages["success"],
+            "error": messages["error"],
+        },
+    )
+
+
+@app.post("/admin/packages")
+def admin_create_package(
+    request: Request,
+    name_th: str = Form(""),
+    name_en: str = Form(""),
+    description_th: str = Form(""),
+    description_en: str = Form(""),
+    slug: str = Form(...),
+    price: str = Form(""),
+    price_amount: float = Form(0),
+    badge: str = Form(""),
+    image_file_1: UploadFile = File(None),
+    image_file_2: UploadFile = File(None),
+    image_file_3: UploadFile = File(None),
+    image_file_4: UploadFile = File(None),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/packages", status_code=303)
+
+    slug = normalize_slug(slug)
+
+    if not name_th.strip() and not name_en.strip():
+        return admin_redirect_with_message(
+            "/admin/packages",
+            error="กรุณาใส่ชื่อ Package ภาษาไทยหรืออังกฤษอย่างน้อย 1 ภาษา",
+        )
+
+    if not slug:
+        return admin_redirect_with_message(
+            "/admin/packages",
+            error="กรุณาใส่ Slug เป็นภาษาอังกฤษ เช่น skin-booster",
+        )
+
+    try:
+        name_i18n = ai_translate_5_languages(
+            th_text=name_th,
+            en_text=name_en,
+        )
+
+        desc_i18n = ai_translate_5_languages(
+            th_text=description_th,
+            en_text=description_en,
+        )
+
+        img1 = save_uploaded_image(PACKAGE_IMAGE_DIR, f"{slug}-1", image_file_1)
+        img2 = save_uploaded_image(PACKAGE_IMAGE_DIR, f"{slug}-2", image_file_2)
+        img3 = save_uploaded_image(PACKAGE_IMAGE_DIR, f"{slug}-3", image_file_3)
+        img4 = save_uploaded_image(PACKAGE_IMAGE_DIR, f"{slug}-4", image_file_4)
+
+        conn = get_db()
+
+        exists = conn.execute(
+            "SELECT id FROM packages WHERE slug = ?",
+            (slug,),
+        ).fetchone()
+
+        if exists:
+            conn.close()
+            return admin_redirect_with_message(
+                "/admin/packages",
+                error=f"Slug '{slug}' มีอยู่แล้ว กรุณาเปลี่ยนเป็นชื่ออื่น",
+            )
+
+        conn.execute(
+            """
+            INSERT INTO packages (
+                name,
+                slug,
+                description,
+                price,
+                price_amount,
+                badge,
+                image_file,
+                image_file_1,
+                image_file_2,
+                image_file_3,
+                image_file_4,
+                is_active,
+                created_at,
+
+                name_th,
+                name_en,
+                name_zh,
+                name_ja,
+                name_ko,
+
+                description_th,
+                description_en,
+                description_zh,
+                description_ja,
+                description_ko
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                name_i18n["th"],
+                slug,
+                desc_i18n["th"],
+                price.strip(),
+                price_amount,
+                badge.strip(),
+                img1,
+                img1,
+                img2,
+                img3,
+                img4,
+                is_active,
+                datetime.now().isoformat(timespec="seconds"),
+
+                name_i18n["th"],
+                name_i18n["en"],
+                name_i18n["zh"],
+                name_i18n["ja"],
+                name_i18n["ko"],
+
+                desc_i18n["th"],
+                desc_i18n["en"],
+                desc_i18n["zh"],
+                desc_i18n["ja"],
+                desc_i18n["ko"],
+            ),
+        )
+
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message(
+            "/admin/packages",
+            success="เพิ่ม Package และแปลภาษา AI สำเร็จ",
+        )
+
+    except Exception as e:
+        print("PACKAGE CREATE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/packages",
+            error=f"เพิ่ม Package ไม่สำเร็จ: {str(e)}",
+        )
+
+
+@app.post("/admin/packages/{package_id}/update")
+def admin_update_package(
+    request: Request,
+    package_id: int,
+    name_th: str = Form(""),
+    name_en: str = Form(""),
+    description_th: str = Form(""),
+    description_en: str = Form(""),
+    slug: str = Form(...),
+    price: str = Form(""),
+    price_amount: float = Form(0),
+    badge: str = Form(""),
+    image_file_1: UploadFile = File(None),
+    image_file_2: UploadFile = File(None),
+    image_file_3: UploadFile = File(None),
+    image_file_4: UploadFile = File(None),
+    existing_image_file_1: str = Form(""),
+    existing_image_file_2: str = Form(""),
+    existing_image_file_3: str = Form(""),
+    existing_image_file_4: str = Form(""),
+    remove_image_1: str = Form("0"),
+    remove_image_2: str = Form("0"),
+    remove_image_3: str = Form("0"),
+    remove_image_4: str = Form("0"),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/packages", status_code=303)
+
+    slug = normalize_slug(slug)
+
+    if not name_th.strip() and not name_en.strip():
+        return admin_redirect_with_message(
+            "/admin/packages",
+            error="ชื่อ Package ภาษาไทยหรืออังกฤษ ห้ามว่างทั้งหมด",
+        )
+
+    if not slug:
+        return admin_redirect_with_message("/admin/packages", error="Slug ห้ามว่าง")
+
+    try:
+        conn = get_db()
+
+        exists = conn.execute(
+            """
+            SELECT id FROM packages
+            WHERE slug = ? AND id != ?
+            """,
+            (slug, package_id),
+        ).fetchone()
+
+        if exists:
+            conn.close()
+            return admin_redirect_with_message(
+                "/admin/packages",
+                error=f"Slug '{slug}' ซ้ำกับ Package อื่น",
+            )
+
+        name_i18n = ai_translate_5_languages(
+            th_text=name_th,
+            en_text=name_en,
+        )
+
+        desc_i18n = ai_translate_5_languages(
+            th_text=description_th,
+            en_text=description_en,
+        )
+
+        img1 = "" if remove_image_1 == "1" else existing_image_file_1
+        img2 = "" if remove_image_2 == "1" else existing_image_file_2
+        img3 = "" if remove_image_3 == "1" else existing_image_file_3
+        img4 = "" if remove_image_4 == "1" else existing_image_file_4
+
+        new_img1 = save_uploaded_image(PACKAGE_IMAGE_DIR, f"{slug}-1", image_file_1)
+        new_img2 = save_uploaded_image(PACKAGE_IMAGE_DIR, f"{slug}-2", image_file_2)
+        new_img3 = save_uploaded_image(PACKAGE_IMAGE_DIR, f"{slug}-3", image_file_3)
+        new_img4 = save_uploaded_image(PACKAGE_IMAGE_DIR, f"{slug}-4", image_file_4)
+
+        if new_img1:
+            img1 = new_img1
+        if new_img2:
+            img2 = new_img2
+        if new_img3:
+            img3 = new_img3
+        if new_img4:
+            img4 = new_img4
+
+        conn.execute(
+            """
+            UPDATE packages
+            SET name = ?,
+                slug = ?,
+                description = ?,
+                price = ?,
+                price_amount = ?,
+                badge = ?,
+                image_file = ?,
+                image_file_1 = ?,
+                image_file_2 = ?,
+                image_file_3 = ?,
+                image_file_4 = ?,
+                is_active = ?,
+
+                name_th = ?,
+                name_en = ?,
+                name_zh = ?,
+                name_ja = ?,
+                name_ko = ?,
+
+                description_th = ?,
+                description_en = ?,
+                description_zh = ?,
+                description_ja = ?,
+                description_ko = ?
+            WHERE id = ?
+            """,
+            (
+                name_i18n["th"],
+                slug,
+                desc_i18n["th"],
+                price.strip(),
+                price_amount,
+                badge.strip(),
+                img1,
+                img1,
+                img2,
+                img3,
+                img4,
+                is_active,
+
+                name_i18n["th"],
+                name_i18n["en"],
+                name_i18n["zh"],
+                name_i18n["ja"],
+                name_i18n["ko"],
+
+                desc_i18n["th"],
+                desc_i18n["en"],
+                desc_i18n["zh"],
+                desc_i18n["ja"],
+                desc_i18n["ko"],
+
+                package_id,
+            ),
+        )
+
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message(
+            "/admin/packages",
+            success="บันทึก Package และแปลภาษา AI สำเร็จ",
+        )
+
+    except Exception as e:
+        print("PACKAGE UPDATE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/packages",
+            error=f"บันทึก Package ไม่สำเร็จ: {str(e)}",
+        )
+
+
+@app.get("/admin/promotions")
+def admin_promotions(request: Request):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/promotions", status_code=303)
+
+    conn = get_db()
+    promotions = conn.execute(
+        "SELECT * FROM promotions ORDER BY id DESC"
+    ).fetchall()
+    conn.close()
+
+    messages = get_admin_messages(request)
+
+    return templates.TemplateResponse(
+        "admin_promotions.html",
+        {
+            "request": request,
+            "user": admin,
+            "promotions": promotions,
+            "success": messages["success"],
+            "error": messages["error"],
+        },
+    )
+
+
+@app.post("/admin/promotions")
+def admin_create_promotion(
+    request: Request,
+    title_th: str = Form(""),
+    title_en: str = Form(""),
+    description_th: str = Form(""),
+    description_en: str = Form(""),
+    slug: str = Form(...),
+    price: str = Form(""),
+    badge: str = Form(""),
+    image_file_1: UploadFile = File(None),
+    image_file_2: UploadFile = File(None),
+    image_file_3: UploadFile = File(None),
+    image_file_4: UploadFile = File(None),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/promotions", status_code=303)
+
+    slug = normalize_slug(slug)
+
+    if not title_th.strip() and not title_en.strip():
+        return admin_redirect_with_message(
+            "/admin/promotions",
+            error="กรุณาใส่ชื่อ Promotion ภาษาไทยหรืออังกฤษอย่างน้อย 1 ภาษา",
+        )
+
+    if not slug:
+        return admin_redirect_with_message("/admin/promotions", error="กรุณาใส่ Slug")
+
+    try:
+        title_i18n = ai_translate_5_languages(
+            th_text=title_th,
+            en_text=title_en,
+        )
+
+        desc_i18n = ai_translate_5_languages(
+            th_text=description_th,
+            en_text=description_en,
+        )
+
+        img1 = save_uploaded_image(PROMOTION_IMAGE_DIR, f"{slug}-1", image_file_1)
+        img2 = save_uploaded_image(PROMOTION_IMAGE_DIR, f"{slug}-2", image_file_2)
+        img3 = save_uploaded_image(PROMOTION_IMAGE_DIR, f"{slug}-3", image_file_3)
+        img4 = save_uploaded_image(PROMOTION_IMAGE_DIR, f"{slug}-4", image_file_4)
+
+        conn = get_db()
+
+        exists = conn.execute(
+            "SELECT id FROM promotions WHERE slug = ?",
+            (slug,),
+        ).fetchone()
+
+        if exists:
+            conn.close()
+            return admin_redirect_with_message(
+                "/admin/promotions",
+                error=f"Slug '{slug}' มีอยู่แล้ว กรุณาเปลี่ยนชื่อ",
+            )
+
+        conn.execute(
+            """
+            INSERT INTO promotions (
+                title,
+                slug,
+                description,
+                price,
+                badge,
+                image_file_1,
+                image_file_2,
+                image_file_3,
+                image_file_4,
+                is_active,
+                created_at,
+
+                title_th,
+                title_en,
+                title_zh,
+                title_ja,
+                title_ko,
+
+                description_th,
+                description_en,
+                description_zh,
+                description_ja,
+                description_ko
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                title_i18n["th"],
+                slug,
+                desc_i18n["th"],
+                price.strip(),
+                badge.strip(),
+                img1,
+                img2,
+                img3,
+                img4,
+                is_active,
+                datetime.now().isoformat(timespec="seconds"),
+
+                title_i18n["th"],
+                title_i18n["en"],
+                title_i18n["zh"],
+                title_i18n["ja"],
+                title_i18n["ko"],
+
+                desc_i18n["th"],
+                desc_i18n["en"],
+                desc_i18n["zh"],
+                desc_i18n["ja"],
+                desc_i18n["ko"],
+            ),
+        )
+
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message(
+            "/admin/promotions",
+            success="เพิ่ม Promotion และแปลภาษา AI สำเร็จ",
+        )
+
+    except Exception as e:
+        print("PROMOTION CREATE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/promotions",
+            error=f"เพิ่ม Promotion ไม่สำเร็จ: {str(e)}",
+        )
+
+
+@app.post("/admin/promotions/{promotion_id}/update")
+def admin_update_promotion(
+    request: Request,
+    promotion_id: int,
+    title_th: str = Form(""),
+    title_en: str = Form(""),
+    description_th: str = Form(""),
+    description_en: str = Form(""),
+    slug: str = Form(...),
+    price: str = Form(""),
+    badge: str = Form(""),
+    image_file_1: UploadFile = File(None),
+    image_file_2: UploadFile = File(None),
+    image_file_3: UploadFile = File(None),
+    image_file_4: UploadFile = File(None),
+    existing_image_file_1: str = Form(""),
+    existing_image_file_2: str = Form(""),
+    existing_image_file_3: str = Form(""),
+    existing_image_file_4: str = Form(""),
+    remove_image_1: str = Form("0"),
+    remove_image_2: str = Form("0"),
+    remove_image_3: str = Form("0"),
+    remove_image_4: str = Form("0"),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/promotions", status_code=303)
+
+    slug = normalize_slug(slug)
+
+    if not title_th.strip() and not title_en.strip():
+        return admin_redirect_with_message(
+            "/admin/promotions",
+            error="ชื่อ Promotion ภาษาไทยหรืออังกฤษ ห้ามว่างทั้งหมด",
+        )
+
+    if not slug:
+        return admin_redirect_with_message("/admin/promotions", error="Slug ห้ามว่าง")
+
+    try:
+        conn = get_db()
+
+        exists = conn.execute(
+            """
+            SELECT id FROM promotions
+            WHERE slug = ? AND id != ?
+            """,
+            (slug, promotion_id),
+        ).fetchone()
+
+        if exists:
+            conn.close()
+            return admin_redirect_with_message(
+                "/admin/promotions",
+                error=f"Slug '{slug}' ซ้ำกับ Promotion อื่น",
+            )
+
+        title_i18n = ai_translate_5_languages(
+            th_text=title_th,
+            en_text=title_en,
+        )
+
+        desc_i18n = ai_translate_5_languages(
+            th_text=description_th,
+            en_text=description_en,
+        )
+
+        img1 = "" if remove_image_1 == "1" else existing_image_file_1
+        img2 = "" if remove_image_2 == "1" else existing_image_file_2
+        img3 = "" if remove_image_3 == "1" else existing_image_file_3
+        img4 = "" if remove_image_4 == "1" else existing_image_file_4
+
+        new_img1 = save_uploaded_image(PROMOTION_IMAGE_DIR, f"{slug}-1", image_file_1)
+        new_img2 = save_uploaded_image(PROMOTION_IMAGE_DIR, f"{slug}-2", image_file_2)
+        new_img3 = save_uploaded_image(PROMOTION_IMAGE_DIR, f"{slug}-3", image_file_3)
+        new_img4 = save_uploaded_image(PROMOTION_IMAGE_DIR, f"{slug}-4", image_file_4)
+
+        if new_img1:
+            img1 = new_img1
+        if new_img2:
+            img2 = new_img2
+        if new_img3:
+            img3 = new_img3
+        if new_img4:
+            img4 = new_img4
+
+        conn.execute(
+            """
+            UPDATE promotions
+            SET title = ?,
+                slug = ?,
+                description = ?,
+                price = ?,
+                badge = ?,
+                image_file_1 = ?,
+                image_file_2 = ?,
+                image_file_3 = ?,
+                image_file_4 = ?,
+                is_active = ?,
+
+                title_th = ?,
+                title_en = ?,
+                title_zh = ?,
+                title_ja = ?,
+                title_ko = ?,
+
+                description_th = ?,
+                description_en = ?,
+                description_zh = ?,
+                description_ja = ?,
+                description_ko = ?
+            WHERE id = ?
+            """,
+            (
+                title_i18n["th"],
+                slug,
+                desc_i18n["th"],
+                price.strip(),
+                badge.strip(),
+                img1,
+                img2,
+                img3,
+                img4,
+                is_active,
+
+                title_i18n["th"],
+                title_i18n["en"],
+                title_i18n["zh"],
+                title_i18n["ja"],
+                title_i18n["ko"],
+
+                desc_i18n["th"],
+                desc_i18n["en"],
+                desc_i18n["zh"],
+                desc_i18n["ja"],
+                desc_i18n["ko"],
+
+                promotion_id,
+            ),
+        )
+
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message(
+            "/admin/promotions",
+            success="บันทึก Promotion และแปลภาษา AI สำเร็จ",
+        )
+
+    except Exception as e:
+        print("PROMOTION UPDATE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/promotions",
+            error=f"บันทึก Promotion ไม่สำเร็จ: {str(e)}",
+        )
+
+
+@app.get("/admin/reviews")
+def admin_reviews(request: Request):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/reviews", status_code=303)
+
+    conn = get_db()
+    reviews = conn.execute(
+        "SELECT * FROM reviews ORDER BY id DESC"
+    ).fetchall()
+    conn.close()
+
+    messages = get_admin_messages(request)
+
+    return templates.TemplateResponse(
+        "admin_reviews.html",
+        {
+            "request": request,
+            "user": admin,
+            "reviews": reviews,
+            "success": messages["success"],
+            "error": messages["error"],
+        },
+    )
+
+
+@app.post("/admin/reviews")
+def admin_create_review(
+    request: Request,
+    customer_name: str = Form(...),
+    review_text: str = Form(...),
+    rating: int = Form(5),
+    image_file: UploadFile = File(None),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/reviews", status_code=303)
+
+    if not customer_name.strip():
+        return admin_redirect_with_message("/admin/reviews", error="กรุณาใส่ชื่อ Review")
+
+    if not review_text.strip():
+        return admin_redirect_with_message("/admin/reviews", error="กรุณาใส่ข้อความ Review")
+
+    try:
+        img = save_uploaded_image(REVIEW_IMAGE_DIR, customer_name, image_file)
+
+        conn = get_db()
+        conn.execute(
+            """
+            INSERT INTO reviews (
+                customer_name,
+                review_text,
+                rating,
+                image_file,
+                is_active,
+                created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                customer_name.strip(),
+                review_text.strip(),
+                rating,
+                img,
+                is_active,
+                datetime.now().isoformat(timespec="seconds"),
+            ),
+        )
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message("/admin/reviews", success="เพิ่ม Review สำเร็จ")
+
+    except Exception as e:
+        print("REVIEW CREATE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/reviews",
+            error=f"เพิ่ม Review ไม่สำเร็จ: {str(e)}",
+        )
+
+
+@app.post("/admin/reviews/{review_id}/update")
+def admin_update_review(
+    request: Request,
+    review_id: int,
+    customer_name: str = Form(...),
+    review_text: str = Form(...),
+    rating: int = Form(5),
+    image_file: UploadFile = File(None),
+    existing_image_file: str = Form(""),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/reviews", status_code=303)
+
+    if not customer_name.strip():
+        return admin_redirect_with_message("/admin/reviews", error="ชื่อ Review ห้ามว่าง")
+
+    if not review_text.strip():
+        return admin_redirect_with_message("/admin/reviews", error="ข้อความ Review ห้ามว่าง")
+
+    try:
+        img = save_uploaded_image(REVIEW_IMAGE_DIR, customer_name, image_file) or existing_image_file
+
+        conn = get_db()
+        conn.execute(
+            """
+            UPDATE reviews
+            SET customer_name = ?,
+                review_text = ?,
+                rating = ?,
+                image_file = ?,
+                is_active = ?
+            WHERE id = ?
+            """,
+            (
+                customer_name.strip(),
+                review_text.strip(),
+                rating,
+                img,
+                is_active,
+                review_id,
+            ),
+        )
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message("/admin/reviews", success="บันทึก Review สำเร็จ")
+
+    except Exception as e:
+        print("REVIEW UPDATE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/reviews",
+            error=f"บันทึก Review ไม่สำเร็จ: {str(e)}",
+        )
+
+
+@app.get("/admin/doctors")
+def admin_doctors(request: Request):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/doctors", status_code=303)
+
+    conn = get_db()
+    doctors = conn.execute(
+        "SELECT * FROM doctors ORDER BY id DESC"
+    ).fetchall()
+    conn.close()
+
+    messages = get_admin_messages(request)
+
+    return templates.TemplateResponse(
+        "admin_doctors.html",
+        {
+            "request": request,
+            "user": admin,
+            "doctors": doctors,
+            "success": messages["success"],
+            "error": messages["error"],
+        },
+    )
+
+
+@app.post("/admin/doctors")
+def admin_create_doctor(
+    request: Request,
+    name: str = Form(...),
+    specialty: str = Form(""),
+    expertise: str = Form(""),
+    phone: str = Form(""),
+    image_file: UploadFile = File(None),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/doctors", status_code=303)
+
+    if not name.strip():
+        return admin_redirect_with_message("/admin/doctors", error="กรุณาใส่ชื่อคุณหมอ")
+
+    try:
+        name_i18n = ai_translate_5_languages(th_text=name, en_text="")
+        specialty_i18n = ai_translate_5_languages(th_text=specialty, en_text="")
+        expertise_i18n = ai_translate_5_languages(th_text=expertise, en_text="")
+
+        img = save_uploaded_image(DOCTOR_IMAGE_DIR, f"doctor-{name}", image_file)
+
+        conn = get_db()
+        conn.execute(
+            """
+            INSERT INTO doctors (
+                name,
+                specialty,
+                expertise,
+                phone,
+                image_file,
+                is_active,
+                created_at,
+
+                name_th,
+                name_en,
+                name_zh,
+                name_ja,
+                name_ko,
+
+                specialty_th,
+                specialty_en,
+                specialty_zh,
+                specialty_ja,
+                specialty_ko,
+
+                expertise_th,
+                expertise_en,
+                expertise_zh,
+                expertise_ja,
+                expertise_ko
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                name_i18n["th"],
+                specialty_i18n["th"],
+                expertise_i18n["th"],
+                phone.strip(),
+                img,
+                is_active,
+                datetime.now().isoformat(timespec="seconds"),
+
+                name_i18n["th"],
+                name_i18n["en"],
+                name_i18n["zh"],
+                name_i18n["ja"],
+                name_i18n["ko"],
+
+                specialty_i18n["th"],
+                specialty_i18n["en"],
+                specialty_i18n["zh"],
+                specialty_i18n["ja"],
+                specialty_i18n["ko"],
+
+                expertise_i18n["th"],
+                expertise_i18n["en"],
+                expertise_i18n["zh"],
+                expertise_i18n["ja"],
+                expertise_i18n["ko"],
+            ),
+        )
+
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message("/admin/doctors", success="เพิ่มคุณหมอและแปลภาษา AI สำเร็จ")
+
+    except Exception as e:
+        print("DOCTOR CREATE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/doctors",
+            error=f"เพิ่มคุณหมอไม่สำเร็จ: {str(e)}",
+        )
+
+
+@app.post("/admin/doctors/{doctor_id}/update")
+def admin_update_doctor(
+    request: Request,
+    doctor_id: int,
+    name: str = Form(...),
+    specialty: str = Form(""),
+    expertise: str = Form(""),
+    phone: str = Form(""),
+    image_file: UploadFile = File(None),
+    existing_image_file: str = Form(""),
+    remove_image: str = Form("0"),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/doctors", status_code=303)
+
+    if not name.strip():
+        return admin_redirect_with_message("/admin/doctors", error="ชื่อคุณหมอห้ามว่าง")
+
+    try:
+        name_i18n = ai_translate_5_languages(th_text=name, en_text="")
+        specialty_i18n = ai_translate_5_languages(th_text=specialty, en_text="")
+        expertise_i18n = ai_translate_5_languages(th_text=expertise, en_text="")
+
+        img = "" if remove_image == "1" else existing_image_file
+        new_img = save_uploaded_image(DOCTOR_IMAGE_DIR, f"doctor-{name}", image_file)
+
+        if new_img:
+            img = new_img
+
+        conn = get_db()
+        conn.execute(
+            """
+            UPDATE doctors
+            SET name = ?,
+                specialty = ?,
+                expertise = ?,
+                phone = ?,
+                image_file = ?,
+                is_active = ?,
+
+                name_th = ?,
+                name_en = ?,
+                name_zh = ?,
+                name_ja = ?,
+                name_ko = ?,
+
+                specialty_th = ?,
+                specialty_en = ?,
+                specialty_zh = ?,
+                specialty_ja = ?,
+                specialty_ko = ?,
+
+                expertise_th = ?,
+                expertise_en = ?,
+                expertise_zh = ?,
+                expertise_ja = ?,
+                expertise_ko = ?
+            WHERE id = ?
+            """,
+            (
+                name_i18n["th"],
+                specialty_i18n["th"],
+                expertise_i18n["th"],
+                phone.strip(),
+                img,
+                is_active,
+
+                name_i18n["th"],
+                name_i18n["en"],
+                name_i18n["zh"],
+                name_i18n["ja"],
+                name_i18n["ko"],
+
+                specialty_i18n["th"],
+                specialty_i18n["en"],
+                specialty_i18n["zh"],
+                specialty_i18n["ja"],
+                specialty_i18n["ko"],
+
+                expertise_i18n["th"],
+                expertise_i18n["en"],
+                expertise_i18n["zh"],
+                expertise_i18n["ja"],
+                expertise_i18n["ko"],
+
+                doctor_id,
+            ),
+        )
+
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message("/admin/doctors", success="บันทึกข้อมูลคุณหมอและแปลภาษา AI สำเร็จ")
+
+    except Exception as e:
+        print("DOCTOR UPDATE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/doctors",
+            error=f"บันทึกข้อมูลคุณหมอไม่สำเร็จ: {str(e)}",
+        )
+
+
+@app.post("/admin/doctors/{doctor_id}/delete")
+def admin_delete_doctor(
+    request: Request,
+    doctor_id: int,
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/doctors", status_code=303)
+
+    try:
+        conn = get_db()
+
+        conn.execute(
+            "DELETE FROM doctor_schedules WHERE doctor_id = ?",
+            (doctor_id,),
+        )
+
+        conn.execute(
+            "DELETE FROM doctors WHERE id = ?",
+            (doctor_id,),
+        )
+
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message("/admin/doctors", success="ลบคุณหมอสำเร็จ")
+
+    except Exception as e:
+        print("DOCTOR DELETE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/doctors",
+            error=f"ลบคุณหมอไม่สำเร็จ: {str(e)}",
+        )
+
+
+@app.get("/packages/{slug}")
+def package_detail(request: Request, slug: str):
+    package = get_package_by_slug(slug)
+
+    if not package:
+        return RedirectResponse("/home", status_code=303)
+
+    return templates.TemplateResponse(
+        "package_detail.html",
+        {
+            "request": request,
+            "user": current_user(request),
+            "package": package,
+        },
+    )

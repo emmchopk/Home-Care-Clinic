@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Register | Home Care Clinic{% endblock %}
+
+{% block content %}
+
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-image register-img"></div>
+
+    <div class="auth-form">
+      <p class="eyebrow">Create Account</p>
+
+      <h1>Register</h1>
+
+      <p class="auth-desc">
+        สมัครสมาชิกเพื่อจองคิวออนไลน์ และรับ Email แจ้งเตือนวันนัด
+      </p>
+
+      {% if error %}
+        <div class="alert-error">
+          {{ error }}
+        </div>
+      {% endif %}
+
+      <a href="/auth/google" class="google-btn">
+        <span>G</span>
+        Register with Google
+      </a>
+
+      <div class="or-line">
+        <span>or create account with email</span>
+      </div>
+
+      <form method="post" action="/register">
+        <label>Full Name</label>
+        <input
+          type="text"
+          name="full_name"
+          required
+          placeholder="ชื่อ-นามสกุล"
+        />
+
+        <label>Email</label>
+        <input
+          type="email"
+          name="email"
+          required
+          placeholder="your@email.com"
+        />
+
+        <label>Phone</label>
+        <input
+          type="text"
+          name="phone"
+          placeholder="เบอร์โทรศัพท์"
+        />
+
+        <label>Password</label>
+        <input
+          type="password"
+          name="password"
+          required
+          placeholder="Password"
+        />
+
+        <button type="submit">
+          Create Account
+        </button>
+      </form>
+
+      <p class="switch-auth">
+        มีบัญชีอยู่แล้ว?
+        <a href="/login">Login</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

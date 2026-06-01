@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Login | Home Care Clinic{% endblock %}
+
+{% block content %}
+
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-image login-img"></div>
+
+    <div class="auth-form">
+      <p class="eyebrow">Welcome Back</p>
+
+      <h1>Login</h1>
+
+      <p class="auth-desc">
+        กรุณาเข้าสู่ระบบก่อนทำการจองคิวออนไลน์
+      </p>
+
+      {% if error %}
+        <div class="alert-error">
+          {{ error }}
+        </div>
+      {% endif %}
+
+      <a href="/auth/google" class="google-btn">
+        <span>G</span>
+        Login with Google
+      </a>
+
+      <div class="or-line">
+        <span>or login with email</span>
+      </div>
+
+      <form method="post" action="/login">
+        <input type="hidden" name="next_url" value="{{ next_url }}" />
+
+        <label>Email</label>
+        <input
+          type="email"
+          name="email"
+          required
+          placeholder="your@email.com"
+        />
+
+        <label>Password</label>
+        <input
+          type="password"
+          name="password"
+          required
+          placeholder="Password"
+        />
+
+        <button type="submit">
+          Login
+        </button>
+      </form>
+
+      <p class="switch-auth">
+        ยังไม่มีบัญชี?
+        <a href="/register">Register</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

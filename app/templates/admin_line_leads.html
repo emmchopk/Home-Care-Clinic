@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}LINE Leads | Home Care Clinic{% endblock %}
+
+{% block content %}
+
+<section class="admin-page">
+  <div class="admin-head">
+    <div>
+      <p class="eyebrow">LINE Official</p>
+      <h1>LINE Leads / Bookings</h1>
+      <p>ข้อมูลลูกค้าที่ทักหรือจองผ่าน LINE Official Account</p>
+    </div>
+
+    <div class="admin-actions">
+      <a href="/admin/dashboard" class="btn-outline">Dashboard</a>
+      <a href="/admin/bookings" class="btn-primary">Web Bookings</a>
+    </div>
+  </div>
+
+  <div class="admin-panel">
+    <div class="panel-head">
+      <h2>ลูกค้าจาก LINE</h2>
+      <span>{{ leads|length }} รายการ</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>LINE Name</th>
+            <th>ข้อความ</th>
+            <th>ข้อมูลจอง</th>
+            <th>Status</th>
+            <th>Note / แก้ไข</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for lead in leads %}
+            <tr>
+              <td>#{{ lead.id }}</td>
+
+              <td>
+                <b>{{ lead.display_name or "-" }}</b><br />
+                <small>{{ lead.line_user_id or "-" }}</small><br />
+                <small>{{ lead.created_at }}</small>
+              </td>
+
+              <td style="min-width: 260px;">
+                <pre style="white-space: pre-wrap; font-family: inherit;">{{ lead.message_text }}</pre>
+              </td>
+
+              <td style="min-width: 260px;">
+                <form
+                  method="post"
+                  action="/admin/line-leads/{{ lead.id }}/update"
+                  class="admin-form"
+                >
+                  <label>ชื่อลูกค้า</label>
+                  <input
+                    type="text"
+                    name="customer_name"
+                    value="{{ lead.customer_name or '' }}"
+                    placeholder="ชื่อลูกค้า"
+                  />
+
+                  <label>เบอร์โทร</label>
+                  <input
+                    type="text"
+                    name="phone"
+                    value="{{ lead.phone or '' }}"
+                    placeholder="เบอร์โทร"
+                  />
+
+                  <label>แพ็กเกจ</label>
+                  <input
+                    type="text"
+                    name="package_name"
+                    value="{{ lead.package_name or '' }}"
+                    placeholder="แพ็กเกจที่สนใจ"
+                  />
+
+                  <label>วันที่ต้องการจอง</label>
+                  <input
+                    type="text"
+                    name="appointment_date"
+                    value="{{ lead.appointment_date or '' }}"
+                    placeholder="เช่น 2026-05-20"
+                  />
+
+                  <label>เวลา</label>
+                  <input
+                    type="text"
+                    name="appointment_time"
+                    value="{{ lead.appointment_time or '' }}"
+                    placeholder="เช่น 14:00"
+                  />
+              </td>
+
+              <td>
+                  <select name="status">
+                    <option value="NEW" {% if lead.status == "NEW" %}selected{% endif %}>NEW</option>
+                    <option value="CONTACTED" {% if lead.status == "CONTACTED" %}selected{% endif %}>CONTACTED</option>
+                    <option value="BOOKING_REQUEST" {% if lead.status == "BOOKING_REQUEST" %}selected{% endif %}>BOOKING REQUEST</option>
+                    <option value="BOOKED" {% if lead.status == "BOOKED" %}selected{% endif %}>BOOKED</option>
+                    <option value="DONE" {% if lead.status == "DONE" %}selected{% endif %}>DONE</option>
+                    <option value="CANCELLED" {% if lead.status == "CANCELLED" %}selected{% endif %}>CANCELLED</option>
+                  </select>
+
+                  <div style="margin-top: 10px;">
+                    {% if lead.status == "BOOKED" or lead.status == "DONE" %}
+                      <span class="status ok">{{ lead.status }}</span>
+                    {% elif lead.status == "CANCELLED" %}
+                      <span class="status bad">{{ lead.status }}</span>
+                    {% else %}
+                      <span class="status pending">{{ lead.status }}</span>
+                    {% endif %}
+                  </div>
+              </td>
+
+              <td style="min-width: 240px;">
+                  <textarea
+                    name="note"
+                    rows="5"
+                    placeholder="Note สำหรับ Admin"
+                  >{{ lead.note or '' }}</textarea>
+
+                  <button type="submit" class="mini-btn">
+                    Save
+                  </button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6">
+                ยังไม่มีลูกค้าจาก LINE
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

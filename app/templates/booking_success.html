@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Booking Success | Home Care Clinic{% endblock %}
+
+{% block content %}
+
+<section class="success-page">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+
+    <p class="eyebrow">Booking Confirmed</p>
+    <h1>จองคิวสำเร็จ</h1>
+
+    <p>
+      ระบบได้บันทึกข้อมูลการจอง และส่งรายละเอียดไปที่ Email ของคุณแล้ว
+    </p>
+
+    <div class="success-detail">
+      <div>
+        <span>Customer</span>
+        <b>{{ user["full_name"] }}</b>
+      </div>
+
+      <div>
+        <span>Email</span>
+        <b>{{ user["email"] }}</b>
+      </div>
+
+      <div>
+        <span>Package</span>
+        <b>{{ booking["package_name"] }}</b>
+      </div>
+
+      <div>
+        <span>Date</span>
+        <b>{{ booking["appointment_date"] }}</b>
+      </div>
+
+      <div>
+        <span>Time</span>
+        <b>{{ booking["appointment_time"] }}</b>
+      </div>
+
+      <div>
+        <span>Status</span>
+        <b>{{ booking["status"] }}</b>
+      </div>
+    </div>
+
+    <div class="success-actions">
+      <a href="/home" class="btn-outline">Back Home</a>
+      <a href="/booking" class="btn-primary">Book Again</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

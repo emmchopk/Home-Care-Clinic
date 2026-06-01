@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section dashboard-page">
+  <div class="container">
+    <div class="dashboard-head">
+      <div>
+        <span class="eyebrow">Doctor Schedule</span>
+        <h1>จัดการหมอและตารางเข้าเวร</h1>
+        <p>เพิ่มชื่อหมอ จัดการวันเข้า และเวลาทำงานของแต่ละคน</p>
+      </div>
+
+      <div class="dashboard-actions">
+        <a href="/admin" class="btn btn-outline">กลับหน้า Dashboard</a>
+        <a href="/" class="btn btn-primary">กลับหน้าเว็บไซต์</a>
+      </div>
+    </div>
+
+    <div class="table-card mb-24">
+      <div class="table-head">
+        <h2>เพิ่มรายชื่อหมอ</h2>
+      </div>
+
+      <form method="post" action="/admin/doctors/add" class="booking-form pad-24">
+        <div class="form-grid">
+          <div>
+            <label>ชื่อหมอ</label>
+            <input type="text" name="name" required>
+          </div>
+          <div>
+            <label>ความเชี่ยวชาญ</label>
+            <input type="text" name="specialty" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">เพิ่มหมอ</button>
+      </form>
+    </div>
+
+    <div class="table-card mb-24">
+      <div class="table-head">
+        <h2>รายการหมอ</h2>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>ชื่อหมอ</th>
+              <th>ความเชี่ยวชาญ</th>
+              <th>ลบ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if doctors|length > 0 %}
+              {% for doctor in doctors %}
+              <tr>
+                <td>#{{ doctor.id }}</td>
+                <td>{{ doctor.name }}</td>
+                <td>{{ doctor.specialty }}</td>
+                <td>
+                  <form method="post" action="/admin/doctors/{{ doctor.id }}/delete">
+                    <button type="submit" class="btn-mini danger">ลบ</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="4" style="text-align:center;">ยังไม่มีรายชื่อหมอ</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="table-card mb-24">
+      <div class="table-head">
+        <h2>เพิ่มตารางหมอ</h2>
+      </div>
+
+      <form method="post" action="/admin/schedule/add" class="booking-form pad-24">
+        <div class="form-grid">
+          <div>
+            <label>เลือกหมอ</label>
+            <select name="doctor_id" required>
+              {% for doctor in doctors %}
+              <option value="{{ doctor.id }}">{{ doctor.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label>วันที่</label>
+            <input type="date" name="work_date" required>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div>
+            <label>เวลาเริ่ม</label>
+            <input type="time" name="start_time" required>
+          </div>
+          <div>
+            <label>เวลาสิ้นสุด</label>
+            <input type="time" name="end_time" required>
+          </div>
+        </div>
+
+        <div>
+          <label>สถานะ</label>
+          <select name="available">
+            <option value="1">ว่าง</option>
+            <option value="0">ปิดรับคิว</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">เพิ่มตาราง</button>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <div class="table-head">
+        <h2>รายการตารางหมอ</h2>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>หมอ</th>
+              <th>วันที่</th>
+              <th>เวลาเริ่ม</th>
+              <th>เวลาสิ้นสุด</th>
+              <th>สถานะ</th>
+              <th>ลบ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if schedules|length > 0 %}
+              {% for item in schedules %}
+              <tr>
+                <td>#{{ item.id }}</td>
+                <td>{{ item.doctor_name }}</td>
+                <td>{{ item.work_date }}</td>
+                <td>{{ item.start_time }}</td>
+                <td>{{ item.end_time }}</td>
+                <td>
+                  {% if item.available %}
+                    <span class="status status-confirmed">ว่าง</span>
+                  {% else %}
+                    <span class="status status-cancelled">ปิดรับ</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <form method="post" action="/admin/schedule/{{ item.id }}/delete">
+                    <button type="submit" class="btn-mini danger">ลบ</button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="7" style="text-align:center;">ยังไม่มีตารางหมอ</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

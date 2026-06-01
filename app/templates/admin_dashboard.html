@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | Home Care Clinic{% endblock %}
+
+{% block content %}
+
+<section class="admin-page">
+  <div class="admin-head">
+    <div>
+      <p class="eyebrow">Back Office</p>
+      <h1>Admin Dashboard</h1>
+      <p>ดูภาพรวมรายได้และการจองของ Home Care Clinic</p>
+    </div>
+
+    <div class="admin-actions">
+      <a href="/admin/bookings" class="btn-primary">Bookings</a>
+      <a href="/admin/packages" class="btn-outline">Packages</a>
+      <a href="/admin/doctors" class="btn-outline">Doctor Schedule</a>
+    </div>
+  </div>
+
+  <div class="admin-stats">
+    <div class="stat-card">
+      <span>Revenue Today</span>
+      <b>฿{{ "{:,.0f}".format(revenue_stats.daily) }}</b>
+    </div>
+
+    <div class="stat-card">
+      <span>Revenue This Month</span>
+      <b>฿{{ "{:,.0f}".format(revenue_stats.monthly) }}</b>
+    </div>
+
+    <div class="stat-card">
+      <span>Revenue This Year</span>
+      <b>฿{{ "{:,.0f}".format(revenue_stats.yearly) }}</b>
+    </div>
+
+    <div class="stat-card">
+      <span>Total Bookings</span>
+      <b>{{ stats.total_bookings }}</b>
+    </div>
+  </div>
+
+  <div
+    id="revenueStats"
+    data-daily="{{ revenue_stats.daily }}"
+    data-monthly="{{ revenue_stats.monthly }}"
+    data-yearly="{{ revenue_stats.yearly }}"
+  ></div>
+
+  <div class="admin-panel">
+    <div class="panel-head">
+      <h2>Revenue Graph</h2>
+      <span>Daily / Monthly / Yearly</span>
+    </div>
+
+    <canvas id="revenueChart" height="110"></canvas>
+  </div>
+
+  <div class="admin-panel">
+    <div class="panel-head">
+      <h2>Latest Bookings</h2>
+      <a href="/admin/bookings">ดูทั้งหมด</a>
+    </div>
+
+    <div class="table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Package</th>
+            <th>Revenue</th>
+            <th>Doctor</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Email</th>
+            <th>LINE</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for booking in bookings %}
+          <tr>
+            <td>{{ booking.full_name }}</td>
+            <td>{{ booking.customer_phone or "-" }}</td>
+            <td>{{ booking.package_name }}</td>
+            <td>฿{{ "{:,.0f}".format(booking.revenue_amount or 0) }}</td>
+            <td>{{ booking.doctor_name or "-" }}</td>
+            <td>{{ booking.appointment_date }}</td>
+            <td>{{ booking.appointment_time }}</td>
+
+            <td>
+              {% if booking.email_sent %}
+                <span class="status ok">Sent</span>
+              {% else %}
+                <span class="status bad">Fail</span>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if booking.line_sent %}
+                <span class="status ok">Sent</span>
+              {% else %}
+                <span class="status bad">Fail</span>
+              {% endif %}
+            </td>
+
+            <td>
+              <span class="status pending">{{ booking.status }}</span>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="10">ยังไม่มีรายการจอง</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const canvas = document.getElementById("revenueChart");
+    const statsBox = document.getElementById("revenueStats");
+
+    if (!canvas || !statsBox || typeof Chart === "undefined") {
+      return;
+    }
+
+    const dailyRevenue = Number(statsBox.dataset.daily || 0);
+    const monthlyRevenue = Number(statsBox.dataset.monthly || 0);
+    const yearlyRevenue = Number(statsBox.dataset.yearly || 0);
+
+    new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: ["Today", "This Month", "This Year"],
+        datasets: [
+          {
+            label: "Revenue",
+            data: [dailyRevenue, monthlyRevenue, yearlyRevenue],
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              precision: 0
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Admin | Bookings{% endblock %}
+
+{% block head_extra %}
+<style>
+  .topbar{
+    margin-top:22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  .filters{
+    margin-top:16px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .filters input,
+  .filters select{
+    min-height:44px;
+    padding:0 14px;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:#fff;
+    font-size:14px;
+  }
+
+  .table-card{
+    margin-top:16px;
+    overflow:auto;
+  }
+
+  table{
+    width:100%;
+    min-width:920px;
+    border-collapse:separate;
+    border-spacing:0 10px;
+  }
+
+  th{
+    text-align:left;
+    font-size:12px;
+    color:var(--muted2);
+    padding:0 10px;
+  }
+
+  td{
+    background:#fff;
+    border:1px solid var(--border);
+    padding:14px 10px;
+    vertical-align:top;
+    font-size:14px;
+  }
+
+  tr td:first-child{
+    border-top-left-radius:14px;
+    border-bottom-left-radius:14px;
+  }
+
+  tr td:last-child{
+    border-top-right-radius:14px;
+    border-bottom-right-radius:14px;
+  }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#f8fbfd;
+    color:var(--muted);
+    font-size:12px;
+    font-weight:700;
+  }
+
+  .empty{
+    color:var(--muted);
+    font-size:14px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1 style="margin-bottom:6px">รายการจองทั้งหมด</h1>
+    <div class="sub">หน้า Admin แยกจากหน้า User และต้องล็อกอินก่อนเข้าใช้งาน</div>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <a class="btn" href="/home">🏠 กลับหน้า Home</a>
+    <a class="btn danger" href="/admin/logout">ออกจากระบบ</a>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px;">
+  <form method="get" action="/admin/bookings" class="filters">
+    <input type="date" name="date">
+    <select name="doctor_id">
+      <option value="">-- ทุกแพทย์ --</option>
+      {% for d in doctors %}
+        <option value="{{ d.id }}">{{ d.name }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn primary" type="submit">กรองรายการ</button>
+    <a class="btn" href="/admin/bookings">ล้างตัวกรอง</a>
+  </form>
+</div>
+
+<div class="card table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>วัน</th>
+        <th>เวลา</th>
+        <th>ผู้จอง</th>
+        <th>โทร</th>
+        <th>บริการ</th>
+        <th>โปร/แบรนด์</th>
+        <th>แพทย์</th>
+        <th>หมายเหตุ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if bookings|length == 0 %}
+      <tr>
+        <td colspan="8" class="empty">ยังไม่มีรายการจอง</td>
+      </tr>
+      {% endif %}
+
+      {% for b in bookings %}
+      <tr>
+        <td>{{ b.booking_date }}</td>
+        <td><span class="badge">{{ b.booking_time }}</span></td>
+        <td><strong>{{ b.patient_name }}</strong></td>
+        <td>{{ b.phone }}</td>
+        <td>{{ b.service }}</td>
+        <td>{{ b.product }}</td>
+        <td>
+          {% set d = doc_map.get(b.doctor_id) %}
+          {% if d %}{{ d.name }}{% else %}Doctor #{{ b.doctor_id }}{% endif %}
+        </td>
+        <td style="color:var(--muted)">{{ b.note }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

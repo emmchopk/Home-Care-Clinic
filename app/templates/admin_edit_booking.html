@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Booking | Home Care Clinic{% endblock %}
+
+{% block content %}
+
+<section class="admin-page">
+  <div class="admin-head">
+    <div>
+      <p class="eyebrow">Back Office</p>
+      <h1>Edit Booking</h1>
+      <p>แก้ไขวันนัดของลูกค้า และส่ง Email ยืนยันใหม่</p>
+    </div>
+
+    <a href="/admin/bookings" class="btn-outline">Back Bookings</a>
+  </div>
+
+  <div class="admin-panel">
+    <div class="booking-user-box">
+      <span>Customer</span>
+      <b>{{ booking.full_name }}</b>
+      <small>{{ booking.email }}</small>
+    </div>
+
+    <form class="admin-form" method="post" action="/admin/bookings/{{ booking.id }}/edit">
+      <label>Phone</label>
+      <input name="customer_phone" value="{{ booking.customer_phone or '' }}" />
+
+      <label>Doctor</label>
+      <select name="doctor_id" required>
+        {% for doctor in doctors %}
+          <option value="{{ doctor.id }}" {% if booking.doctor_id == doctor.id %}selected{% endif %}>
+            {{ doctor.name }} — {{ doctor.specialty }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <label>Appointment Date</label>
+      <input type="date" name="appointment_date" value="{{ booking.appointment_date }}" required />
+
+      <label>Appointment Time</label>
+      <input type="time" name="appointment_time" value="{{ booking.appointment_time }}" required />
+
+      <label>Status</label>
+      <select name="status">
+        <option value="PENDING" {% if booking.status == "PENDING" %}selected{% endif %}>PENDING</option>
+        <option value="CONFIRMED" {% if booking.status == "CONFIRMED" %}selected{% endif %}>CONFIRMED</option>
+        <option value="DONE" {% if booking.status == "DONE" %}selected{% endif %}>DONE</option>
+        <option value="CANCELLED" {% if booking.status == "CANCELLED" %}selected{% endif %}>CANCELLED</option>
+      </select>
+
+      <label>Note</label>
+      <textarea name="note" rows="4">{{ booking.note or '' }}</textarea>
+
+      <button type="submit">Save & Send Email Again</button>
+    </form>
+  </div>
+</section>
+
+{% endblock %}

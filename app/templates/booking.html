@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Booking | Home Care Clinic{% endblock %}
+
+{% block content %}
+
+<section class="booking-page">
+  <div class="booking-hero">
+    <div>
+      <p class="eyebrow">Online Appointment</p>
+      <h1>Book Your Clinic Appointment</h1>
+      <p>
+        เลือกแพ็กเกจ วัน เวลา และคุณหมอที่เข้าเวรในวันนั้น
+        ระบบจะส่ง Email ยืนยันให้คุณหลังจองสำเร็จ
+      </p>
+    </div>
+
+    <div class="booking-user-box">
+      <span>Logged in as</span>
+      <b>{{ user["full_name"] }}</b>
+      <small>{{ user["email"] }}</small>
+    </div>
+  </div>
+
+  <div class="booking-layout">
+    <div class="booking-image"></div>
+
+    <form class="booking-form" method="post" action="/booking">
+      <h2>Appointment Form</h2>
+
+      <label>Phone</label>
+      <input type="text" name="customer_phone" required placeholder="เบอร์โทรศัพท์" />
+
+      <label>Package</label>
+      <select name="package_name" required>
+        <option value="">เลือกแพ็กเกจ</option>
+        {% for package in packages %}
+          <option value="{{ package.name }}">{{ package.name }} — {{ package.price }}</option>
+        {% endfor %}
+      </select>
+
+      <label>Appointment Date</label>
+      <input type="date" name="appointment_date" id="appointmentDate" required />
+
+      <label>Doctor Available On This Date</label>
+      <select name="doctor_id" id="doctorSelect" required>
+        <option value="">กรุณาเลือกวันที่ก่อน</option>
+      </select>
+
+      <label>Appointment Time</label>
+      <select name="appointment_time" required>
+        <option value="">เลือกเวลา</option>
+        <option value="10:00">10:00</option>
+        <option value="11:00">11:00</option>
+        <option value="12:00">12:00</option>
+        <option value="13:00">13:00</option>
+        <option value="14:00">14:00</option>
+        <option value="15:00">15:00</option>
+        <option value="16:00">16:00</option>
+        <option value="17:00">17:00</option>
+        <option value="18:00">18:00</option>
+        <option value="19:00">19:00</option>
+      </select>
+
+      <label>Note</label>
+      <textarea name="note" rows="4" placeholder="รายละเอียดเพิ่มเติม"></textarea>
+
+      <button type="submit">Confirm Booking & Send Email</button>
+    </form>
+  </div>
+</section>
+
+<script>
+  const dateInput = document.getElementById("appointmentDate");
+  const doctorSelect = document.getElementById("doctorSelect");
+
+  dateInput.addEventListener("change", async () => {
+    const date = dateInput.value;
+    doctorSelect.innerHTML = `<option value="">กำลังโหลดข้อมูลหมอ...</option>`;
+
+    if (!date) {
+      doctorSelect.innerHTML = `<option value="">กรุณาเลือกวันที่ก่อน</option>`;
+      return;
+    }
+
+    const res = await fetch(`/api/doctors/available?date=${date}`);
+    const data = await res.json();
+
+    if (!data.doctors || data.doctors.length === 0) {
+      doctorSelect.innerHTML = `<option value="">ไม่มีหมอเข้าเวรในวันนี้</option>`;
+      return;
+    }
+
+    doctorSelect.innerHTML = `<option value="">เลือกคุณหมอ</option>`;
+
+    data.doctors.forEach((doctor) => {
+      const option = document.createElement("option");
+      option.value = doctor.doctor_id;
+      option.textContent = `${doctor.name} (${doctor.specialty || "Doctor"}) ${doctor.start_time}-${doctor.end_time}`;
+      doctorSelect.appendChild(option);
+    });
+  });
+</script>
+
+{% endblock %}

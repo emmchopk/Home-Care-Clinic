@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Packages | Home Care Clinic{% endblock %}
+
+{% block content %}
+
+<section class="admin-page">
+  <div class="admin-container">
+    <div class="admin-header">
+      <div>
+        <p class="blossom-kicker">ADMIN PANEL</p>
+        <h1>Manage Packages</h1>
+        <p>
+          Admin กรอกภาษาไทยหรืออังกฤษ ระบบจะใช้ AI แปลให้อัตโนมัติครบ 5 ภาษา
+        </p>
+      </div>
+
+      <a href="/admin/dashboard" class="blossom-btn-light">
+        ← Dashboard
+      </a>
+    </div>
+
+    {% if success %}
+      <div class="admin-alert success">{{ success }}</div>
+    {% endif %}
+
+    {% if error %}
+      <div class="admin-alert error">{{ error }}</div>
+    {% endif %}
+
+
+    <div class="admin-card">
+      <h2>Add New Package</h2>
+
+      <form
+        action="/admin/packages"
+        method="post"
+        enctype="multipart/form-data"
+        class="admin-form-grid"
+      >
+        <div>
+          <label>Package Name TH</label>
+          <input
+            type="text"
+            name="name_th"
+            placeholder="เช่น โปรแกรมหน้าใส Skin Booster"
+          />
+        </div>
+
+        <div>
+          <label>Package Name EN</label>
+          <input
+            type="text"
+            name="name_en"
+            placeholder="Example: Skin Booster Program"
+          />
+        </div>
+
+        <div>
+          <label>Slug</label>
+          <input
+            type="text"
+            name="slug"
+            placeholder="skin-booster"
+            required
+          />
+        </div>
+
+        <div>
+          <label>Price Text</label>
+          <input
+            type="text"
+            name="price"
+            placeholder="฿2,990"
+          />
+        </div>
+
+        <div>
+          <label>Price Amount</label>
+          <input
+            type="number"
+            step="0.01"
+            name="price_amount"
+            value="0"
+          />
+        </div>
+
+        <div>
+          <label>Badge</label>
+          <input
+            type="text"
+            name="badge"
+            placeholder="POPULAR / NEW / SALE"
+          />
+        </div>
+
+        <div class="full">
+          <label>Description TH</label>
+          <textarea
+            name="description_th"
+            rows="4"
+            placeholder="รายละเอียดแพ็กเกจภาษาไทย"
+          ></textarea>
+        </div>
+
+        <div class="full">
+          <label>Description EN</label>
+          <textarea
+            name="description_en"
+            rows="4"
+            placeholder="Package description in English"
+          ></textarea>
+        </div>
+
+        <div>
+          <label>Image 1</label>
+          <input type="file" name="image_file_1" accept="image/*" />
+        </div>
+
+        <div>
+          <label>Image 2</label>
+          <input type="file" name="image_file_2" accept="image/*" />
+        </div>
+
+        <div>
+          <label>Image 3</label>
+          <input type="file" name="image_file_3" accept="image/*" />
+        </div>
+
+        <div>
+          <label>Image 4</label>
+          <input type="file" name="image_file_4" accept="image/*" />
+        </div>
+
+        <div>
+          <label>Status</label>
+          <select name="is_active">
+            <option value="1">Active</option>
+            <option value="0">Hidden</option>
+          </select>
+        </div>
+
+        <div class="full">
+          <button type="submit" class="blossom-btn-primary">
+            Save Package + AI Translate
+          </button>
+        </div>
+      </form>
+    </div>
+
+
+    <div class="admin-list">
+      <h2>Package List</h2>
+
+      {% for package in packages %}
+        <div class="admin-edit-card">
+          <div class="admin-edit-head">
+            <div>
+              <h3>{{ package.name_th or package.name }}</h3>
+              <p>
+                Slug: {{ package.slug }}
+                |
+                Status:
+                {% if package.is_active %}
+                  Active
+                {% else %}
+                  Hidden
+                {% endif %}
+              </p>
+            </div>
+
+            <a
+              href="/packages/{{ package.slug }}"
+              target="_blank"
+              class="blossom-btn-light"
+            >
+              View
+            </a>
+          </div>
+
+          <form
+            action="/admin/packages/{{ package.id }}/update"
+            method="post"
+            enctype="multipart/form-data"
+            class="admin-form-grid"
+          >
+            <div>
+              <label>Package Name TH</label>
+              <input
+                type="text"
+                name="name_th"
+                value="{{ package.name_th or package.name or '' }}"
+              />
+            </div>
+
+            <div>
+              <label>Package Name EN</label>
+              <input
+                type="text"
+                name="name_en"
+                value="{{ package.name_en or '' }}"
+              />
+            </div>
+
+            <div>
+              <label>Slug</label>
+              <input
+                type="text"
+                name="slug"
+                value="{{ package.slug }}"
+                required
+              />
+            </div>
+
+            <div>
+              <label>Price Text</label>
+              <input
+                type="text"
+                name="price"
+                value="{{ package.price or '' }}"
+              />
+            </div>
+
+            <div>
+              <label>Price Amount</label>
+              <input
+                type="number"
+                step="0.01"
+                name="price_amount"
+                value="{{ package.price_amount or 0 }}"
+              />
+            </div>
+
+            <div>
+              <label>Badge</label>
+              <input
+                type="text"
+                name="badge"
+                value="{{ package.badge or '' }}"
+              />
+            </div>
+
+            <div class="full">
+              <label>Description TH</label>
+              <textarea name="description_th" rows="4">{{ package.description_th or package.description or '' }}</textarea>
+            </div>
+
+            <div class="full">
+              <label>Description EN</label>
+              <textarea name="description_en" rows="4">{{ package.description_en or '' }}</textarea>
+            </div>
+
+            <input
+              type="hidden"
+              name="existing_image_file_1"
+              value="{{ package.image_file_1 or package.image_file or '' }}"
+            />
+            <input
+              type="hidden"
+              name="existing_image_file_2"
+              value="{{ package.image_file_2 or '' }}"
+            />
+            <input
+              type="hidden"
+              name="existing_image_file_3"
+              value="{{ package.image_file_3 or '' }}"
+            />
+            <input
+              type="hidden"
+              name="existing_image_file_4"
+              value="{{ package.image_file_4 or '' }}"
+            />
+
+            <div class="full">
+              <label>Current Images</label>
+
+              <div class="admin-image-preview-grid">
+                {% set p_images = [
+                  package.image_file_1 or package.image_file,
+                  package.image_file_2,
+                  package.image_file_3,
+                  package.image_file_4
+                ] %}
+
+                {% for img in p_images %}
+                  <div class="admin-image-preview">
+                    {% if img %}
+                      <img
+                        src="/static/images/packages/{{ img }}?v={{ package.id }}"
+                        alt="Package image"
+                      />
+                    {% else %}
+                      <div class="admin-no-image">No Image</div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div>
+              <label>Replace Image 1</label>
+              <input type="file" name="image_file_1" accept="image/*" />
+
+              <label class="admin-checkbox">
+                <input type="checkbox" name="remove_image_1" value="1" />
+                Remove image 1
+              </label>
+            </div>
+
+            <div>
+              <label>Replace Image 2</label>
+              <input type="file" name="image_file_2" accept="image/*" />
+
+              <label class="admin-checkbox">
+                <input type="checkbox" name="remove_image_2" value="1" />
+                Remove image 2
+              </label>
+            </div>
+
+            <div>
+              <label>Replace Image 3</label>
+              <input type="file" name="image_file_3" accept="image/*" />
+
+              <label class="admin-checkbox">
+                <input type="checkbox" name="remove_image_3" value="1" />
+                Remove image 3
+              </label>
+            </div>
+
+            <div>
+              <label>Replace Image 4</label>
+              <input type="file" name="image_file_4" accept="image/*" />
+
+              <label class="admin-checkbox">
+                <input type="checkbox" name="remove_image_4" value="1" />
+                Remove image 4
+              </label>
+            </div>
+
+            <div>
+              <label>Status</label>
+              <select name="is_active">
+                <option value="1" {% if package.is_active %}selected{% endif %}>
+                  Active
+                </option>
+                <option value="0" {% if not package.is_active %}selected{% endif %}>
+                  Hidden
+                </option>
+              </select>
+            </div>
+
+            <div class="full admin-form-actions">
+              <button type="submit" class="blossom-btn-primary">
+                Update + AI Translate
+              </button>
+            </div>
+          </form>
+        </div>
+      {% else %}
+        <div class="admin-empty">
+          ยังไม่มี Package
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

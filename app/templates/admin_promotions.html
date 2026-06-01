@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Promotions | Home Care Clinic{% endblock %}
+
+{% block content %}
+
+<section class="admin-page">
+  <div class="admin-container">
+    <div class="admin-header">
+      <div>
+        <p class="blossom-kicker">ADMIN PANEL</p>
+        <h1>Manage Promotions</h1>
+        <p>
+          Admin กรอกภาษาไทยหรืออังกฤษ ระบบจะใช้ AI แปลโปรโมชั่นให้อัตโนมัติครบ 5 ภาษา
+        </p>
+      </div>
+
+      <a href="/admin/dashboard" class="blossom-btn-light">
+        ← Dashboard
+      </a>
+    </div>
+
+    {% if success %}
+      <div class="admin-alert success">{{ success }}</div>
+    {% endif %}
+
+    {% if error %}
+      <div class="admin-alert error">{{ error }}</div>
+    {% endif %}
+
+
+    <div class="admin-card">
+      <h2>Add New Promotion</h2>
+
+      <form
+        action="/admin/promotions"
+        method="post"
+        enctype="multipart/form-data"
+        class="admin-form-grid"
+      >
+        <div>
+          <label>Promotion Title TH</label>
+          <input
+            type="text"
+            name="title_th"
+            placeholder="เช่น โปรโมชั่นหน้าใส"
+          />
+        </div>
+
+        <div>
+          <label>Promotion Title EN</label>
+          <input
+            type="text"
+            name="title_en"
+            placeholder="Example: Glow Skin Promotion"
+          />
+        </div>
+
+        <div>
+          <label>Slug</label>
+          <input
+            type="text"
+            name="slug"
+            placeholder="glow-skin-promotion"
+            required
+          />
+        </div>
+
+        <div>
+          <label>Price Text</label>
+          <input
+            type="text"
+            name="price"
+            placeholder="฿1,990"
+          />
+        </div>
+
+        <div>
+          <label>Badge</label>
+          <input
+            type="text"
+            name="badge"
+            placeholder="SPECIAL / NEW / SALE"
+          />
+        </div>
+
+        <div class="full">
+          <label>Description TH</label>
+          <textarea
+            name="description_th"
+            rows="4"
+            placeholder="รายละเอียดโปรโมชั่นภาษาไทย"
+          ></textarea>
+        </div>
+
+        <div class="full">
+          <label>Description EN</label>
+          <textarea
+            name="description_en"
+            rows="4"
+            placeholder="Promotion description in English"
+          ></textarea>
+        </div>
+
+        <div>
+          <label>Image 1</label>
+          <input type="file" name="image_file_1" accept="image/*" />
+        </div>
+
+        <div>
+          <label>Image 2</label>
+          <input type="file" name="image_file_2" accept="image/*" />
+        </div>
+
+        <div>
+          <label>Image 3</label>
+          <input type="file" name="image_file_3" accept="image/*" />
+        </div>
+
+        <div>
+          <label>Image 4</label>
+          <input type="file" name="image_file_4" accept="image/*" />
+        </div>
+
+        <div>
+          <label>Status</label>
+          <select name="is_active">
+            <option value="1">Active</option>
+            <option value="0">Hidden</option>
+          </select>
+        </div>
+
+        <div class="full">
+          <button type="submit" class="blossom-btn-primary">
+            Save Promotion + AI Translate
+          </button>
+        </div>
+      </form>
+    </div>
+
+
+    <div class="admin-list">
+      <h2>Promotion List</h2>
+
+      {% for promotion in promotions %}
+        <div class="admin-edit-card">
+          <div class="admin-edit-head">
+            <div>
+              <h3>{{ promotion.title_th or promotion.title }}</h3>
+              <p>
+                Slug: {{ promotion.slug }}
+                |
+                Status:
+                {% if promotion.is_active %}
+                  Active
+                {% else %}
+                  Hidden
+                {% endif %}
+              </p>
+            </div>
+          </div>
+
+          <form
+            action="/admin/promotions/{{ promotion.id }}/update"
+            method="post"
+            enctype="multipart/form-data"
+            class="admin-form-grid"
+          >
+            <div>
+              <label>Promotion Title TH</label>
+              <input
+                type="text"
+                name="title_th"
+                value="{{ promotion.title_th or promotion.title or '' }}"
+              />
+            </div>
+
+            <div>
+              <label>Promotion Title EN</label>
+              <input
+                type="text"
+                name="title_en"
+                value="{{ promotion.title_en or '' }}"
+              />
+            </div>
+
+            <div>
+              <label>Slug</label>
+              <input
+                type="text"
+                name="slug"
+                value="{{ promotion.slug }}"
+                required
+              />
+            </div>
+
+            <div>
+              <label>Price Text</label>
+              <input
+                type="text"
+                name="price"
+                value="{{ promotion.price or '' }}"
+              />
+            </div>
+
+            <div>
+              <label>Badge</label>
+              <input
+                type="text"
+                name="badge"
+                value="{{ promotion.badge or '' }}"
+              />
+            </div>
+
+            <div class="full">
+              <label>Description TH</label>
+              <textarea name="description_th" rows="4">{{ promotion.description_th or promotion.description or '' }}</textarea>
+            </div>
+
+            <div class="full">
+              <label>Description EN</label>
+              <textarea name="description_en" rows="4">{{ promotion.description_en or '' }}</textarea>
+            </div>
+
+            <input
+              type="hidden"
+              name="existing_image_file_1"
+              value="{{ promotion.image_file_1 or '' }}"
+            />
+            <input
+              type="hidden"
+              name="existing_image_file_2"
+              value="{{ promotion.image_file_2 or '' }}"
+            />
+            <input
+              type="hidden"
+              name="existing_image_file_3"
+              value="{{ promotion.image_file_3 or '' }}"
+            />
+            <input
+              type="hidden"
+              name="existing_image_file_4"
+              value="{{ promotion.image_file_4 or '' }}"
+            />
+
+            <div class="full">
+              <label>Current Images</label>
+
+              <div class="admin-image-preview-grid">
+                {% set promo_images = [
+                  promotion.image_file_1,
+                  promotion.image_file_2,
+                  promotion.image_file_3,
+                  promotion.image_file_4
+                ] %}
+
+                {% for img in promo_images %}
+                  <div class="admin-image-preview">
+                    {% if img %}
+                      <img
+                        src="/static/images/promotions/{{ img }}?v={{ promotion.id }}"
+                        alt="Promotion image"
+                      />
+                    {% else %}
+                      <div class="admin-no-image">No Image</div>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div>
+              <label>Replace Image 1</label>
+              <input type="file" name="image_file_1" accept="image/*" />
+
+              <label class="admin-checkbox">
+                <input type="checkbox" name="remove_image_1" value="1" />
+                Remove image 1
+              </label>
+            </div>
+
+            <div>
+              <label>Replace Image 2</label>
+              <input type="file" name="image_file_2" accept="image/*" />
+
+              <label class="admin-checkbox">
+                <input type="checkbox" name="remove_image_2" value="1" />
+                Remove image 2
+              </label>
+            </div>
+
+            <div>
+              <label>Replace Image 3</label>
+              <input type="file" name="image_file_3" accept="image/*" />
+
+              <label class="admin-checkbox">
+                <input type="checkbox" name="remove_image_3" value="1" />
+                Remove image 3
+              </label>
+            </div>
+
+            <div>
+              <label>Replace Image 4</label>
+              <input type="file" name="image_file_4" accept="image/*" />
+
+              <label class="admin-checkbox">
+                <input type="checkbox" name="remove_image_4" value="1" />
+                Remove image 4
+              </label>
+            </div>
+
+            <div>
+              <label>Status</label>
+              <select name="is_active">
+                <option value="1" {% if promotion.is_active %}selected{% endif %}>
+                  Active
+                </option>
+                <option value="0" {% if not promotion.is_active %}selected{% endif %}>
+                  Hidden
+                </option>
+              </select>
+            </div>
+
+            <div class="full admin-form-actions">
+              <button type="submit" class="blossom-btn-primary">
+                Update + AI Translate
+              </button>
+            </div>
+          </form>
+        </div>
+      {% else %}
+        <div class="admin-empty">
+          ยังไม่มี Promotion
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

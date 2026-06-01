@@ -1,0 +1,413 @@
+{% extends "base.html" %}
+
+{% block title %}Home Care Clinic | Aesthetic Clinic{% endblock %}
+
+{% block content %}
+
+<section class="blossom-hero">
+  <div class="blossom-hero-bg"></div>
+
+  <div class="blossom-hero-inner">
+    <div class="blossom-hero-content">
+      <p class="blossom-kicker" data-i18n="hero_kicker">HOME CARE AESTHETIC CLINIC</p>
+
+      <h1>
+        <span data-i18n="hero_title">ดูแลผิวเฉพาะบุคคล</span><br />
+        <span data-i18n="hero_title_span">เพื่อความงามที่เป็นธรรมชาติ</span>
+      </h1>
+
+      <p data-i18n="hero_desc">
+        แพ็กเกจดูแลผิวและสุขภาพความงาม ออกแบบตามปัญหาผิวของแต่ละบุคคล
+        ดูแลโดยทีมผู้เชี่ยวชาญ เพื่อผลลัพธ์ที่ปลอดภัย ดูเป็นธรรมชาติ และน่าเชื่อถือ
+      </p>
+
+      <div class="blossom-hero-actions">
+        <a href="https://line.me/R/ti/p/@homecare" target="_blank" rel="noopener noreferrer" class="blossom-btn-primary" data-i18n="hero_btn_booking">จองคิวออนไลน์</a>
+        <a href="#packages" class="blossom-btn-light" data-i18n="hero_btn_packages">ดูแพ็กเกจ</a>
+      </div>
+
+      <div class="blossom-trust-row">
+        <div>
+          <b data-i18n="trust_certified">Certified</b>
+          <span data-i18n="trust_doctors">Doctors</span>
+        </div>
+
+        <div>
+          <b data-i18n="trust_safe">Safe</b>
+          <span data-i18n="trust_treatment">Treatment</span>
+        </div>
+
+        <div>
+          <b data-i18n="trust_custom">Custom</b>
+          <span data-i18n="trust_skin_plan">Skin Plan</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="blossom-hero-image">
+      <div class="blossom-floating-card card-a">
+        <b data-i18n="hero_card_1_title">ปรึกษาปัญหาผิว</b>
+        <span data-i18n="hero_card_1_text">วิเคราะห์ผิวก่อนเริ่มดูแล</span>
+      </div>
+
+      <div class="blossom-floating-card card-b">
+        <b data-i18n="hero_card_2_title">จองออนไลน์</b>
+        <span data-i18n="hero_card_2_text">จองง่าย มี Email ยืนยัน</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="blossom-intro">
+  <div class="blossom-container blossom-intro-grid">
+    <div>
+      <p class="blossom-kicker" data-i18n="intro_kicker">CUSTOMIZED TECHNIQUES</p>
+      <h2 data-i18n="intro_title">ดูแลแบบเฉพาะบุคคล เพื่อผิวที่ดูดีอย่างเป็นธรรมชาติ</h2>
+    </div>
+
+    <div>
+      <p data-i18n="intro_desc">
+        Home Care Clinic ให้ความสำคัญกับการประเมินปัญหาผิวอย่างละเอียด
+        เลือกแพ็กเกจและวางแผนการดูแลให้เหมาะกับแต่ละคน
+        ตั้งแต่การดูแลสิว เติมความชุ่มชื้น ปรับผิวให้กระจ่างใส
+        ไปจนถึงการฟื้นฟูผิวให้ดูสุขภาพดี
+      </p>
+
+      <a href="https://line.me/R/ti/p/@homecare" target="_blank" rel="noopener noreferrer" class="blossom-text-link" data-i18n="intro_link">ปรึกษาและจองคิว →</a>
+    </div>
+  </div>
+</section>
+
+
+<section class="blossom-services" id="packages">
+  <div class="blossom-section-head">
+    <p class="blossom-kicker" data-i18n="packages_kicker">OUR SERVICES</p>
+    <h2 data-i18n="packages_title">Featured Packages</h2>
+    <span data-i18n="packages_subtitle">แพ็กเกจยอดนิยมที่ลูกค้าเลือกใช้บริการมากที่สุด</span>
+  </div>
+
+  <div class="blossom-package-grid">
+    {% for package in packages %}
+      <a class="blossom-package-card" href="/packages/{{ package.slug }}">
+        <div class="hc-home-slider">
+          {% set p1 = package.image_file_1 or package.image_file %}
+          {% set p2 = package.image_file_2 %}
+          {% set p3 = package.image_file_3 %}
+          {% set p4 = package.image_file_4 %}
+
+          {% if p1 %}
+            <div class="hc-home-slide" style="background-image: url('/static/images/packages/{{ p1 }}?v={{ package.id }}');"></div>
+          {% endif %}
+          {% if p2 %}
+            <div class="hc-home-slide" style="background-image: url('/static/images/packages/{{ p2 }}?v={{ package.id }}');"></div>
+          {% endif %}
+          {% if p3 %}
+            <div class="hc-home-slide" style="background-image: url('/static/images/packages/{{ p3 }}?v={{ package.id }}');"></div>
+          {% endif %}
+          {% if p4 %}
+            <div class="hc-home-slide" style="background-image: url('/static/images/packages/{{ p4 }}?v={{ package.id }}');"></div>
+          {% endif %}
+
+          {% if not p1 and not p2 and not p3 and not p4 %}
+            <div class="hc-home-slide hc-home-slide-active" style="background-image: url('/static/images/packages/facial-radiance.jpg');"></div>
+          {% endif %}
+        </div>
+
+        <div class="blossom-package-body">
+          <div class="blossom-package-top">
+            {% if package.badge %}
+              <span class="blossom-badge">{{ package.badge }}</span>
+            {% else %}
+              <span class="blossom-badge" data-i18n="package_default_badge">แพ็กเกจ</span>
+            {% endif %}
+
+            {% if package.price %}
+              <b>{{ package.price }}</b>
+            {% endif %}
+          </div>
+
+          <h3
+            class="db-i18n"
+            data-th="{{ package.name_th or package.name }}"
+            data-en="{{ package.name_en or package.name }}"
+            data-zh="{{ package.name_zh or package.name }}"
+            data-ja="{{ package.name_ja or package.name }}"
+            data-ko="{{ package.name_ko or package.name }}"
+          >
+            {{ package.name_th or package.name }}
+          </h3>
+
+          {% if package.description or package.description_th %}
+            <p
+              class="db-i18n"
+              data-th="{{ package.description_th or package.description }}"
+              data-en="{{ package.description_en or package.description }}"
+              data-zh="{{ package.description_zh or package.description }}"
+              data-ja="{{ package.description_ja or package.description }}"
+              data-ko="{{ package.description_ko or package.description }}"
+            >
+              {{ package.description_th or package.description }}
+            </p>
+          {% else %}
+            <p data-i18n="package_default_desc">แพ็กเกจดูแลผิวและความงามโดยทีมผู้เชี่ยวชาญ</p>
+          {% endif %}
+
+          <div class="blossom-card-link" data-i18n="detail_link">ดูรายละเอียด →</div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+
+
+<section class="blossom-program-section" id="promotions">
+  <div class="blossom-container">
+    <div class="blossom-section-head light">
+      <p class="blossom-kicker" data-i18n="promotions_kicker">PROMOTIONS</p>
+      <h2 data-i18n="promotions_title">Current Promotions</h2>
+      <span data-i18n="promotions_subtitle">โปรโมชั่นพิเศษสำหรับลูกค้า Home Care Clinic</span>
+    </div>
+
+    <div class="blossom-promo-grid">
+      {% for promotion in promotions %}
+        <div class="blossom-promo-card">
+          <div class="hc-home-slider hc-promo-slider">
+            {% set pr1 = promotion.image_file_1 %}
+            {% set pr2 = promotion.image_file_2 %}
+            {% set pr3 = promotion.image_file_3 %}
+            {% set pr4 = promotion.image_file_4 %}
+
+            {% if pr1 %}
+              <div class="hc-home-slide" style="background-image: url('/static/images/promotions/{{ pr1 }}?v={{ promotion.id }}');"></div>
+            {% endif %}
+            {% if pr2 %}
+              <div class="hc-home-slide" style="background-image: url('/static/images/promotions/{{ pr2 }}?v={{ promotion.id }}');"></div>
+            {% endif %}
+            {% if pr3 %}
+              <div class="hc-home-slide" style="background-image: url('/static/images/promotions/{{ pr3 }}?v={{ promotion.id }}');"></div>
+            {% endif %}
+            {% if pr4 %}
+              <div class="hc-home-slide" style="background-image: url('/static/images/promotions/{{ pr4 }}?v={{ promotion.id }}');"></div>
+            {% endif %}
+
+            {% if not pr1 and not pr2 and not pr3 and not pr4 %}
+              <div class="hc-home-slide hc-home-slide-active" style="background-image: url('/static/images/packages/facial-radiance.jpg');"></div>
+            {% endif %}
+          </div>
+
+          <div class="blossom-promo-content">
+            {% if promotion.badge %}
+              <span>{{ promotion.badge }}</span>
+            {% else %}
+              <span data-i18n="promotion_default_badge">พิเศษ</span>
+            {% endif %}
+
+            <h3
+              class="db-i18n"
+              data-th="{{ promotion.title_th or promotion.title }}"
+              data-en="{{ promotion.title_en or promotion.title }}"
+              data-zh="{{ promotion.title_zh or promotion.title }}"
+              data-ja="{{ promotion.title_ja or promotion.title }}"
+              data-ko="{{ promotion.title_ko or promotion.title }}"
+            >
+              {{ promotion.title_th or promotion.title }}
+            </h3>
+
+            {% if promotion.description or promotion.description_th %}
+              <p
+                class="db-i18n"
+                data-th="{{ promotion.description_th or promotion.description }}"
+                data-en="{{ promotion.description_en or promotion.description }}"
+                data-zh="{{ promotion.description_zh or promotion.description }}"
+                data-ja="{{ promotion.description_ja or promotion.description }}"
+                data-ko="{{ promotion.description_ko or promotion.description }}"
+              >
+                {{ promotion.description_th or promotion.description }}
+              </p>
+            {% else %}
+              <p data-i18n="promotion_default_desc">โปรโมชั่นพิเศษสำหรับการดูแลผิวและสุขภาพความงาม</p>
+            {% endif %}
+
+            {% if promotion.price %}
+              <b>{{ promotion.price }}</b>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<section class="hc-doctor-section" id="doctors">
+  <div class="blossom-container">
+    <div class="blossom-section-head">
+      <p class="blossom-kicker" data-i18n="doctors_kicker">OUR DOCTORS</p>
+      <h2 data-i18n="doctors_title">Meet Our Doctors</h2>
+      <span data-i18n="doctors_subtitle">ทีมคุณหมอของ Home Care Clinic และความเชี่ยวชาญของแต่ละท่าน</span>
+    </div>
+
+    <div class="hc-doctor-grid">
+      {% for doctor in doctors %}
+        <div class="hc-doctor-card">
+          {% if doctor.image_file %}
+            <div class="hc-doctor-photo" style="background-image: url('/static/images/doctors/{{ doctor.image_file }}?v={{ doctor.id }}');"></div>
+          {% else %}
+            <div class="hc-doctor-photo hc-doctor-empty">Doctor</div>
+          {% endif %}
+
+          <div class="hc-doctor-body">
+            <span data-i18n="doctor_label">HOME CARE DOCTOR</span>
+
+            <h3
+              class="db-i18n"
+              data-th="{{ doctor.name_th or doctor.name }}"
+              data-en="{{ doctor.name_en or doctor.name }}"
+              data-zh="{{ doctor.name_zh or doctor.name }}"
+              data-ja="{{ doctor.name_ja or doctor.name }}"
+              data-ko="{{ doctor.name_ko or doctor.name }}"
+            >
+              {{ doctor.name_th or doctor.name }}
+            </h3>
+
+            {% if doctor.specialty %}
+              <b
+                class="db-i18n"
+                data-th="{{ doctor.specialty_th or doctor.specialty }}"
+                data-en="{{ doctor.specialty_en or doctor.specialty }}"
+                data-zh="{{ doctor.specialty_zh or doctor.specialty }}"
+                data-ja="{{ doctor.specialty_ja or doctor.specialty }}"
+                data-ko="{{ doctor.specialty_ko or doctor.specialty }}"
+              >
+                {{ doctor.specialty_th or doctor.specialty }}
+              </b>
+            {% endif %}
+
+            {% if doctor.expertise %}
+              <p
+                class="db-i18n"
+                data-th="{{ doctor.expertise_th or doctor.expertise }}"
+                data-en="{{ doctor.expertise_en or doctor.expertise }}"
+                data-zh="{{ doctor.expertise_zh or doctor.expertise }}"
+                data-ja="{{ doctor.expertise_ja or doctor.expertise }}"
+                data-ko="{{ doctor.expertise_ko or doctor.expertise }}"
+              >
+                {{ doctor.expertise_th or doctor.expertise }}
+              </p>
+            {% else %}
+              <p data-i18n="doctor_default_desc">ดูแลและให้คำปรึกษาด้านผิวพรรณและความงามแบบเฉพาะบุคคล</p>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<section class="blossom-review-section">
+  <div class="blossom-section-head">
+    <p class="blossom-kicker" data-i18n="reviews_kicker">CLIENT EXPERIENCE</p>
+    <h2 data-i18n="reviews_title">Why Clients Choose Us</h2>
+    <span data-i18n="reviews_subtitle">รีวิวและความประทับใจจากลูกค้าของ Home Care Clinic</span>
+  </div>
+
+  <div class="blossom-review-grid">
+    {% for review in reviews %}
+      <div class="blossom-review-card">
+        {% if review.image_file %}
+          <div class="review-photo" style="background-image: url('/static/images/reviews/{{ review.image_file }}?v={{ review.id }}');"></div>
+        {% endif %}
+
+        <div class="review-stars">
+          {% for i in range(review.rating or 5) %}★{% endfor %}
+        </div>
+
+        <p>{{ review.review_text }}</p>
+        <b>{{ review.customer_name }}</b>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+
+<section class="blossom-location-section" id="location">
+  <div class="blossom-container blossom-location-card">
+    <div>
+      <p class="blossom-kicker" data-i18n="location_kicker">LOCATION</p>
+      <h2>{{ clinic_location_name | default('Home Care Clinic, Bangkok') }}</h2>
+      <p data-i18n="location_desc">
+        กดปุ่มด้านขวาเพื่อเปิด Google Map และนำทางมายังคลินิกได้ทันที
+      </p>
+    </div>
+
+    <a
+      href="{{ clinic_google_map_url | default('https://maps.google.com/?q=Home+Care+Clinic+Bangkok') }}"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="blossom-btn-primary"
+      data-i18n="location_btn"
+    >
+      เปิด Google Map →
+    </a>
+  </div>
+</section>
+
+
+<section class="blossom-final-cta">
+  <div class="blossom-container">
+    <p class="blossom-kicker" data-i18n="final_kicker">BOOK YOUR APPOINTMENT</p>
+    <h2 data-i18n="final_title">พร้อมเริ่มดูแลผิวของคุณแล้วหรือยัง?</h2>
+    <p data-i18n="final_desc">
+      เลือกแพ็กเกจที่เหมาะกับคุณ จองออนไลน์ได้ทันที
+      หรือทัก LINE Official เพื่อสอบถามก่อนจอง
+    </p>
+
+    <a href="https://line.me/R/ti/p/@homecare" target="_blank" rel="noopener noreferrer" class="blossom-btn-primary" data-i18n="final_btn">จองคิว →</a>
+  </div>
+</section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const sliders = document.querySelectorAll(".hc-home-slider");
+
+    sliders.forEach(function (slider) {
+      const slides = slider.querySelectorAll(".hc-home-slide");
+
+      if (!slides.length) return;
+
+      let currentIndex = 0;
+
+      slides.forEach(function (slide, index) {
+        slide.classList.remove("is-active", "is-prev");
+
+        if (index === 0) {
+          slide.classList.add("is-active");
+        }
+      });
+
+      if (slides.length === 1) return;
+
+      setInterval(function () {
+        const currentSlide = slides[currentIndex];
+
+        currentSlide.classList.remove("is-active");
+        currentSlide.classList.add("is-prev");
+
+        currentIndex = (currentIndex + 1) % slides.length;
+
+        const nextSlide = slides[currentIndex];
+
+        nextSlide.classList.remove("is-prev");
+        nextSlide.classList.add("is-active");
+
+        setTimeout(function () {
+          currentSlide.classList.remove("is-prev");
+        }, 800);
+      }, 3000);
+    });
+  });
+</script>
+
+{% endblock %}

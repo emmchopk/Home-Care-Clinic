@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {{ package.name_th or package.name }} | Home Care Clinic
+{% endblock %}
+
+{% block content %}
+
+<section class="package-detail-hero">
+  <div class="package-detail-bg">
+    {% set p1 = package.image_file_1 or package.image_file %}
+    {% if p1 %}
+      <div
+        class="package-detail-image"
+        style="background-image: url('/static/images/packages/{{ p1 }}?v={{ package.id }}');"
+      ></div>
+    {% else %}
+      <div
+        class="package-detail-image"
+        style="background-image: url('/static/images/packages/facial-radiance.jpg');"
+      ></div>
+    {% endif %}
+  </div>
+
+  <div class="package-detail-overlay"></div>
+
+  <div class="package-detail-content">
+    {% if package.badge %}
+      <span class="blossom-badge">{{ package.badge }}</span>
+    {% else %}
+      <span class="blossom-badge" data-i18n="package_default_badge">แพ็กเกจ</span>
+    {% endif %}
+
+    <h1
+      class="db-i18n"
+      data-th="{{ package.name_th or package.name }}"
+      data-en="{{ package.name_en or package.name }}"
+      data-zh="{{ package.name_zh or package.name }}"
+      data-ja="{{ package.name_ja or package.name }}"
+      data-ko="{{ package.name_ko or package.name }}"
+    >
+      {{ package.name_th or package.name }}
+    </h1>
+
+    {% if package.description or package.description_th %}
+      <p
+        class="db-i18n"
+        data-th="{{ package.description_th or package.description }}"
+        data-en="{{ package.description_en or package.description }}"
+        data-zh="{{ package.description_zh or package.description }}"
+        data-ja="{{ package.description_ja or package.description }}"
+        data-ko="{{ package.description_ko or package.description }}"
+      >
+        {{ package.description_th or package.description }}
+      </p>
+    {% endif %}
+
+    <div class="package-detail-actions">
+      <a href="https://line.me/R/ti/p/@homecare" target="_blank" rel="noopener noreferrer" class="blossom-btn-primary" data-i18n="detail_book">
+        จองแพ็กเกจนี้
+      </a>
+
+      <a href="/home" class="blossom-btn-light" data-i18n="detail_back">
+        กลับหน้าแรก
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<section class="package-detail-section">
+  <div class="package-detail-container">
+    <div class="package-detail-main">
+      <p class="blossom-kicker" data-i18n="detail_description">
+        รายละเอียดแพ็กเกจ
+      </p>
+
+      <h2
+        class="db-i18n"
+        data-th="{{ package.name_th or package.name }}"
+        data-en="{{ package.name_en or package.name }}"
+        data-zh="{{ package.name_zh or package.name }}"
+        data-ja="{{ package.name_ja or package.name }}"
+        data-ko="{{ package.name_ko or package.name }}"
+      >
+        {{ package.name_th or package.name }}
+      </h2>
+
+      {% if package.description or package.description_th %}
+        <p
+          class="package-detail-text db-i18n"
+          data-th="{{ package.description_th or package.description }}"
+          data-en="{{ package.description_en or package.description }}"
+          data-zh="{{ package.description_zh or package.description }}"
+          data-ja="{{ package.description_ja or package.description }}"
+          data-ko="{{ package.description_ko or package.description }}"
+        >
+          {{ package.description_th or package.description }}
+        </p>
+      {% else %}
+        <p class="package-detail-text" data-i18n="package_default_desc">
+          แพ็กเกจดูแลผิวและความงามโดยทีมผู้เชี่ยวชาญ
+        </p>
+      {% endif %}
+
+      <div class="package-gallery">
+        {% set images = [
+          package.image_file_1 or package.image_file,
+          package.image_file_2,
+          package.image_file_3,
+          package.image_file_4
+        ] %}
+
+        {% for img in images %}
+          {% if img %}
+            <div
+              class="package-gallery-item"
+              style="background-image: url('/static/images/packages/{{ img }}?v={{ package.id }}');"
+            ></div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <aside class="package-detail-card">
+      <span data-i18n="detail_price">ราคา</span>
+
+      {% if package.price %}
+        <h3>{{ package.price }}</h3>
+      {% else %}
+        <h3>-</h3>
+      {% endif %}
+
+      <p
+        class="db-i18n"
+        data-th="{{ package.name_th or package.name }}"
+        data-en="{{ package.name_en or package.name }}"
+        data-zh="{{ package.name_zh or package.name }}"
+        data-ja="{{ package.name_ja or package.name }}"
+        data-ko="{{ package.name_ko or package.name }}"
+      >
+        {{ package.name_th or package.name }}
+      </p>
+
+      <a href="https://line.me/R/ti/p/@homecare" target="_blank" rel="noopener noreferrer" class="blossom-btn-primary" data-i18n="detail_book">
+        จองแพ็กเกจนี้
+      </a>
+    </aside>
+  </div>
+</section>
+
+{% endblock %}

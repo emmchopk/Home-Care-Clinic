@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Doctors | Home Care Clinic{% endblock %}
+
+{% block content %}
+
+<section class="admin-page">
+  <div class="admin-head">
+    <div>
+      <p class="eyebrow">Admin Management</p>
+      <h1>Doctors</h1>
+      <p>เพิ่ม/แก้ไข/ลบรายชื่อคุณหมอ พร้อมรูปและความเชี่ยวชาญ</p>
+    </div>
+
+    <div class="admin-actions">
+      <a href="/admin/dashboard" class="btn-outline">Dashboard</a>
+      <a href="/home" class="btn-primary">View Home</a>
+    </div>
+  </div>
+
+  {% if error %}
+    <div class="admin-alert error">{{ error }}</div>
+  {% endif %}
+
+  {% if success %}
+    <div class="admin-alert success">{{ success }}</div>
+  {% endif %}
+
+  <div class="admin-panel">
+    <div class="panel-head">
+      <h2>Add Doctor</h2>
+      <span>เพิ่มรายชื่อคุณหมอ</span>
+    </div>
+
+    <form method="post" action="/admin/doctors" enctype="multipart/form-data" class="admin-form-grid">
+      <div>
+        <label>Doctor Name</label>
+        <input type="text" name="name" placeholder="Dr. Ploy" required />
+      </div>
+
+      <div>
+        <label>Position / Specialty</label>
+        <input type="text" name="specialty" placeholder="Aesthetic Doctor" />
+      </div>
+
+      <div class="full">
+        <label>Expertise / ความถนัด</label>
+        <textarea name="expertise" rows="3" placeholder="เช่น ดูแลสิว เลเซอร์ หน้าใส ปรับรูปหน้า"></textarea>
+      </div>
+
+      <div>
+        <label>Phone</label>
+        <input type="text" name="phone" placeholder="เบอร์ติดต่อคุณหมอ" />
+      </div>
+
+      <div>
+        <label>Doctor Photo</label>
+        <input type="file" name="image_file" accept="image/*" />
+      </div>
+
+      <div>
+        <label>Status</label>
+        <select name="is_active">
+          <option value="1" selected>Active</option>
+          <option value="0">Hidden</option>
+        </select>
+      </div>
+
+      <div class="full">
+        <button type="submit" class="btn-primary">Add Doctor</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="admin-panel">
+    <div class="panel-head">
+      <h2>Doctor List</h2>
+      <span>{{ doctors|length }} รายการ</span>
+    </div>
+
+    <div class="admin-card-list">
+      {% for doctor in doctors %}
+        <form
+          method="post"
+          action="/admin/doctors/{{ doctor.id }}/update"
+          enctype="multipart/form-data"
+          class="admin-edit-card review-edit-card"
+        >
+          <div class="admin-edit-preview">
+            {% if doctor.image_file %}
+              <div
+                class="review-admin-photo"
+                style="background-image: url('/static/images/doctors/{{ doctor.image_file }}?v={{ doctor.id }}');"
+              ></div>
+            {% else %}
+              <div class="review-admin-photo empty-photo">No Doctor Photo</div>
+            {% endif %}
+          </div>
+
+          <div class="admin-edit-body">
+            <div class="admin-form-grid">
+              <div>
+                <label>Doctor Name</label>
+                <input type="text" name="name" value="{{ doctor.name }}" required />
+              </div>
+
+              <div>
+                <label>Position / Specialty</label>
+                <input type="text" name="specialty" value="{{ doctor.specialty or '' }}" />
+              </div>
+
+              <div class="full">
+                <label>Expertise / ความถนัด</label>
+                <textarea name="expertise" rows="3">{{ doctor.expertise or '' }}</textarea>
+              </div>
+
+              <div>
+                <label>Phone</label>
+                <input type="text" name="phone" value="{{ doctor.phone or '' }}" />
+              </div>
+
+              <div>
+                <label>Status</label>
+                <select name="is_active">
+                  <option value="1" {% if doctor.is_active == 1 %}selected{% endif %}>Active</option>
+                  <option value="0" {% if doctor.is_active == 0 %}selected{% endif %}>Hidden</option>
+                </select>
+              </div>
+
+              <input type="hidden" name="existing_image_file" value="{{ doctor.image_file or '' }}" />
+
+              <div>
+                <label>Replace Doctor Photo</label>
+                <input type="file" name="image_file" accept="image/*" />
+              </div>
+
+              <div>
+                <label>
+                  <input type="checkbox" name="remove_image" value="1" />
+                  Remove Doctor Photo
+                </label>
+              </div>
+
+              <div class="full">
+                <button type="submit" class="mini-btn">Save Doctor</button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <form
+          method="post"
+          action="/admin/doctors/{{ doctor.id }}/delete"
+          onsubmit="return confirm('ต้องการลบคุณหมอคนนี้ใช่ไหม?');"
+          style="margin: -12px 0 24px 0;"
+        >
+          <button type="submit" class="btn-outline">
+            Delete Doctor #{{ doctor.id }}
+          </button>
+        </form>
+      {% else %}
+        <div class="empty-state">
+          <h3>ยังไม่มีคุณหมอ</h3>
+          <p>เพิ่มรายชื่อคุณหมอได้จากฟอร์มด้านบน</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}
