@@ -24,8 +24,15 @@ from starlette.middleware.sessions import SessionMiddleware
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, "clinic.db")
 ENV_PATH = os.path.join(BASE_DIR, ".env")
+
+# Vercel เป็น Serverless: เขียนไฟล์ได้เฉพาะ /tmp
+# ใช้ /tmp/clinic.db เพื่อกัน Serverless Function crash ตอนสร้าง/แก้ไข SQLite
+IS_VERCEL = bool(os.getenv("VERCEL"))
+if IS_VERCEL:
+    DB_PATH = "/tmp/clinic.db"
+else:
+    DB_PATH = os.path.join(BASE_DIR, "clinic.db")
 
 STATIC_IMAGE_DIR = os.path.join(BASE_DIR, "app", "static", "images")
 PACKAGE_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "packages")
@@ -36,12 +43,23 @@ SERVICE_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "services")
 STATIC_VIDEO_DIR = os.path.join(BASE_DIR, "app", "static", "videos")
 SERVICE_VIDEO_DIR = os.path.join(STATIC_VIDEO_DIR, "services")
 
-os.makedirs(PACKAGE_IMAGE_DIR, exist_ok=True)
-os.makedirs(PROMOTION_IMAGE_DIR, exist_ok=True)
-os.makedirs(REVIEW_IMAGE_DIR, exist_ok=True)
-os.makedirs(DOCTOR_IMAGE_DIR, exist_ok=True)
-os.makedirs(SERVICE_IMAGE_DIR, exist_ok=True)
-os.makedirs(SERVICE_VIDEO_DIR, exist_ok=True)
+# ตอนรันบน Vercel โฟลเดอร์ deployment อาจเป็น read-only
+# จึงพยายามสร้างโฟลเดอร์แบบปลอดภัย ไม่ให้เว็บ crash ถ้าสร้างไม่ได้
+def safe_makedirs(path: str):
+    try:
+        os.makedirs(path, exist_ok=True)
+    except Exception as e:
+        print("CREATE FOLDER SKIPPED:", path, repr(e))
+
+for folder in [
+    PACKAGE_IMAGE_DIR,
+    PROMOTION_IMAGE_DIR,
+    REVIEW_IMAGE_DIR,
+    DOCTOR_IMAGE_DIR,
+    SERVICE_IMAGE_DIR,
+    SERVICE_VIDEO_DIR,
+]:
+    safe_makedirs(folder)
 
 load_dotenv(ENV_PATH, override=True)
 
