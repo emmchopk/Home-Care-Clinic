@@ -1,0 +1,1220 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Services | Home Care Clinic{% endblock %}
+
+{% block content %}
+<style>
+  .svc-admin {
+    max-width: 1320px;
+    margin: 28px auto 80px;
+    padding: 0 20px;
+    color: #2f2926;
+  }
+
+  .svc-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 22px;
+  }
+
+  .svc-head h1 {
+    margin: 0;
+    font-size: 34px;
+    color: #7a3541;
+  }
+
+  .svc-head p {
+    margin: 8px 0 0;
+    color: #8a7d75;
+    line-height: 1.7;
+  }
+
+  .svc-top-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .svc-link-btn,
+  .svc-btn,
+  .svc-btn-dark,
+  .svc-btn-danger,
+  .svc-btn-soft {
+    border: none;
+    border-radius: 999px;
+    min-height: 40px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  .svc-link-btn,
+  .svc-btn {
+    background: #8fa184;
+    color: #fff;
+  }
+
+  .svc-btn-dark {
+    background: #2f2926;
+    color: #fff;
+  }
+
+  .svc-btn-danger {
+    background: #b85c5c;
+    color: #fff;
+  }
+
+  .svc-btn-soft {
+    background: #fff;
+    color: #66785f;
+    border: 1px solid #e5cdb1;
+  }
+
+  .svc-alert-success,
+  .svc-alert-error {
+    padding: 13px 16px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+    font-weight: 900;
+  }
+
+  .svc-alert-success {
+    background: #eaf4e6;
+    color: #4d6448;
+  }
+
+  .svc-alert-error {
+    background: #ffe9e9;
+    color: #9d3434;
+  }
+
+  .svc-flow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .svc-flow-card {
+    background: #fffaf3;
+    border: 1px solid #f0d8bd;
+    border-radius: 20px;
+    padding: 16px;
+    box-shadow: 0 12px 26px rgba(100, 70, 60, 0.06);
+  }
+
+  .svc-flow-card b {
+    display: block;
+    color: #7a3541;
+    margin-bottom: 7px;
+    font-size: 16px;
+  }
+
+  .svc-flow-card span {
+    color: #8a7d75;
+    line-height: 1.65;
+    font-size: 14px;
+  }
+
+  .svc-card {
+    background: #fffaf3;
+    border: 1px solid #f0d8bd;
+    border-radius: 24px;
+    padding: 22px;
+    box-shadow: 0 14px 34px rgba(100, 70, 60, 0.08);
+    margin-bottom: 22px;
+  }
+
+  .svc-card h2,
+  .svc-card h3,
+  .svc-card h4 {
+    margin-top: 0;
+    color: #7a3541;
+  }
+
+  .svc-hint {
+    background: #fff3f4;
+    border: 1px dashed #e5cdb1;
+    color: #7a6c64;
+    padding: 13px 15px;
+    border-radius: 16px;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .svc-toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+
+  .svc-search {
+    width: min(430px, 100%);
+    min-height: 44px;
+    border: 1px solid #e5cdb1;
+    border-radius: 999px;
+    padding: 0 16px;
+    background: #fff;
+    font-family: inherit;
+  }
+
+  .svc-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .svc-form-grid .full {
+    grid-column: 1 / -1;
+  }
+
+  .svc-form-grid label,
+  .inline-label {
+    font-size: 13px;
+    font-weight: 900;
+    color: #554943;
+  }
+
+  .svc-form-grid input,
+  .svc-form-grid textarea,
+  .svc-form-grid select,
+  .inline-input {
+    width: 100%;
+    margin-top: 6px;
+    padding: 11px 12px;
+    border-radius: 14px;
+    border: 1px solid #e5cdb1;
+    background: #fff;
+    font-family: inherit;
+  }
+
+  .svc-form-grid textarea,
+  .inline-textarea {
+    min-height: 88px;
+    resize: vertical;
+  }
+
+  .svc-actions-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .svc-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 28px 0 14px;
+  }
+
+  .svc-section-title h2 {
+    margin: 0;
+    color: #7a3541;
+  }
+
+  .service-panel {
+    border: 1px solid #f0d8bd;
+    background: #fff;
+    border-radius: 26px;
+    overflow: hidden;
+    box-shadow: 0 14px 34px rgba(100, 70, 60, 0.08);
+    margin-bottom: 18px;
+  }
+
+  .service-main-head {
+    display: grid;
+    grid-template-columns: 210px 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 18px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #fffaf3, #fff3f4);
+  }
+
+  .service-main-image {
+    height: 150px;
+    border-radius: 20px;
+    background: #f8d8dc;
+    background-size: cover;
+    background-position: center;
+    border: 1px solid #f0d8bd;
+  }
+
+  .service-main-info h3 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    color: #2f2926;
+  }
+
+  .service-main-info p {
+    margin: 0;
+    color: #8a7d75;
+    line-height: 1.7;
+  }
+
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 9px;
+  }
+
+  .badge {
+    display: inline-flex;
+    min-height: 26px;
+    padding: 0 10px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .badge-on {
+    background: #eaf4e6;
+    color: #4d6448;
+  }
+
+  .badge-off {
+    background: #ffe9e9;
+    color: #9d3434;
+  }
+
+  .badge-count {
+    background: #fff;
+    color: #66785f;
+    border: 1px solid #e5cdb1;
+  }
+
+  .service-panel-body {
+    display: none;
+    padding: 0 18px 18px;
+    background: #fff;
+  }
+
+  .service-panel.open .service-panel-body {
+    display: block;
+  }
+
+  .toggle-arrow {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid #e5cdb1;
+    display: grid;
+    place-items: center;
+    color: #7a3541;
+    font-size: 24px;
+    font-weight: 900;
+  }
+
+  .service-panel.open .toggle-arrow {
+    transform: rotate(180deg);
+  }
+
+  .edit-box,
+  .add-box,
+  .program-box {
+    background: #fffaf3;
+    border: 1px solid #f0d8bd;
+    border-radius: 22px;
+    padding: 18px;
+    margin-top: 16px;
+  }
+
+  .box-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .box-title h4 {
+    margin: 0;
+    color: #7a3541;
+    font-size: 20px;
+  }
+
+  .program-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .program-box {
+    background: #fff;
+  }
+
+  .program-head {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .program-cover {
+    height: 94px;
+    border-radius: 16px;
+    background: #f8d8dc;
+    background-size: cover;
+    background-position: center;
+    border: 1px solid #f0d8bd;
+  }
+
+  .program-head h4 {
+    margin: 0 0 6px;
+    color: #2f2926;
+    font-size: 21px;
+  }
+
+  .program-head p {
+    margin: 0;
+    color: #8a7d75;
+    line-height: 1.55;
+    font-size: 14px;
+  }
+
+  .program-body {
+    display: none;
+    padding-top: 16px;
+  }
+
+  .program-box.open .program-body {
+    display: block;
+  }
+
+  .mini-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .mini-tab {
+    border: 1px solid #e5cdb1;
+    background: #fff;
+    color: #66785f;
+    border-radius: 999px;
+    min-height: 34px;
+    padding: 0 13px;
+    font-weight: 900;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .mini-tab.active {
+    background: #8fa184;
+    color: #fff;
+    border-color: #8fa184;
+  }
+
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: block;
+  }
+
+  .media-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .media-card {
+    background: #fffaf3;
+    border: 1px solid #f0d8bd;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .media-preview {
+    height: 170px;
+    background: #f8d8dc;
+    background-size: cover;
+    background-position: center;
+    display: grid;
+    place-items: center;
+  }
+
+  .media-preview video,
+  .media-preview iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    object-fit: cover;
+  }
+
+  .media-body {
+    padding: 13px;
+  }
+
+  .empty-box {
+    border: 1px dashed #e5cdb1;
+    background: #fffaf3;
+    border-radius: 18px;
+    padding: 18px;
+    color: #8a7d75;
+    text-align: center;
+    line-height: 1.7;
+  }
+
+  .preview-img {
+    margin-top: 8px;
+    width: 100%;
+    max-width: 230px;
+    height: 120px;
+    border-radius: 16px;
+    object-fit: cover;
+    display: none;
+    border: 1px solid #e5cdb1;
+  }
+
+  @media (max-width: 1050px) {
+    .svc-flow,
+    .media-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .service-main-head {
+      grid-template-columns: 160px 1fr auto;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .svc-head,
+    .svc-toolbar,
+    .svc-section-title {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .svc-flow,
+    .svc-form-grid,
+    .media-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .service-main-head,
+    .program-head {
+      grid-template-columns: 1fr;
+    }
+
+    .service-main-image,
+    .program-cover {
+      height: 190px;
+    }
+
+    .svc-top-actions,
+    .svc-actions-row {
+      width: 100%;
+    }
+
+    .svc-btn,
+    .svc-btn-dark,
+    .svc-btn-danger,
+    .svc-btn-soft,
+    .svc-link-btn {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="svc-admin">
+  <div class="svc-head">
+    <div>
+      <h1>บริการของเรา / Program</h1>
+      <p>
+        จัดการแบบใช้งานง่าย: สร้าง Program ใหญ่ 1 รูปหลัก → เพิ่ม Program ย่อย → เพิ่มรูป/วิดีโอ/คำบรรยายของแต่ละ Program ย่อย
+      </p>
+    </div>
+
+    <div class="svc-top-actions">
+      <a class="svc-link-btn" href="/home" target="_blank">ดูหน้าเว็บ</a>
+      <a class="svc-link-btn" href="/admin/dashboard">กลับ Dashboard</a>
+    </div>
+  </div>
+
+  {% if success %}
+    <div class="svc-alert-success">{{ success }}</div>
+  {% endif %}
+
+  {% if error %}
+    <div class="svc-alert-error">{{ error }}</div>
+  {% endif %}
+
+  <div class="svc-flow">
+    <div class="svc-flow-card">
+      <b>1) Program ใหญ่</b>
+      <span>คือการ์ดที่ขึ้นหน้าเว็บ เช่น “ยกกระชับผิว” ใส่รูปหลัก 1 รูป</span>
+    </div>
+    <div class="svc-flow-card">
+      <b>2) Program ย่อย</b>
+      <span>คือรายการที่เด้งขึ้นมาตอนเอาเมาส์ไปชี้ เช่น Ulthera / Oligio</span>
+    </div>
+    <div class="svc-flow-card">
+      <b>3) Detail</b>
+      <span>คือรูป วิดีโอ YouTube และคำบรรยาย เมื่อคลิก Program ย่อย</span>
+    </div>
+  </div>
+
+
+  <div class="svc-card" id="example-guide">
+    <h2>ตัวอย่างวิธีเพิ่ม / แก้ไข / ลบ Program</h2>
+    <div class="svc-hint">
+      ใช้ตัวอย่างนี้เป็นแนวทางในการกรอกข้อมูลจริง: <b>Program ใหญ่</b> คือรูปหลักบนหน้าเว็บ, <b>Program ย่อย</b> คือเมนูที่เด้งตอนเอาเมาส์ไปชี้, และ <b>Detail</b> คือรูป/วิดีโอ/คำบรรยายหลังคลิก Program ย่อย
+    </div>
+
+    <div class="svc-flow">
+      <div class="svc-flow-card">
+        <b>ตัวอย่าง Program ใหญ่</b>
+        <span>
+          ชื่อ: ยกกระชับผิวหน้า<br>
+          Slug: face-lifting<br>
+          รายละเอียดสั้น: รวมโปรแกรมยกกระชับ ลดแก้ม ลดเหนียง ปรับกรอบหน้าให้ชัดขึ้น<br>
+          รูปหลัก: เลือกรูปหน้าคน / คลินิก / เครื่องมือ 1 รูป
+        </span>
+      </div>
+
+      <div class="svc-flow-card">
+        <b>ตัวอย่าง Program ย่อย</b>
+        <span>
+          1. Ulthera Prime<br>
+          2. Oligio X<br>
+          3. Ultraformer III<br><br>
+          Program ย่อยจะอยู่ในกล่องเด้งตอนเอาเมาส์ไปชี้ Program ใหญ่
+        </span>
+      </div>
+
+      <div class="svc-flow-card">
+        <b>ตัวอย่าง Detail</b>
+        <span>
+          หัวข้อ: Ulthera Prime คืออะไร<br>
+          ประเภท: รูปภาพ / วิดีโอ / YouTube<br>
+          คำบรรยาย: อธิบายจุดเด่น วิธีทำ เหมาะกับใคร และการดูแลหลังทำ<br>
+          ลำดับ: 1, 2, 3
+        </span>
+      </div>
+    </div>
+
+    <div class="svc-form-grid">
+      <div class="svc-hint">
+        <b>วิธีเพิ่ม</b><br>
+        1) กรอก Program ใหญ่ด้านล่างแล้วกด “เพิ่ม Program ใหญ่”<br>
+        2) เปิด Program ใหญ่ที่สร้างไว้ แล้วกรอก “เพิ่ม Program ย่อย”<br>
+        3) เปิด Program ย่อย แล้วกดแท็บ “เพิ่ม Detail” เพื่อใส่รูป/วิดีโอ/YouTube/คำบรรยาย
+      </div>
+
+      <div class="svc-hint">
+        <b>วิธีลบ</b><br>
+        - ลบ Detail: กดปุ่ม “ลบ Detail” ใต้รายการ Detail นั้น<br>
+        - ลบ Program ย่อย: กดปุ่ม “ลบ Program ย่อย” ใต้ Program ย่อยนั้น<br>
+        - ลบ Program ใหญ่: กดปุ่ม “ลบ Program ใหญ่” ใต้ Program ใหญ่นั้น ระบบจะลบ Program ย่อยและ Detail ข้างในไปด้วย
+      </div>
+    </div>
+
+    <div class="svc-actions-row" style="margin-top:14px;">
+      <button type="button" class="svc-btn-soft" onclick="fillMainProgramExample()">ใส่ตัวอย่าง Program ใหญ่ให้ทันที</button>
+      <a class="svc-btn-soft" href="#create-main-program">ไปที่ฟอร์มเพิ่ม Program ใหญ่</a>
+    </div>
+  </div>
+
+  <div class="svc-card" id="create-main-program">
+    <h2>เพิ่ม Program ใหญ่</h2>
+    <div class="svc-hint">
+      Program ใหญ่จะขึ้นเป็นรูปหลักในหน้าเว็บ และเมื่อเอาเมาส์ไปชี้จะมี Program ย่อยเด้งขึ้นมา
+    </div>
+
+    <form method="post" action="/admin/services" enctype="multipart/form-data">
+      <div class="svc-form-grid">
+        <label>
+          ชื่อ Program ใหญ่ ภาษาไทย
+          <input type="text" name="title_th" placeholder="เช่น ยกกระชับผิว" required>
+        </label>
+
+        <label>
+          ชื่อ Program ใหญ่ ภาษาอังกฤษ
+          <input type="text" name="title_en" placeholder="Lifting Program">
+        </label>
+
+        <label>
+          Slug ภาษาอังกฤษ
+          <input type="text" name="slug" placeholder="lifting-program" required>
+        </label>
+
+        <label>
+          รูปหลักหน้าเว็บ 1 รูป
+          <input type="file" name="image_file" accept="image/*" data-preview="main-create-preview">
+          <img id="main-create-preview" class="preview-img" alt="preview">
+        </label>
+
+        <label>
+          คำอธิบายสั้นภาษาไทย
+          <textarea name="description_th" placeholder="ข้อความสั้นที่โชว์บนการ์ดหน้าเว็บ"></textarea>
+        </label>
+
+        <label>
+          คำอธิบายสั้นภาษาอังกฤษ
+          <textarea name="description_en"></textarea>
+        </label>
+
+        <label>
+          รายละเอียดรวมภาษาไทย
+          <textarea name="detail_th" placeholder="รายละเอียดรวมของหมวดนี้"></textarea>
+        </label>
+
+        <label>
+          รายละเอียดรวมภาษาอังกฤษ
+          <textarea name="detail_en"></textarea>
+        </label>
+
+        <label>
+          สถานะ
+          <select name="is_active">
+            <option value="1">แสดงหน้าเว็บ</option>
+            <option value="0">ซ่อน</option>
+          </select>
+        </label>
+
+        <div class="full svc-actions-row">
+          <button class="svc-btn" type="submit">+ เพิ่ม Program ใหญ่</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="svc-toolbar">
+    <input class="svc-search" type="text" id="serviceSearchInput" placeholder="ค้นหา Program ใหญ่ / Program ย่อย...">
+    <div class="svc-actions-row">
+      <button class="svc-btn-soft" type="button" onclick="openAllPanels()">เปิดทั้งหมด</button>
+      <button class="svc-btn-soft" type="button" onclick="closeAllPanels()">ปิดทั้งหมด</button>
+    </div>
+  </div>
+
+  <div class="svc-section-title">
+    <h2>รายการ Program ใหญ่</h2>
+    <a class="svc-link-btn" href="#create-main-program">+ เพิ่ม Program ใหญ่</a>
+  </div>
+
+  {% if services and services|length > 0 %}
+    {% for service in services %}
+      {% set programs = programs_by_service.get(service.id, []) %}
+      <div class="service-panel js-service-panel" data-search="{{ service.title }} {{ service.description }} {{ service.detail }}">
+        <div class="service-main-head" onclick="toggleServicePanel(this)">
+          <div class="service-main-image" {% if service.image_file %}style="background-image:url('/static/images/services/{{ service.image_file }}')"{% endif %}></div>
+
+          <div class="service-main-info">
+            <div class="badge-row">
+              {% if service.is_active == 1 %}
+                <span class="badge badge-on">แสดงหน้าเว็บ</span>
+              {% else %}
+                <span class="badge badge-off">ซ่อนอยู่</span>
+              {% endif %}
+              <span class="badge badge-count">Program ย่อย {{ programs|length }} รายการ</span>
+            </div>
+
+            <h3>{{ service.title }}</h3>
+            <p>{{ service.description or 'ยังไม่มีคำอธิบายสั้น' }}</p>
+          </div>
+
+          <div class="toggle-arrow">⌄</div>
+        </div>
+
+        <div class="service-panel-body">
+          <div class="edit-box">
+            <div class="box-title">
+              <h4>แก้ไข Program ใหญ่: {{ service.title }}</h4>
+              <span class="badge badge-count">รูปนี้ขึ้นหน้าเว็บ</span>
+            </div>
+
+            <form method="post" action="/admin/services/{{ service.id }}/update" enctype="multipart/form-data">
+              <input type="hidden" name="existing_image_file" value="{{ service.image_file or '' }}">
+
+              <div class="svc-form-grid">
+                <label>
+                  ชื่อภาษาไทย
+                  <input type="text" name="title_th" value="{{ service.title_th or service.title }}" required>
+                </label>
+
+                <label>
+                  ชื่อภาษาอังกฤษ
+                  <input type="text" name="title_en" value="{{ service.title_en or service.title }}">
+                </label>
+
+                <label>
+                  Slug
+                  <input type="text" name="slug" value="{{ service.slug }}" required>
+                </label>
+
+                <label>
+                  เปลี่ยนรูปหลักหน้าเว็บ
+                  <input type="file" name="image_file" accept="image/*" data-preview="service-preview-{{ service.id }}">
+                  <img id="service-preview-{{ service.id }}" class="preview-img" alt="preview">
+                </label>
+
+                <label>
+                  คำอธิบายสั้นภาษาไทย
+                  <textarea name="description_th">{{ service.description_th or service.description }}</textarea>
+                </label>
+
+                <label>
+                  คำอธิบายสั้นภาษาอังกฤษ
+                  <textarea name="description_en">{{ service.description_en or service.description }}</textarea>
+                </label>
+
+                <label>
+                  รายละเอียดรวมภาษาไทย
+                  <textarea name="detail_th">{{ service.detail_th or service.detail }}</textarea>
+                </label>
+
+                <label>
+                  รายละเอียดรวมภาษาอังกฤษ
+                  <textarea name="detail_en">{{ service.detail_en or service.detail }}</textarea>
+                </label>
+
+                <label>
+                  ลบรูปหลักเดิม
+                  <select name="remove_image">
+                    <option value="0">ไม่ลบ</option>
+                    <option value="1">ลบรูปหลัก</option>
+                  </select>
+                </label>
+
+                <label>
+                  สถานะ
+                  <select name="is_active">
+                    <option value="1" {% if service.is_active == 1 %}selected{% endif %}>แสดงหน้าเว็บ</option>
+                    <option value="0" {% if service.is_active == 0 %}selected{% endif %}>ซ่อน</option>
+                  </select>
+                </label>
+
+                <div class="full svc-actions-row">
+                  <button class="svc-btn" type="submit">บันทึก Program ใหญ่</button>
+                </div>
+              </div>
+            </form>
+
+            <form method="post" action="/admin/services/{{ service.id }}/delete" onsubmit="return confirm('ต้องการลบ Program ใหญ่นี้ พร้อม Program ย่อยและ Detail ทั้งหมดใช่ไหม?')" style="margin-top:12px;">
+              <button class="svc-btn-danger" type="submit">ลบ Program ใหญ่นี้ทั้งหมด</button>
+            </form>
+          </div>
+
+          <div class="add-box">
+            <div class="box-title">
+              <h4>+ เพิ่ม Program ย่อยใน “{{ service.title }}”</h4>
+              <span class="badge badge-count">ขึ้นตอนเอาเมาส์ชี้</span>
+            </div>
+
+            <form method="post" action="/admin/services/{{ service.id }}/programs" enctype="multipart/form-data">
+              <div class="svc-form-grid">
+                <label>
+                  ชื่อ Program ย่อย
+                  <input type="text" name="title" required placeholder="เช่น Ulthera Prime">
+                </label>
+
+                <label>
+                  Slug
+                  <input type="text" name="slug" placeholder="ulthera-prime">
+                </label>
+
+                <label>
+                  รูปปก Program ย่อย
+                  <input type="file" name="cover_image_file" accept="image/*" data-preview="program-create-preview-{{ service.id }}">
+                  <img id="program-create-preview-{{ service.id }}" class="preview-img" alt="preview">
+                </label>
+
+                <label>
+                  ลำดับ
+                  <input type="number" name="sort_order" value="0">
+                </label>
+
+                <label>
+                  คำอธิบายสั้น
+                  <textarea name="short_description" placeholder="โชว์ในกล่องเด้ง"></textarea>
+                </label>
+
+                <label>
+                  รายละเอียด Program ย่อย
+                  <textarea name="detail" placeholder="รายละเอียดเมื่อคลิก Program ย่อย"></textarea>
+                </label>
+
+                <label>
+                  สถานะ
+                  <select name="is_active">
+                    <option value="1">แสดง</option>
+                    <option value="0">ซ่อน</option>
+                  </select>
+                </label>
+
+                <div class="full svc-actions-row">
+                  <button class="svc-btn-dark" type="submit">+ เพิ่ม Program ย่อย</button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {% if programs and programs|length > 0 %}
+            <div class="program-list">
+              {% for program in programs %}
+                {% set medias = media_by_program.get(program.id, []) %}
+                <div class="program-box js-program-box" data-search="{{ program.title }} {{ program.short_description }} {{ program.detail }}">
+                  <div class="program-head" onclick="toggleProgramBox(this)">
+                    <div class="program-cover" {% if program.cover_image_file %}style="background-image:url('/static/images/services/{{ program.cover_image_file }}')"{% endif %}></div>
+
+                    <div>
+                      <div class="badge-row">
+                        {% if program.is_active == 1 %}
+                          <span class="badge badge-on">Program แสดงอยู่</span>
+                        {% else %}
+                          <span class="badge badge-off">Program ซ่อนอยู่</span>
+                        {% endif %}
+                        <span class="badge badge-count">Detail {{ medias|length }} รายการ</span>
+                      </div>
+
+                      <h4>{{ program.title }}</h4>
+                      <p>{{ program.short_description or 'ยังไม่มีคำอธิบายสั้น' }}</p>
+                    </div>
+
+                    <div class="toggle-arrow">⌄</div>
+                  </div>
+
+                  <div class="program-body">
+                    <div class="mini-tabs">
+                      <button type="button" class="mini-tab active" onclick="switchPane(this, 'edit-program-{{ program.id }}')">แก้ไข Program ย่อย</button>
+                      <button type="button" class="mini-tab" onclick="switchPane(this, 'add-media-{{ program.id }}')">เพิ่ม Detail</button>
+                      <button type="button" class="mini-tab" onclick="switchPane(this, 'list-media-{{ program.id }}')">รายการ Detail</button>
+                    </div>
+
+                    <div id="edit-program-{{ program.id }}" class="tab-pane active">
+                      <form method="post" action="/admin/service-programs/{{ program.id }}/update" enctype="multipart/form-data">
+                        <input type="hidden" name="existing_cover_image_file" value="{{ program.cover_image_file or '' }}">
+
+                        <div class="svc-form-grid">
+                          <label>
+                            ชื่อ Program ย่อย
+                            <input type="text" name="title" value="{{ program.title }}" required>
+                          </label>
+
+                          <label>
+                            Slug
+                            <input type="text" name="slug" value="{{ program.slug }}">
+                          </label>
+
+                          <label>
+                            เปลี่ยนรูปปก
+                            <input type="file" name="cover_image_file" accept="image/*" data-preview="program-preview-{{ program.id }}">
+                            <img id="program-preview-{{ program.id }}" class="preview-img" alt="preview">
+                          </label>
+
+                          <label>
+                            ลำดับ
+                            <input type="number" name="sort_order" value="{{ program.sort_order or 0 }}">
+                          </label>
+
+                          <label>
+                            คำอธิบายสั้น
+                            <textarea name="short_description">{{ program.short_description }}</textarea>
+                          </label>
+
+                          <label>
+                            รายละเอียด Program ย่อย
+                            <textarea name="detail">{{ program.detail }}</textarea>
+                          </label>
+
+                          <label>
+                            ลบรูปปกเดิม
+                            <select name="remove_cover">
+                              <option value="0">ไม่ลบ</option>
+                              <option value="1">ลบรูปปก</option>
+                            </select>
+                          </label>
+
+                          <label>
+                            สถานะ
+                            <select name="is_active">
+                              <option value="1" {% if program.is_active == 1 %}selected{% endif %}>แสดง</option>
+                              <option value="0" {% if program.is_active == 0 %}selected{% endif %}>ซ่อน</option>
+                            </select>
+                          </label>
+
+                          <div class="full svc-actions-row">
+                            <button class="svc-btn" type="submit">บันทึก Program ย่อย</button>
+                          </div>
+                        </div>
+                      </form>
+
+                      <form method="post" action="/admin/service-programs/{{ program.id }}/delete" onsubmit="return confirm('ลบ Program ย่อยนี้ พร้อม Detail ทั้งหมดใช่ไหม?')" style="margin-top:12px;">
+                        <button class="svc-btn-danger" type="submit">ลบ Program ย่อยนี้</button>
+                      </form>
+                    </div>
+
+                    <div id="add-media-{{ program.id }}" class="tab-pane">
+                      <div class="svc-hint">
+                        Detail คือรูป/วิดีโอ/YouTube/คำบรรยาย ที่จะแสดงหลังลูกค้าคลิก Program ย่อยนี้
+                      </div>
+
+                      <form method="post" action="/admin/service-programs/{{ program.id }}/media" enctype="multipart/form-data">
+                        <div class="svc-form-grid">
+                          <label>
+                            ประเภท Detail
+                            <select name="media_type">
+                              <option value="image">รูปภาพ</option>
+                              <option value="video">วิดีโอ</option>
+                            </select>
+                          </label>
+
+                          <label>
+                            ลำดับ
+                            <input type="number" name="sort_order" value="0">
+                          </label>
+
+                          <label>
+                            อัปโหลดรูป
+                            <input type="file" name="image_file" accept="image/*" data-preview="media-preview-new-{{ program.id }}">
+                            <img id="media-preview-new-{{ program.id }}" class="preview-img" alt="preview">
+                          </label>
+
+                          <label>
+                            อัปโหลดวิดีโอ
+                            <input type="file" name="video_file" accept="video/*">
+                          </label>
+
+                          <label class="full">
+                            หรือใส่ลิงก์วิดีโอ / YouTube
+                            <input type="text" name="video_url" placeholder="https://www.youtube.com/embed/... หรือ https://...">
+                          </label>
+
+                          <label class="full">
+                            คำบรรยายของ Detail นี้
+                            <textarea name="caption" placeholder="อธิบายรูป/วิดีโอนี้"></textarea>
+                          </label>
+
+                          <label>
+                            สถานะ
+                            <select name="is_active">
+                              <option value="1">แสดง</option>
+                              <option value="0">ซ่อน</option>
+                            </select>
+                          </label>
+
+                          <div class="full svc-actions-row">
+                            <button class="svc-btn-dark" type="submit">+ เพิ่ม Detail</button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+
+                    <div id="list-media-{{ program.id }}" class="tab-pane">
+                      {% if medias and medias|length > 0 %}
+                        <div class="media-grid">
+                          {% for media in medias %}
+                            <div class="media-card">
+                              {% if media.media_type == 'video' %}
+                                <div class="media-preview">
+                                  {% if media.video_file %}
+                                    <video src="/static/videos/services/{{ media.video_file }}" controls></video>
+                                  {% elif media.video_url %}
+                                    <iframe src="{{ media.video_url }}" allowfullscreen></iframe>
+                                  {% else %}
+                                    <span>Video</span>
+                                  {% endif %}
+                                </div>
+                              {% else %}
+                                <div class="media-preview" {% if media.image_file %}style="background-image:url('/static/images/services/{{ media.image_file }}')"{% endif %}></div>
+                              {% endif %}
+
+                              <div class="media-body">
+                                <div class="badge-row">
+                                  {% if media.is_active == 1 %}
+                                    <span class="badge badge-on">แสดง</span>
+                                  {% else %}
+                                    <span class="badge badge-off">ซ่อน</span>
+                                  {% endif %}
+                                  <span class="badge badge-count">ลำดับ {{ media.sort_order or 0 }}</span>
+                                </div>
+
+                                <form method="post" action="/admin/program-media/{{ media.id }}/update">
+                                  <label class="inline-label">
+                                    คำบรรยาย
+                                    <textarea class="inline-input inline-textarea" name="caption">{{ media.caption }}</textarea>
+                                  </label>
+
+                                  <div class="svc-form-grid" style="grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+                                    <label>
+                                      ลำดับ
+                                      <input type="number" name="sort_order" value="{{ media.sort_order or 0 }}">
+                                    </label>
+
+                                    <label>
+                                      สถานะ
+                                      <select name="is_active">
+                                        <option value="1" {% if media.is_active == 1 %}selected{% endif %}>แสดง</option>
+                                        <option value="0" {% if media.is_active == 0 %}selected{% endif %}>ซ่อน</option>
+                                      </select>
+                                    </label>
+                                  </div>
+
+                                  <button class="svc-btn" type="submit" style="width:100%;margin-top:10px;">บันทึก Detail</button>
+                                </form>
+
+                                <form method="post" action="/admin/program-media/{{ media.id }}/delete" onsubmit="return confirm('ลบ Detail นี้ใช่ไหม?')" style="margin-top:10px;">
+                                  <button class="svc-btn-danger" type="submit" style="width:100%;">ลบ Detail</button>
+                                </form>
+                              </div>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      {% else %}
+                        <div class="empty-box">Program ย่อยนี้ยังไม่มี Detail ให้กดแท็บ “เพิ่ม Detail” เพื่อใส่รูป/วิดีโอ/คำบรรยาย</div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-box">Program ใหญ่นี้ยังไม่มี Program ย่อย ให้เพิ่ม Program ย่อยด้านบนก่อน</div>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-box">
+      ยังไม่มี Program ใหญ่ ให้เริ่มจากปุ่ม “เพิ่ม Program ใหญ่” ด้านบน
+    </div>
+  {% endif %}
+</div>
+
+<script>
+
+    function fillMainProgramExample() {
+      var box = document.getElementById("create-main-program");
+      if (!box) return;
+
+      var titleTh = box.querySelector('input[name="title_th"]');
+      var titleEn = box.querySelector('input[name="title_en"]');
+      var slug = box.querySelector('input[name="slug"]');
+      var descTh = box.querySelector('textarea[name="description_th"]');
+      var descEn = box.querySelector('textarea[name="description_en"]');
+      var detailTh = box.querySelector('textarea[name="detail_th"]');
+      var detailEn = box.querySelector('textarea[name="detail_en"]');
+
+      if (titleTh) titleTh.value = "ยกกระชับผิวหน้า";
+      if (titleEn) titleEn.value = "Face Lifting";
+      if (slug) slug.value = "face-lifting";
+      if (descTh) descTh.value = "รวมโปรแกรมยกกระชับ ลดแก้ม ลดเหนียง และปรับกรอบหน้าให้ชัดขึ้น";
+      if (descEn) descEn.value = "Non-surgical lifting programs for a firmer and more defined facial contour.";
+      if (detailTh) detailTh.value = "เหมาะสำหรับผู้ที่ต้องการดูแลความหย่อนคล้อย กรอบหน้าไม่ชัด แก้มตก หรือเหนียง โดยเลือก Program ย่อยให้เหมาะกับสภาพผิวและปัญหาของแต่ละคน";
+      if (detailEn) detailEn.value = "Suitable for clients who want to improve sagging skin, facial contour, cheeks, or double chin with personalized program selection.";
+
+      box.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+  (function () {
+    function closest(el, selector) {
+      while (el && el !== document) {
+        if (el.matches(selector)) return el;
+        el = el.parentElement;
+      }
+      return null;
+    }
+
+    window.toggleServicePanel = function (head) {
+      var panel = closest(head, ".service-panel");
+      if (!panel) return;
+      panel.classList.toggle("open");
+    };
+
+    window.toggleProgramBox = function (head) {
+      var box = closest(head, ".program-box");
+      if (!box) return;
+      box.classList.toggle("open");
+    };
+
+    window.openAllPanels = function () {
+      document.querySelectorAll(".service-panel").forEach(function (panel) {
+        panel.classList.add("open");
+      });
+    };
+
+    window.closeAllPanels = function () {
+      document.querySelectorAll(".service-panel").forEach(function (panel) {
+        panel.classList.remove("open");
+      });
+      document.querySelectorAll(".program-box").forEach(function (box) {
+        box.classList.remove("open");
+      });
+    };
+
+    window.switchPane = function (button, paneId) {
+      var programBox = closest(button, ".program-box");
+      if (!programBox) return;
+
+      programBox.querySelectorAll(".mini-tab").forEach(function (tab) {
+        tab.classList.remove("active");
+      });
+
+      programBox.querySelectorAll(".tab-pane").forEach(function (pane) {
+        pane.classList.remove("active");
+      });
+
+      button.classList.add("active");
+      var target = document.getElementById(paneId);
+      if (target) target.classList.add("active");
+    };
+
+    document.querySelectorAll("input[type='file'][data-preview]").forEach(function (input) {
+      input.addEventListener("change", function () {
+        var id = input.getAttribute("data-preview");
+        var img = document.getElementById(id);
+        if (!img || !input.files || !input.files[0]) return;
+        img.src = URL.createObjectURL(input.files[0]);
+        img.style.display = "block";
+      });
+    });
+
+    var searchInput = document.getElementById("serviceSearchInput");
+    if (searchInput) {
+      searchInput.addEventListener("input", function () {
+        var keyword = (searchInput.value || "").toLowerCase().trim();
+
+        document.querySelectorAll(".js-service-panel").forEach(function (panel) {
+          var text = (panel.getAttribute("data-search") || "").toLowerCase();
+          var programText = "";
+
+          panel.querySelectorAll(".js-program-box").forEach(function (box) {
+            programText += " " + (box.getAttribute("data-search") || "").toLowerCase();
+          });
+
+          var match = !keyword || text.indexOf(keyword) !== -1 || programText.indexOf(keyword) !== -1;
+          panel.style.display = match ? "block" : "none";
+
+          if (keyword && match) {
+            panel.classList.add("open");
+          }
+        });
+      });
+    }
+
+    var firstPanel = document.querySelector(".service-panel");
+    if (firstPanel) firstPanel.classList.add("open");
+  })();
+</script>
+{% endblock %}

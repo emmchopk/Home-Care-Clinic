@@ -1,413 +1,105 @@
 {% extends "base.html" %}
-
-{% block title %}Home Care Clinic | Aesthetic Clinic{% endblock %}
-
+{% block title %}Home Care Clinic{% endblock %}
 {% block content %}
+<style>
+  .home-page{background:#fff3f4;color:#332b28;overflow-x:hidden}.home-container{width:min(1180px,calc(100% - 40px));margin:0 auto}.label{margin:0 0 8px;color:#c7a46b;font-size:12px;font-weight:900;letter-spacing:1.8px;text-transform:uppercase}.section-head{text-align:center;margin-bottom:28px}.section-head h2{margin:0 0 8px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(30px,4vw,44px);font-weight:400;color:#2f2926}.section-head p{margin:0;color:#8a7d75;line-height:1.8}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 24px;border-radius:999px;font-size:14px;font-weight:800;text-decoration:none;border:0;cursor:pointer;background:#8fa184;color:#fff}.btn-soft{background:#fff;color:#66785f;border:1px solid rgba(199,164,107,.35)}.hero{padding:34px 0 0}.hero-box{min-height:470px;border-radius:30px;overflow:hidden;border:1px solid rgba(199,164,107,.28);box-shadow:0 18px 45px rgba(108,77,65,.13);background:linear-gradient(90deg,rgba(47,41,38,.72),rgba(47,41,38,.28),rgba(255,255,255,.06)),url('/static/images/packages/facial-radiance.jpg');background-size:cover;background-position:center;display:flex;align-items:center}.hero-content{width:min(680px,100%);padding:58px;color:#fff}.hero-content .label{color:#f5e8cf}.hero-content h1{margin:0 0 18px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(42px,6vw,72px);line-height:1;font-weight:400;color:#fff}.hero-content p{margin:0;color:rgba(255,255,255,.9);line-height:1.9;font-size:16px}.hero-actions{margin-top:26px;display:flex;flex-wrap:wrap;gap:14px}.about{margin-top:34px}.about-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:24px}.about-img{min-height:260px;border-radius:24px;background:linear-gradient(120deg,rgba(255,255,255,.08),rgba(255,243,244,.34)),url('/static/images/packages/acne-care.jpg');background-size:cover;background-position:center;border:1px solid rgba(199,164,107,.28);box-shadow:0 14px 34px rgba(100,70,60,.09)}.about-text{padding:30px;border-radius:24px;background:rgba(255,250,243,.92);border:1px solid rgba(199,164,107,.28);box-shadow:0 14px 34px rgba(100,70,60,.09)}.about-text h2{margin:0 0 12px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(28px,3vw,38px);font-weight:400}.about-text p{color:#8a7d75;line-height:1.9}.promo{margin-top:56px}.promo-wrap{position:relative;width:min(960px,100%);margin:0 auto;border-radius:30px;overflow:hidden;background:#fffaf3;border:1px solid rgba(199,164,107,.28);box-shadow:0 18px 45px rgba(108,77,65,.13)}.promo-slider{position:relative;height:420px;overflow:hidden}.promo-slide{position:absolute;inset:0;display:grid;grid-template-columns:1.05fr .95fr;opacity:0;transform:translateX(100%);transition:.8s ease;background:#fffaf3}.promo-slide.active{opacity:1;transform:translateX(0);z-index:2}.promo-slide.prev{opacity:0;transform:translateX(-100%);z-index:1}.promo-img{min-height:420px;background:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('/static/images/packages/laser-glow.jpg');background-size:cover;background-position:center}.promo-content{padding:46px;display:flex;flex-direction:column;justify-content:center}.promo-content h3{margin:12px 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(30px,4vw,48px);font-weight:400}.promo-price{color:#66785f;font-weight:900;font-size:20px;margin-bottom:14px}.promo-content p{color:#8a7d75;line-height:1.85}.promo-dots{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:5;display:flex;gap:8px}.promo-dot{width:9px;height:9px;border-radius:999px;border:0;background:rgba(102,120,95,.35);cursor:pointer}.promo-dot.active{width:28px;background:#8fa184}.review,.doctors,.services{margin-top:56px}.review-wrap{display:grid;grid-template-columns:48px 1fr 48px;gap:14px;align-items:center}.review-slider{display:flex;gap:18px;overflow-x:auto;scroll-behavior:smooth;padding:8px 4px 18px}.review-card{min-width:300px;max-width:300px;padding:24px;border-radius:22px;background:#fffaf3;border:1px solid rgba(199,164,107,.28);box-shadow:0 14px 34px rgba(100,70,60,.08)}.stars{color:#c7a46b;letter-spacing:2px;margin-bottom:12px}.review-card p{color:#8a7d75;line-height:1.7}.review-card b{color:#66785f}.arrow{width:48px;height:48px;border:0;border-radius:999px;cursor:pointer;background:#fff;color:#66785f;font-size:34px;box-shadow:0 12px 30px rgba(100,70,60,.12)}.doctor-grid{width:min(920px,100%);margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.doctor-card{overflow:hidden;border-radius:22px;background:#fffaf3;border:1px solid rgba(199,164,107,.28);box-shadow:0 12px 28px rgba(100,70,60,.07)}.doctor-img{height:190px;background:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('/static/images/doctors/doctor-default.jpg');background-size:cover;background-position:center top}.doctor-body{padding:15px 17px 17px}.doctor-body h3{margin:8px 0 5px;font-family:Georgia,"Times New Roman",serif;font-size:23px;font-weight:400}.doctor-body b{color:#66785f;font-size:13px}.doctor-body p{color:#8a7d75;line-height:1.55;font-size:13px}.services{padding-bottom:70px}.service-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}.service-card{position:relative;border:0;padding:0;width:100%;height:360px;text-align:left;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 18px 45px rgba(100,70,60,.11);cursor:pointer}.service-card:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.54));z-index:1}.service-card:hover{transform:translateY(-8px);box-shadow:0 26px 70px rgba(100,70,60,.22)}.service-img{position:absolute;inset:0;background:#f8d8dc;background-size:cover;background-position:center;transition:.3s ease}.service-card:hover .service-img{transform:scale(1.06)}.service-overlay{position:absolute;z-index:2;inset:auto 0 0;padding:24px;color:#fff}.service-overlay h3{font-family:Georgia,"Times New Roman",serif;font-size:30px;font-weight:400;margin:0 0 8px}.service-overlay p{margin:0;line-height:1.65;color:rgba(255,255,255,.88)}.empty{padding:34px;text-align:center;border-radius:24px;background:#fffaf3;border:1px solid rgba(199,164,107,.28);color:#8a7d75}.program-popover{position:fixed;z-index:99999;width:min(920px,calc(100vw - 28px));max-height:min(620px,calc(100vh - 28px));background:#fff;border:1px solid rgba(199,164,107,.35);border-radius:28px;overflow:hidden;box-shadow:0 26px 90px rgba(47,41,38,.26);display:grid;grid-template-columns:260px 1fr;opacity:0;visibility:hidden;transform:translateY(14px) scale(.98);transition:opacity .18s ease,transform .18s ease,visibility .18s ease;pointer-events:none}.program-popover.show{opacity:1;visibility:visible;transform:translateY(0) scale(1);pointer-events:auto}.popover-sidebar{background:#f3e8df;padding:24px;overflow-y:auto}.popover-sidebar h3{margin:0 0 10px;color:#7a303b;font-size:24px}.popover-sidebar p{margin:0 0 18px;color:#8a7d75;line-height:1.6;font-size:14px}.program-list{display:grid;gap:8px}.program-btn{border:0;background:transparent;text-align:left;padding:11px 12px;border-radius:14px;cursor:pointer;font-size:15px;color:#2f2926;font-weight:800}.program-btn:hover,.program-btn.active{background:#fff;color:#7a303b}.popover-main{padding:24px;overflow-y:auto;max-height:min(620px,calc(100vh - 28px))}.popover-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.popover-head small{color:#9b6b70;font-weight:800}.popover-head h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(30px,4vw,48px);line-height:1.05;margin:6px 0 0;color:#7a303b}.popover-close{width:36px;height:36px;border:0;border-radius:999px;background:#f3e8df;font-size:24px;cursor:pointer;color:#7a303b;flex:0 0 auto}.program-detail{color:#8a7d75;line-height:1.75;margin:0 0 16px}.media-view{display:grid;gap:14px}.media-item{border-radius:22px;overflow:hidden;background:#fffaf3;border:1px solid #f0d8bd}.media-item img,.media-item video{display:block;width:100%;max-height:360px;object-fit:cover}.media-item iframe{display:block;width:100%;height:360px;border:0}.media-caption{padding:12px 16px;color:#554943;line-height:1.6}.recommend-box{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}.recommend-card{position:relative;min-height:180px;border-radius:22px;overflow:hidden;background:#f8d8dc;background-size:cover;background-position:center;border:0;cursor:pointer}.recommend-card:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.55))}.recommend-card h3{position:absolute;left:18px;right:18px;bottom:18px;color:#fff;font-size:24px;margin:0}.no-media{padding:22px;border-radius:18px;background:#fff3f4;color:#8a7d75}@media(max-width:1020px){.promo-slide{grid-template-columns:1fr}.promo-img{min-height:240px}.promo-slider{height:620px}.doctor-grid,.service-grid{grid-template-columns:repeat(2,1fr)}.about-grid{grid-template-columns:1fr}.program-popover{grid-template-columns:1fr;left:14px!important;right:14px!important;top:80px!important;width:calc(100vw - 28px)}.popover-sidebar{max-height:190px}.recommend-box{grid-template-columns:1fr}}@media(max-width:700px){.home-container{width:calc(100% - 28px)}.hero-content{padding:34px 24px}.hero-content h1{font-size:40px}.hero-actions{flex-direction:column}.btn{width:100%}.promo-slider{height:660px}.doctor-grid,.service-grid{grid-template-columns:1fr}.review-wrap{grid-template-columns:40px 1fr 40px}.arrow{width:40px;height:40px;font-size:28px}.review-card{min-width:260px;max-width:260px}.popover-main{padding:20px}.service-card{height:300px}}
+</style>
 
-<section class="blossom-hero">
-  <div class="blossom-hero-bg"></div>
+<main class="home-page">
+  <section class="hero"><div class="home-container"><div class="hero-box"><div class="hero-content"><p class="label">HOME CARE CLINIC</p><h1>ดูแลสุขภาพและความงามแบบใกล้ชิด</h1><p>บริการปรึกษา ดูแลผิวพรรณ โปรแกรมความงาม และนัดหมายออนไลน์ สะดวก รวดเร็ว พร้อมแจ้งเตือนผ่าน Email และ LINE</p><div class="hero-actions"><a href="#promotions" class="btn">ดูโปรโมชั่น</a><a href="#services" class="btn btn-soft">บริการของเรา</a></div></div></div></div></section>
 
-  <div class="blossom-hero-inner">
-    <div class="blossom-hero-content">
-      <p class="blossom-kicker" data-i18n="hero_kicker">HOME CARE AESTHETIC CLINIC</p>
+  <section class="about" id="about"><div class="home-container"><div class="about-grid"><div class="about-img"></div><div class="about-text"><p class="label">ABOUT</p><h2>เกี่ยวกับ Home Care Clinic</h2><p>Home Care Clinic ให้บริการดูแลสุขภาพและความงามแบบครบวงจร เหมาะสำหรับลูกค้าที่ต้องการดูรายละเอียด โปรโมชั่น และจองคิวล่วงหน้าผ่านระบบออนไลน์</p><p>ระบบรองรับการจองคิวออนไลน์ ตรวจสอบโปรโมชั่น และแจ้งเตือนทาง Email และ LINE ให้แอดมินติดตามลูกค้าได้สะดวก</p></div></div></div></section>
 
-      <h1>
-        <span data-i18n="hero_title">ดูแลผิวเฉพาะบุคคล</span><br />
-        <span data-i18n="hero_title_span">เพื่อความงามที่เป็นธรรมชาติ</span>
-      </h1>
+  <section class="promo" id="promotions"><div class="home-container"><div class="section-head"><p class="label">MONTHLY PROMOTION</p><h2>โปรโมชั่นประจำเดือน</h2><p>โปรโมชั่นจะเลื่อนอัตโนมัติ และเปลี่ยนตามที่ Admin เพิ่ม/ลบ</p></div>{% if promotions and promotions|length > 0 %}<div class="promo-wrap"><div class="promo-slider">{% for promo in promotions %}<article class="promo-slide {% if loop.index0 == 0 %}active{% endif %}"><div class="promo-img" {% if promo.image_url is defined and promo.image_url %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('{{ promo.image_url }}')"{% elif promo.image_file_1 is defined and promo.image_file_1 %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('/static/images/promotions/{{ promo.image_file_1 }}')"{% endif %}></div><div class="promo-content"><p class="label">Promotion</p><h3>{{ promo.title if promo.title is defined else promo.name }}</h3><div class="promo-price">{{ promo.price if promo.price is defined else 'สอบถามราคา' }}</div><p>{{ promo.description if promo.description is defined else promo.desc }}</p></div></article>{% endfor %}</div><div class="promo-dots">{% for promo in promotions %}<button type="button" class="promo-dot {% if loop.index0 == 0 %}active{% endif %}" data-slide-index="{{ loop.index0 }}" onclick="goHomePromoSlideFinal(this.dataset.slideIndex)"></button>{% endfor %}</div></div>{% else %}<div class="empty">ยังไม่มีโปรโมชั่น ให้ Admin เพิ่มโปรโมชั่นก่อน</div>{% endif %}</div></section>
 
-      <p data-i18n="hero_desc">
-        แพ็กเกจดูแลผิวและสุขภาพความงาม ออกแบบตามปัญหาผิวของแต่ละบุคคล
-        ดูแลโดยทีมผู้เชี่ยวชาญ เพื่อผลลัพธ์ที่ปลอดภัย ดูเป็นธรรมชาติ และน่าเชื่อถือ
-      </p>
+  <section class="review" id="reviews"><div class="home-container"><div class="section-head"><p class="label">REVIEW</p><h2>รีวิวจากลูกค้า</h2><p>รีวิวจะแสดงตามที่ Admin เพิ่ม/ลบ</p></div>{% if reviews and reviews|length > 0 %}<div class="review-wrap"><button class="arrow" type="button" onclick="moveHomeReviewFinal(-1)">‹</button><div class="review-slider" id="homeReviewSliderFinal">{% for review in reviews %}<article class="review-card"><div class="stars">{% for i in range(review.rating or 5) %}★{% endfor %}</div><p>{{ review.review_text }}</p><b>{{ review.customer_name }}</b></article>{% endfor %}</div><button class="arrow" type="button" onclick="moveHomeReviewFinal(1)">›</button></div>{% else %}<div class="empty">ยังไม่มีรีวิว ให้ Admin เพิ่มรีวิวก่อน</div>{% endif %}</div></section>
 
-      <div class="blossom-hero-actions">
-        <a href="https://line.me/R/ti/p/@homecare" target="_blank" rel="noopener noreferrer" class="blossom-btn-primary" data-i18n="hero_btn_booking">จองคิวออนไลน์</a>
-        <a href="#packages" class="blossom-btn-light" data-i18n="hero_btn_packages">ดูแพ็กเกจ</a>
-      </div>
+  <section class="doctors" id="doctors"><div class="home-container"><div class="section-head"><p class="label">DOCTORS</p><h2>คุณหมอของเรา</h2><p>ข้อมูลคุณหมอจะแสดงตามที่ Admin เพิ่ม/ลบ</p></div>{% if doctors and doctors|length > 0 %}<div class="doctor-grid">{% for doctor in doctors %}<article class="doctor-card"><div class="doctor-img" {% if doctor.image_url is defined and doctor.image_url %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('{{ doctor.image_url }}')"{% elif doctor.image_file is defined and doctor.image_file %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('/static/images/doctors/{{ doctor.image_file }}')"{% endif %}></div><div class="doctor-body"><p class="label">Doctor</p><h3>{{ doctor.name }}</h3>{% if doctor.specialty %}<b>{{ doctor.specialty }}</b>{% endif %}{% if doctor.expertise %}<p>{{ doctor.expertise }}</p>{% endif %}</div></article>{% endfor %}</div>{% else %}<div class="empty">ยังไม่มีข้อมูลคุณหมอ ให้ Admin เพิ่มคุณหมอก่อน</div>{% endif %}</div></section>
 
-      <div class="blossom-trust-row">
-        <div>
-          <b data-i18n="trust_certified">Certified</b>
-          <span data-i18n="trust_doctors">Doctors</span>
-        </div>
+  <section class="services" id="services"><div class="home-container"><div class="section-head"><p class="label">OUR SERVICES</p><h2>บริการของเรา</h2><p>เอาเมาส์ไปชี้ที่หมวดบริการ จะเด้งกล่องเล็กแบบในรูป แล้วเลือก Program ด้านในได้</p></div>{% if services and services|length > 0 %}<div class="service-grid">{% for service in services %}<button type="button" class="service-card js-open-program-modal" data-service-title="{{ service.title }}" data-service-desc="{{ service.description or '' }}" data-service-img="{{ service.image_url or '' }}" data-programs='{{ service.programs_json|e }}'><div class="service-img" {% if service.image_url %}style="background-image:url('{{ service.image_url }}')"{% endif %}></div><div class="service-overlay"><p class="label" style="color:#f5d49b;">Service</p><h3>{{ service.title }}</h3><p>{{ service.description }}</p></div></button>{% endfor %}</div>{% else %}<div class="empty">ยังไม่มีบริการ ให้ Admin เพิ่มบริการก่อน</div>{% endif %}</div></section>
+</main>
 
-        <div>
-          <b data-i18n="trust_safe">Safe</b>
-          <span data-i18n="trust_treatment">Treatment</span>
-        </div>
-
-        <div>
-          <b data-i18n="trust_custom">Custom</b>
-          <span data-i18n="trust_skin_plan">Skin Plan</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="blossom-hero-image">
-      <div class="blossom-floating-card card-a">
-        <b data-i18n="hero_card_1_title">ปรึกษาปัญหาผิว</b>
-        <span data-i18n="hero_card_1_text">วิเคราะห์ผิวก่อนเริ่มดูแล</span>
-      </div>
-
-      <div class="blossom-floating-card card-b">
-        <b data-i18n="hero_card_2_title">จองออนไลน์</b>
-        <span data-i18n="hero_card_2_text">จองง่าย มี Email ยืนยัน</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<section class="blossom-intro">
-  <div class="blossom-container blossom-intro-grid">
-    <div>
-      <p class="blossom-kicker" data-i18n="intro_kicker">CUSTOMIZED TECHNIQUES</p>
-      <h2 data-i18n="intro_title">ดูแลแบบเฉพาะบุคคล เพื่อผิวที่ดูดีอย่างเป็นธรรมชาติ</h2>
-    </div>
-
-    <div>
-      <p data-i18n="intro_desc">
-        Home Care Clinic ให้ความสำคัญกับการประเมินปัญหาผิวอย่างละเอียด
-        เลือกแพ็กเกจและวางแผนการดูแลให้เหมาะกับแต่ละคน
-        ตั้งแต่การดูแลสิว เติมความชุ่มชื้น ปรับผิวให้กระจ่างใส
-        ไปจนถึงการฟื้นฟูผิวให้ดูสุขภาพดี
-      </p>
-
-      <a href="https://line.me/R/ti/p/@homecare" target="_blank" rel="noopener noreferrer" class="blossom-text-link" data-i18n="intro_link">ปรึกษาและจองคิว →</a>
-    </div>
-  </div>
-</section>
-
-
-<section class="blossom-services" id="packages">
-  <div class="blossom-section-head">
-    <p class="blossom-kicker" data-i18n="packages_kicker">OUR SERVICES</p>
-    <h2 data-i18n="packages_title">Featured Packages</h2>
-    <span data-i18n="packages_subtitle">แพ็กเกจยอดนิยมที่ลูกค้าเลือกใช้บริการมากที่สุด</span>
-  </div>
-
-  <div class="blossom-package-grid">
-    {% for package in packages %}
-      <a class="blossom-package-card" href="/packages/{{ package.slug }}">
-        <div class="hc-home-slider">
-          {% set p1 = package.image_file_1 or package.image_file %}
-          {% set p2 = package.image_file_2 %}
-          {% set p3 = package.image_file_3 %}
-          {% set p4 = package.image_file_4 %}
-
-          {% if p1 %}
-            <div class="hc-home-slide" style="background-image: url('/static/images/packages/{{ p1 }}?v={{ package.id }}');"></div>
-          {% endif %}
-          {% if p2 %}
-            <div class="hc-home-slide" style="background-image: url('/static/images/packages/{{ p2 }}?v={{ package.id }}');"></div>
-          {% endif %}
-          {% if p3 %}
-            <div class="hc-home-slide" style="background-image: url('/static/images/packages/{{ p3 }}?v={{ package.id }}');"></div>
-          {% endif %}
-          {% if p4 %}
-            <div class="hc-home-slide" style="background-image: url('/static/images/packages/{{ p4 }}?v={{ package.id }}');"></div>
-          {% endif %}
-
-          {% if not p1 and not p2 and not p3 and not p4 %}
-            <div class="hc-home-slide hc-home-slide-active" style="background-image: url('/static/images/packages/facial-radiance.jpg');"></div>
-          {% endif %}
-        </div>
-
-        <div class="blossom-package-body">
-          <div class="blossom-package-top">
-            {% if package.badge %}
-              <span class="blossom-badge">{{ package.badge }}</span>
-            {% else %}
-              <span class="blossom-badge" data-i18n="package_default_badge">แพ็กเกจ</span>
-            {% endif %}
-
-            {% if package.price %}
-              <b>{{ package.price }}</b>
-            {% endif %}
-          </div>
-
-          <h3
-            class="db-i18n"
-            data-th="{{ package.name_th or package.name }}"
-            data-en="{{ package.name_en or package.name }}"
-            data-zh="{{ package.name_zh or package.name }}"
-            data-ja="{{ package.name_ja or package.name }}"
-            data-ko="{{ package.name_ko or package.name }}"
-          >
-            {{ package.name_th or package.name }}
-          </h3>
-
-          {% if package.description or package.description_th %}
-            <p
-              class="db-i18n"
-              data-th="{{ package.description_th or package.description }}"
-              data-en="{{ package.description_en or package.description }}"
-              data-zh="{{ package.description_zh or package.description }}"
-              data-ja="{{ package.description_ja or package.description }}"
-              data-ko="{{ package.description_ko or package.description }}"
-            >
-              {{ package.description_th or package.description }}
-            </p>
-          {% else %}
-            <p data-i18n="package_default_desc">แพ็กเกจดูแลผิวและความงามโดยทีมผู้เชี่ยวชาญ</p>
-          {% endif %}
-
-          <div class="blossom-card-link" data-i18n="detail_link">ดูรายละเอียด →</div>
-        </div>
-      </a>
-    {% endfor %}
-  </div>
-</section>
-
-
-<section class="blossom-program-section" id="promotions">
-  <div class="blossom-container">
-    <div class="blossom-section-head light">
-      <p class="blossom-kicker" data-i18n="promotions_kicker">PROMOTIONS</p>
-      <h2 data-i18n="promotions_title">Current Promotions</h2>
-      <span data-i18n="promotions_subtitle">โปรโมชั่นพิเศษสำหรับลูกค้า Home Care Clinic</span>
-    </div>
-
-    <div class="blossom-promo-grid">
-      {% for promotion in promotions %}
-        <div class="blossom-promo-card">
-          <div class="hc-home-slider hc-promo-slider">
-            {% set pr1 = promotion.image_file_1 %}
-            {% set pr2 = promotion.image_file_2 %}
-            {% set pr3 = promotion.image_file_3 %}
-            {% set pr4 = promotion.image_file_4 %}
-
-            {% if pr1 %}
-              <div class="hc-home-slide" style="background-image: url('/static/images/promotions/{{ pr1 }}?v={{ promotion.id }}');"></div>
-            {% endif %}
-            {% if pr2 %}
-              <div class="hc-home-slide" style="background-image: url('/static/images/promotions/{{ pr2 }}?v={{ promotion.id }}');"></div>
-            {% endif %}
-            {% if pr3 %}
-              <div class="hc-home-slide" style="background-image: url('/static/images/promotions/{{ pr3 }}?v={{ promotion.id }}');"></div>
-            {% endif %}
-            {% if pr4 %}
-              <div class="hc-home-slide" style="background-image: url('/static/images/promotions/{{ pr4 }}?v={{ promotion.id }}');"></div>
-            {% endif %}
-
-            {% if not pr1 and not pr2 and not pr3 and not pr4 %}
-              <div class="hc-home-slide hc-home-slide-active" style="background-image: url('/static/images/packages/facial-radiance.jpg');"></div>
-            {% endif %}
-          </div>
-
-          <div class="blossom-promo-content">
-            {% if promotion.badge %}
-              <span>{{ promotion.badge }}</span>
-            {% else %}
-              <span data-i18n="promotion_default_badge">พิเศษ</span>
-            {% endif %}
-
-            <h3
-              class="db-i18n"
-              data-th="{{ promotion.title_th or promotion.title }}"
-              data-en="{{ promotion.title_en or promotion.title }}"
-              data-zh="{{ promotion.title_zh or promotion.title }}"
-              data-ja="{{ promotion.title_ja or promotion.title }}"
-              data-ko="{{ promotion.title_ko or promotion.title }}"
-            >
-              {{ promotion.title_th or promotion.title }}
-            </h3>
-
-            {% if promotion.description or promotion.description_th %}
-              <p
-                class="db-i18n"
-                data-th="{{ promotion.description_th or promotion.description }}"
-                data-en="{{ promotion.description_en or promotion.description }}"
-                data-zh="{{ promotion.description_zh or promotion.description }}"
-                data-ja="{{ promotion.description_ja or promotion.description }}"
-                data-ko="{{ promotion.description_ko or promotion.description }}"
-              >
-                {{ promotion.description_th or promotion.description }}
-              </p>
-            {% else %}
-              <p data-i18n="promotion_default_desc">โปรโมชั่นพิเศษสำหรับการดูแลผิวและสุขภาพความงาม</p>
-            {% endif %}
-
-            {% if promotion.price %}
-              <b>{{ promotion.price }}</b>
-            {% endif %}
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-
-<section class="hc-doctor-section" id="doctors">
-  <div class="blossom-container">
-    <div class="blossom-section-head">
-      <p class="blossom-kicker" data-i18n="doctors_kicker">OUR DOCTORS</p>
-      <h2 data-i18n="doctors_title">Meet Our Doctors</h2>
-      <span data-i18n="doctors_subtitle">ทีมคุณหมอของ Home Care Clinic และความเชี่ยวชาญของแต่ละท่าน</span>
-    </div>
-
-    <div class="hc-doctor-grid">
-      {% for doctor in doctors %}
-        <div class="hc-doctor-card">
-          {% if doctor.image_file %}
-            <div class="hc-doctor-photo" style="background-image: url('/static/images/doctors/{{ doctor.image_file }}?v={{ doctor.id }}');"></div>
-          {% else %}
-            <div class="hc-doctor-photo hc-doctor-empty">Doctor</div>
-          {% endif %}
-
-          <div class="hc-doctor-body">
-            <span data-i18n="doctor_label">HOME CARE DOCTOR</span>
-
-            <h3
-              class="db-i18n"
-              data-th="{{ doctor.name_th or doctor.name }}"
-              data-en="{{ doctor.name_en or doctor.name }}"
-              data-zh="{{ doctor.name_zh or doctor.name }}"
-              data-ja="{{ doctor.name_ja or doctor.name }}"
-              data-ko="{{ doctor.name_ko or doctor.name }}"
-            >
-              {{ doctor.name_th or doctor.name }}
-            </h3>
-
-            {% if doctor.specialty %}
-              <b
-                class="db-i18n"
-                data-th="{{ doctor.specialty_th or doctor.specialty }}"
-                data-en="{{ doctor.specialty_en or doctor.specialty }}"
-                data-zh="{{ doctor.specialty_zh or doctor.specialty }}"
-                data-ja="{{ doctor.specialty_ja or doctor.specialty }}"
-                data-ko="{{ doctor.specialty_ko or doctor.specialty }}"
-              >
-                {{ doctor.specialty_th or doctor.specialty }}
-              </b>
-            {% endif %}
-
-            {% if doctor.expertise %}
-              <p
-                class="db-i18n"
-                data-th="{{ doctor.expertise_th or doctor.expertise }}"
-                data-en="{{ doctor.expertise_en or doctor.expertise }}"
-                data-zh="{{ doctor.expertise_zh or doctor.expertise }}"
-                data-ja="{{ doctor.expertise_ja or doctor.expertise }}"
-                data-ko="{{ doctor.expertise_ko or doctor.expertise }}"
-              >
-                {{ doctor.expertise_th or doctor.expertise }}
-              </p>
-            {% else %}
-              <p data-i18n="doctor_default_desc">ดูแลและให้คำปรึกษาด้านผิวพรรณและความงามแบบเฉพาะบุคคล</p>
-            {% endif %}
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-
-<section class="blossom-review-section">
-  <div class="blossom-section-head">
-    <p class="blossom-kicker" data-i18n="reviews_kicker">CLIENT EXPERIENCE</p>
-    <h2 data-i18n="reviews_title">Why Clients Choose Us</h2>
-    <span data-i18n="reviews_subtitle">รีวิวและความประทับใจจากลูกค้าของ Home Care Clinic</span>
-  </div>
-
-  <div class="blossom-review-grid">
-    {% for review in reviews %}
-      <div class="blossom-review-card">
-        {% if review.image_file %}
-          <div class="review-photo" style="background-image: url('/static/images/reviews/{{ review.image_file }}?v={{ review.id }}');"></div>
-        {% endif %}
-
-        <div class="review-stars">
-          {% for i in range(review.rating or 5) %}★{% endfor %}
-        </div>
-
-        <p>{{ review.review_text }}</p>
-        <b>{{ review.customer_name }}</b>
-      </div>
-    {% endfor %}
-  </div>
-</section>
-
-
-<section class="blossom-location-section" id="location">
-  <div class="blossom-container blossom-location-card">
-    <div>
-      <p class="blossom-kicker" data-i18n="location_kicker">LOCATION</p>
-      <h2>{{ clinic_location_name | default('Home Care Clinic, Bangkok') }}</h2>
-      <p data-i18n="location_desc">
-        กดปุ่มด้านขวาเพื่อเปิด Google Map และนำทางมายังคลินิกได้ทันที
-      </p>
-    </div>
-
-    <a
-      href="{{ clinic_google_map_url | default('https://maps.google.com/?q=Home+Care+Clinic+Bangkok') }}"
-      target="_blank"
-      rel="noopener noreferrer"
-      class="blossom-btn-primary"
-      data-i18n="location_btn"
-    >
-      เปิด Google Map →
-    </a>
-  </div>
-</section>
-
-
-<section class="blossom-final-cta">
-  <div class="blossom-container">
-    <p class="blossom-kicker" data-i18n="final_kicker">BOOK YOUR APPOINTMENT</p>
-    <h2 data-i18n="final_title">พร้อมเริ่มดูแลผิวของคุณแล้วหรือยัง?</h2>
-    <p data-i18n="final_desc">
-      เลือกแพ็กเกจที่เหมาะกับคุณ จองออนไลน์ได้ทันที
-      หรือทัก LINE Official เพื่อสอบถามก่อนจอง
-    </p>
-
-    <a href="https://line.me/R/ti/p/@homecare" target="_blank" rel="noopener noreferrer" class="blossom-btn-primary" data-i18n="final_btn">จองคิว →</a>
-  </div>
-</section>
+<div class="program-popover" id="programPopoverFinal"><aside class="popover-sidebar"><h3 id="popoverServiceTitleFinal">บริการ</h3><p id="popoverServiceDescFinal"></p><div class="program-list" id="popoverProgramListFinal"></div></aside><main class="popover-main"><div class="popover-head"><div><small>Program Detail</small><h2 id="popoverProgramTitleFinal">Program</h2></div><button class="popover-close" type="button" onclick="closeProgramPopoverFinal()">×</button></div><p class="program-detail" id="popoverProgramDetailFinal"></p><div class="media-view" id="popoverMediaViewFinal"></div><div class="recommend-box" id="popoverRecommendFinal"></div></main></div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const sliders = document.querySelectorAll(".hc-home-slider");
+(function(){
+  window.moveHomeReviewFinal=function(direction){var slider=document.getElementById('homeReviewSliderFinal');if(!slider)return;slider.scrollBy({left:direction*330,behavior:'smooth'});};
+  var promoIndex=0;var promoSlides=document.querySelectorAll('.promo-slide');var promoDots=document.querySelectorAll('.promo-dot');
+  window.showHomePromoSlideFinal=function(index){if(!promoSlides.length)return;index=Number(index);promoSlides.forEach(function(slide,i){slide.classList.remove('active','prev');if(i===index){slide.classList.add('active')}else if(i===promoIndex){slide.classList.add('prev')}});promoDots.forEach(function(dot,i){dot.classList.toggle('active',i===index)});promoIndex=index;};
+  window.nextHomePromoSlideFinal=function(){if(!promoSlides.length)return;window.showHomePromoSlideFinal((promoIndex+1)%promoSlides.length);};
+  window.goHomePromoSlideFinal=function(index){window.showHomePromoSlideFinal(Number(index));}; if(promoSlides.length>1){setInterval(window.nextHomePromoSlideFinal,4500)}
 
-    sliders.forEach(function (slider) {
-      const slides = slider.querySelectorAll(".hc-home-slide");
+  var popover=document.getElementById('programPopoverFinal');
+  var title=document.getElementById('popoverServiceTitleFinal');
+  var desc=document.getElementById('popoverServiceDescFinal');
+  var list=document.getElementById('popoverProgramListFinal');
+  var pTitle=document.getElementById('popoverProgramTitleFinal');
+  var pDetail=document.getElementById('popoverProgramDetailFinal');
+  var mediaView=document.getElementById('popoverMediaViewFinal');
+  var recommend=document.getElementById('popoverRecommendFinal');
+  var currentPrograms=[];
+  var closeTimer=null;
+  var locked=false;
 
-      if (!slides.length) return;
+  function safeParse(value){try{return JSON.parse(value||'[]')}catch(e){return[]}}
+  function youtubeEmbed(url){if(!url)return'';var v='';if(url.indexOf('youtube.com/watch')>-1){try{v=new URL(url).searchParams.get('v')||''}catch(e){}}else if(url.indexOf('youtu.be/')>-1){v=url.split('youtu.be/')[1].split('?')[0]} if(v){return 'https://www.youtube.com/embed/'+v} return url;}
+  function clearClose(){if(closeTimer){clearTimeout(closeTimer);closeTimer=null}}
+  function scheduleClose(){if(locked)return;clearClose();closeTimer=setTimeout(function(){closeProgramPopoverFinal()},180)}
 
-      let currentIndex = 0;
+  function positionPopover(card){
+    if(!popover||!card)return;
+    var rect=card.getBoundingClientRect();
+    var gap=16;
+    var w=popover.offsetWidth||920;
+    var h=popover.offsetHeight||520;
+    var left=rect.right+gap;
+    var top=rect.top;
+    if(left+w>window.innerWidth-14){left=rect.left-w-gap;}
+    if(left<14){left=14;}
+    if(top+h>window.innerHeight-14){top=window.innerHeight-h-14;}
+    if(top<14){top=14;}
+    popover.style.left=left+'px';
+    popover.style.top=top+'px';
+  }
 
-      slides.forEach(function (slide, index) {
-        slide.classList.remove("is-active", "is-prev");
+  function renderProgram(index){
+    var program=currentPrograms[index]; if(!program)return;
+    pTitle.textContent=program.title||'Program';
+    pDetail.textContent=program.detail||program.short_description||'';
+    document.querySelectorAll('.program-btn').forEach(function(btn,i){btn.classList.toggle('active',i===index)});
+    var media=program.media||[];
+    mediaView.innerHTML=''; recommend.innerHTML='';
+    if(!media.length && program.cover_image_url){media=[{media_type:'image',image_url:program.cover_image_url,caption:program.short_description||''}]}
+    if(!media.length){mediaView.innerHTML='<div class="no-media">ยังไม่มีรูป/วิดีโอใน Program นี้ ให้ Admin เพิ่มในหน้า Services</div>'}
+    else{media.forEach(function(m){var box=document.createElement('div');box.className='media-item';var html='';if(m.video_src||m.video_url){var src=youtubeEmbed(m.video_src||m.video_url);if(src.indexOf('youtube.com/embed')>-1){html+='<iframe src="'+src+'" allowfullscreen></iframe>'}else{html+='<video src="'+src+'" controls></video>'}}else if(m.image_url){html+='<img src="'+m.image_url+'" alt="'+(m.caption||program.title||'')+'">'}else if(program.cover_image_url){html+='<img src="'+program.cover_image_url+'" alt="'+(program.title||'')+'">'} if(m.caption){html+='<div class="media-caption">'+m.caption+'</div>'} box.innerHTML=html;mediaView.appendChild(box);});}
+    currentPrograms.slice(0,3).forEach(function(p,i){if(i===index)return;var img=p.cover_image_url||'';var card=document.createElement('button');card.type='button';card.className='recommend-card';if(img){card.style.backgroundImage='url('+img+')'}card.innerHTML='<h3>'+p.title+'</h3>';card.onclick=function(){renderProgram(currentPrograms.indexOf(p))};recommend.appendChild(card);});
+  }
 
-        if (index === 0) {
-          slide.classList.add("is-active");
-        }
-      });
+  function openPopover(card, makeLock){
+    clearClose();
+    locked=!!makeLock;
+    currentPrograms=safeParse(card.dataset.programs);
+    title.textContent=card.dataset.serviceTitle||'บริการ';
+    desc.textContent=card.dataset.serviceDesc||'';
+    list.innerHTML='';
+    if(!currentPrograms.length){list.innerHTML='<div class="no-media">ยังไม่มี Program ในหมวดนี้ ให้ Admin เพิ่ม Program ก่อน</div>';pTitle.textContent=card.dataset.serviceTitle||'บริการ';pDetail.textContent=card.dataset.serviceDesc||'';mediaView.innerHTML='';recommend.innerHTML='';}
+    else{currentPrograms.forEach(function(p,i){var btn=document.createElement('button');btn.type='button';btn.className='program-btn';btn.textContent=p.title||('Program '+(i+1));btn.onclick=function(e){e.stopPropagation();locked=true;renderProgram(i)};list.appendChild(btn)});renderProgram(0)}
+    popover.classList.add('show');
+    positionPopover(card);
+  }
 
-      if (slides.length === 1) return;
+  window.closeProgramPopoverFinal=function(){if(!popover)return;locked=false;popover.classList.remove('show')};
 
-      setInterval(function () {
-        const currentSlide = slides[currentIndex];
-
-        currentSlide.classList.remove("is-active");
-        currentSlide.classList.add("is-prev");
-
-        currentIndex = (currentIndex + 1) % slides.length;
-
-        const nextSlide = slides[currentIndex];
-
-        nextSlide.classList.remove("is-prev");
-        nextSlide.classList.add("is-active");
-
-        setTimeout(function () {
-          currentSlide.classList.remove("is-prev");
-        }, 800);
-      }, 3000);
-    });
+  document.querySelectorAll('.js-open-program-modal').forEach(function(card){
+    card.addEventListener('mouseenter',function(){openPopover(card,false)});
+    card.addEventListener('mousemove',function(){if(!locked)positionPopover(card)});
+    card.addEventListener('mouseleave',scheduleClose);
+    card.addEventListener('click',function(e){e.stopPropagation();openPopover(card,true)});
   });
+  if(popover){popover.addEventListener('mouseenter',clearClose);popover.addEventListener('mouseleave',scheduleClose);popover.addEventListener('click',function(e){e.stopPropagation()});}
+  document.addEventListener('click',function(){closeProgramPopoverFinal()});
+  document.addEventListener('scroll',function(){if(!locked)closeProgramPopoverFinal()},{passive:true});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeProgramPopoverFinal()});
+})();
 </script>
-
 {% endblock %}

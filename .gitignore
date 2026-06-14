@@ -1,6 +1,8 @@
-.env
+﻿.env
+venv/
 __pycache__/
 *.pyc
-venv/
 clinic.db
 *.db
+app/static/images/services/*.mp4
+app/static/images/services/*.mov

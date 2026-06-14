@@ -32,11 +32,16 @@ PACKAGE_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "packages")
 PROMOTION_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "promotions")
 REVIEW_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "reviews")
 DOCTOR_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "doctors")
+SERVICE_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "services")
+STATIC_VIDEO_DIR = os.path.join(BASE_DIR, "app", "static", "videos")
+SERVICE_VIDEO_DIR = os.path.join(STATIC_VIDEO_DIR, "services")
 
 os.makedirs(PACKAGE_IMAGE_DIR, exist_ok=True)
 os.makedirs(PROMOTION_IMAGE_DIR, exist_ok=True)
 os.makedirs(REVIEW_IMAGE_DIR, exist_ok=True)
 os.makedirs(DOCTOR_IMAGE_DIR, exist_ok=True)
+os.makedirs(SERVICE_IMAGE_DIR, exist_ok=True)
+os.makedirs(SERVICE_VIDEO_DIR, exist_ok=True)
 
 load_dotenv(ENV_PATH, override=True)
 
@@ -436,6 +441,94 @@ def init_db():
 
     cur.execute(
         """
+        CREATE TABLE IF NOT EXISTS services (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            slug TEXT NOT NULL UNIQUE,
+            description TEXT,
+            detail TEXT,
+            image_file TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL,
+
+            title_th TEXT,
+            title_en TEXT,
+            title_zh TEXT,
+            title_ja TEXT,
+            title_ko TEXT,
+
+            description_th TEXT,
+            description_en TEXT,
+            description_zh TEXT,
+            description_ja TEXT,
+            description_ko TEXT,
+
+            detail_th TEXT,
+            detail_en TEXT,
+            detail_zh TEXT,
+            detail_ja TEXT,
+            detail_ko TEXT
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS service_media (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            service_id INTEGER NOT NULL,
+            media_type TEXT DEFAULT 'image',
+            image_file TEXT,
+            video_file TEXT,
+            video_url TEXT,
+            caption TEXT,
+            sort_order INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(service_id) REFERENCES services(id)
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS service_programs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            service_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            slug TEXT,
+            short_description TEXT,
+            detail TEXT,
+            cover_image_file TEXT,
+            sort_order INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(service_id) REFERENCES services(id)
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS program_media (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            program_id INTEGER NOT NULL,
+            media_type TEXT DEFAULT 'image',
+            image_file TEXT,
+            video_file TEXT,
+            video_url TEXT,
+            caption TEXT,
+            sort_order INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY(program_id) REFERENCES service_programs(id)
+        )
+        """
+    )
+
+
+    cur.execute(
+        """
         CREATE TABLE IF NOT EXISTS doctor_schedules (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             doctor_id INTEGER NOT NULL,
@@ -538,6 +631,62 @@ def init_db():
     add_column_if_missing("doctors", "expertise_zh", "expertise_zh TEXT")
     add_column_if_missing("doctors", "expertise_ja", "expertise_ja TEXT")
     add_column_if_missing("doctors", "expertise_ko", "expertise_ko TEXT")
+
+    add_column_if_missing("services", "title", "title TEXT")
+    add_column_if_missing("services", "slug", "slug TEXT")
+    add_column_if_missing("services", "description", "description TEXT")
+    add_column_if_missing("services", "detail", "detail TEXT")
+    add_column_if_missing("services", "image_file", "image_file TEXT")
+    add_column_if_missing("services", "is_active", "is_active INTEGER DEFAULT 1")
+    add_column_if_missing("services", "created_at", "created_at TEXT")
+
+    add_column_if_missing("services", "title_th", "title_th TEXT")
+    add_column_if_missing("services", "title_en", "title_en TEXT")
+    add_column_if_missing("services", "title_zh", "title_zh TEXT")
+    add_column_if_missing("services", "title_ja", "title_ja TEXT")
+    add_column_if_missing("services", "title_ko", "title_ko TEXT")
+
+    add_column_if_missing("services", "description_th", "description_th TEXT")
+    add_column_if_missing("services", "description_en", "description_en TEXT")
+    add_column_if_missing("services", "description_zh", "description_zh TEXT")
+    add_column_if_missing("services", "description_ja", "description_ja TEXT")
+    add_column_if_missing("services", "description_ko", "description_ko TEXT")
+
+    add_column_if_missing("services", "detail_th", "detail_th TEXT")
+    add_column_if_missing("services", "detail_en", "detail_en TEXT")
+    add_column_if_missing("services", "detail_zh", "detail_zh TEXT")
+    add_column_if_missing("services", "detail_ja", "detail_ja TEXT")
+    add_column_if_missing("services", "detail_ko", "detail_ko TEXT")
+
+    add_column_if_missing("service_media", "service_id", "service_id INTEGER")
+    add_column_if_missing("service_media", "media_type", "media_type TEXT DEFAULT 'image'")
+    add_column_if_missing("service_media", "image_file", "image_file TEXT")
+    add_column_if_missing("service_media", "video_file", "video_file TEXT")
+    add_column_if_missing("service_media", "video_url", "video_url TEXT")
+    add_column_if_missing("service_media", "caption", "caption TEXT")
+    add_column_if_missing("service_media", "sort_order", "sort_order INTEGER DEFAULT 0")
+    add_column_if_missing("service_media", "is_active", "is_active INTEGER DEFAULT 1")
+    add_column_if_missing("service_media", "created_at", "created_at TEXT")
+
+    add_column_if_missing("service_programs", "service_id", "service_id INTEGER")
+    add_column_if_missing("service_programs", "title", "title TEXT")
+    add_column_if_missing("service_programs", "slug", "slug TEXT")
+    add_column_if_missing("service_programs", "short_description", "short_description TEXT")
+    add_column_if_missing("service_programs", "detail", "detail TEXT")
+    add_column_if_missing("service_programs", "cover_image_file", "cover_image_file TEXT")
+    add_column_if_missing("service_programs", "sort_order", "sort_order INTEGER DEFAULT 0")
+    add_column_if_missing("service_programs", "is_active", "is_active INTEGER DEFAULT 1")
+    add_column_if_missing("service_programs", "created_at", "created_at TEXT")
+
+    add_column_if_missing("program_media", "program_id", "program_id INTEGER")
+    add_column_if_missing("program_media", "media_type", "media_type TEXT DEFAULT 'image'")
+    add_column_if_missing("program_media", "image_file", "image_file TEXT")
+    add_column_if_missing("program_media", "video_file", "video_file TEXT")
+    add_column_if_missing("program_media", "video_url", "video_url TEXT")
+    add_column_if_missing("program_media", "caption", "caption TEXT")
+    add_column_if_missing("program_media", "sort_order", "sort_order INTEGER DEFAULT 0")
+    add_column_if_missing("program_media", "is_active", "is_active INTEGER DEFAULT 1")
+    add_column_if_missing("program_media", "created_at", "created_at TEXT")
 
     add_column_if_missing("line_leads", "display_name", "display_name TEXT")
     add_column_if_missing("line_leads", "message_text", "message_text TEXT")
@@ -867,6 +1016,81 @@ def seed_default_clinic_data():
                 ),
             )
 
+    default_services = [
+        (
+            "ปรึกษาปัญหาผิว",
+            "skin-consultation",
+            "วิเคราะห์สภาพผิวและแนะนำโปรแกรมที่เหมาะสมกับลูกค้าแต่ละคน",
+            "บริการปรึกษาปัญหาผิวโดยทีมคลินิก เหมาะสำหรับลูกค้าที่ต้องการเลือกโปรแกรมดูแลผิวให้ตรงกับปัญหาและงบประมาณ",
+            "",
+        ),
+        (
+            "ทรีตเมนต์ผิวหน้า",
+            "facial-treatment",
+            "ดูแลผิวหน้าให้สะอาด ชุ่มชื้น ลดความหมองคล้ำ และช่วยให้ผิวดูสุขภาพดี",
+            "ทรีตเมนต์ผิวหน้าสำหรับฟื้นฟูผิว เติมความชุ่มชื้น และดูแลผิวหมองคล้ำอย่างอ่อนโยน",
+            "",
+        ),
+        (
+            "เลเซอร์ผิว",
+            "skin-laser",
+            "โปรแกรมเลเซอร์เพื่อผิวกระจ่างใส ลดรอย และฟื้นฟูสภาพผิว",
+            "บริการเลเซอร์ผิวเพื่อช่วยดูแลรอยสิว จุดด่างดำ และความหมองคล้ำ โดยเลือกโปรแกรมตามสภาพผิว",
+            "",
+        ),
+        (
+            "คอร์สดูแลต่อเนื่อง",
+            "continuing-care-course",
+            "ออกแบบคอร์สการดูแลเป็นรอบ เหมาะสำหรับลูกค้าที่ต้องการผลลัพธ์ต่อเนื่อง",
+            "คอร์สดูแลต่อเนื่องสำหรับลูกค้าที่ต้องการวางแผนดูแลผิวระยะยาว พร้อมติดตามผลเป็นรอบ",
+            "",
+        ),
+    ]
+
+    for service in default_services:
+        exists = cur.execute(
+            "SELECT id FROM services WHERE slug = ?",
+            (service[1],),
+        ).fetchone()
+
+        if not exists:
+            cur.execute(
+                """
+                INSERT INTO services (
+                    title,
+                    slug,
+                    description,
+                    detail,
+                    image_file,
+                    is_active,
+                    created_at,
+
+                    title_th,
+                    title_en,
+                    description_th,
+                    description_en,
+                    detail_th,
+                    detail_en
+                )
+                VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    service[0],
+                    service[1],
+                    service[2],
+                    service[3],
+                    service[4],
+                    datetime.now().isoformat(timespec="seconds"),
+
+                    service[0],
+                    service[0],
+                    service[2],
+                    service[2],
+                    service[3],
+                    service[3],
+                ),
+            )
+
     conn.commit()
     conn.close()
 
@@ -933,7 +1157,14 @@ def get_active_promotions():
     conn = get_db()
     rows = conn.execute(
         """
-        SELECT * FROM promotions
+        SELECT
+            *,
+            CASE
+                WHEN image_file_1 IS NOT NULL AND image_file_1 != ''
+                THEN '/static/images/promotions/' || image_file_1
+                ELSE ''
+            END AS image_url
+        FROM promotions
         WHERE is_active = 1
         ORDER BY id ASC
         """
@@ -959,7 +1190,14 @@ def get_active_doctors():
     conn = get_db()
     rows = conn.execute(
         """
-        SELECT * FROM doctors
+        SELECT
+            *,
+            CASE
+                WHEN image_file IS NOT NULL AND image_file != ''
+                THEN '/static/images/doctors/' || image_file
+                ELSE ''
+            END AS image_url
+        FROM doctors
         WHERE is_active = 1
         ORDER BY id ASC
         """
@@ -967,6 +1205,100 @@ def get_active_doctors():
     conn.close()
     return rows
 
+
+
+
+def get_active_services():
+    conn = get_db()
+    service_rows = conn.execute(
+        """
+        SELECT
+            *,
+            CASE
+                WHEN image_file IS NOT NULL AND image_file != ''
+                THEN '/static/images/services/' || image_file
+                ELSE ''
+            END AS image_url,
+            title AS name,
+            detail AS full_detail,
+            detail AS subtitle
+        FROM services
+        WHERE is_active = 1
+        ORDER BY id ASC
+        """
+    ).fetchall()
+
+    program_rows = conn.execute(
+        """
+        SELECT *
+        FROM service_programs
+        WHERE is_active = 1
+        ORDER BY service_id ASC, sort_order ASC, id ASC
+        """
+    ).fetchall()
+
+    media_rows = conn.execute(
+        """
+        SELECT *
+        FROM program_media
+        WHERE is_active = 1
+        ORDER BY program_id ASC, sort_order ASC, id ASC
+        """
+    ).fetchall()
+    conn.close()
+
+    media_by_program = {}
+    for row in media_rows:
+        item = dict(row)
+        if item.get("image_file"):
+            item["image_url"] = f"/static/images/services/{item['image_file']}"
+        else:
+            item["image_url"] = ""
+
+        if item.get("video_file"):
+            item["video_src"] = f"/static/videos/services/{item['video_file']}"
+        else:
+            item["video_src"] = item.get("video_url") or ""
+
+        media_by_program.setdefault(item["program_id"], []).append(item)
+
+    programs_by_service = {}
+    for row in program_rows:
+        program = dict(row)
+        if program.get("cover_image_file"):
+            program["cover_image_url"] = f"/static/images/services/{program['cover_image_file']}"
+        else:
+            program["cover_image_url"] = ""
+
+        media_list = media_by_program.get(program["id"], [])
+        if not media_list and program.get("cover_image_file"):
+            media_list = [
+                {
+                    "id": 0,
+                    "program_id": program["id"],
+                    "media_type": "image",
+                    "image_file": program.get("cover_image_file") or "",
+                    "video_file": "",
+                    "video_url": "",
+                    "caption": program.get("short_description") or program.get("detail") or "",
+                    "sort_order": 0,
+                    "is_active": 1,
+                    "image_url": program.get("cover_image_url") or "",
+                    "video_src": "",
+                }
+            ]
+        program["media"] = media_list
+        program["media_json"] = json.dumps(media_list, ensure_ascii=False)
+        programs_by_service.setdefault(program["service_id"], []).append(program)
+
+    services = []
+    for row in service_rows:
+        item = dict(row)
+        item["programs"] = programs_by_service.get(item["id"], [])
+        item["programs_json"] = json.dumps(item["programs"], ensure_ascii=False)
+        services.append(item)
+
+    return services
 
 def get_package_by_slug(slug: str):
     conn = get_db()
@@ -1389,6 +1721,7 @@ def home(request: Request):
             "promotions": get_active_promotions(),
             "reviews": get_active_reviews(),
             "doctors": get_active_doctors(),
+            "services": get_active_services(),
             "clinic_location_name": os.getenv(
                 "CLINIC_LOCATION_NAME",
                 "Home Care Clinic, Bangkok",
@@ -1912,6 +2245,9 @@ def admin_dashboard(request: Request):
         ).fetchone()["count"],
         "doctors": conn.execute(
             "SELECT COUNT(*) AS count FROM doctors"
+        ).fetchone()["count"],
+        "services": conn.execute(
+            "SELECT COUNT(*) AS count FROM services"
         ).fetchone()["count"],
     }
 
@@ -3127,6 +3463,473 @@ def admin_delete_doctor(
             error=f"ลบคุณหมอไม่สำเร็จ: {str(e)}",
         )
 
+
+
+
+def save_uploaded_video(folder_path: str, prefix: str, video_file: UploadFile | None):
+    if not video_file or not video_file.filename:
+        return None
+
+    original_name = video_file.filename.lower()
+    allowed = (".mp4", ".webm", ".mov")
+
+    if not original_name.endswith(allowed):
+        return None
+
+    ext = os.path.splitext(original_name)[1].lower()
+    safe_prefix = safe_filename(prefix)
+    filename = f"{safe_prefix}-{datetime.now().strftime('%Y%m%d%H%M%S%f')}{ext}"
+    file_path = os.path.join(folder_path, filename)
+
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(video_file.file, buffer)
+
+    return filename
+
+
+@app.get("/admin/services")
+def admin_services(request: Request):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/services", status_code=303)
+
+    conn = get_db()
+    services = conn.execute(
+        "SELECT * FROM services ORDER BY id DESC"
+    ).fetchall()
+
+    programs = conn.execute(
+        """
+        SELECT *
+        FROM service_programs
+        ORDER BY service_id ASC, sort_order ASC, id ASC
+        """
+    ).fetchall()
+
+    media_rows = conn.execute(
+        """
+        SELECT *
+        FROM program_media
+        ORDER BY program_id ASC, sort_order ASC, id ASC
+        """
+    ).fetchall()
+    conn.close()
+
+    programs_by_service = {}
+    for row in programs:
+        item = dict(row)
+        if item.get("cover_image_file"):
+            item["cover_image_url"] = f"/static/images/services/{item['cover_image_file']}"
+        else:
+            item["cover_image_url"] = ""
+        programs_by_service.setdefault(item["service_id"], []).append(item)
+
+    media_by_program = {}
+    for row in media_rows:
+        item = dict(row)
+        if item.get("image_file"):
+            item["image_url"] = f"/static/images/services/{item['image_file']}"
+        else:
+            item["image_url"] = ""
+
+        if item.get("video_file"):
+            item["video_src"] = f"/static/videos/services/{item['video_file']}"
+        else:
+            item["video_src"] = item.get("video_url") or ""
+
+        media_by_program.setdefault(item["program_id"], []).append(item)
+
+    messages = get_admin_messages(request)
+
+    return templates.TemplateResponse(
+        "admin_services.html",
+        {
+            "request": request,
+            "user": admin,
+            "services": services,
+            "programs_by_service": programs_by_service,
+            "media_by_program": media_by_program,
+            "success": messages["success"],
+            "error": messages["error"],
+        },
+    )
+
+
+@app.post("/admin/services")
+def admin_create_service(
+    request: Request,
+    title_th: str = Form(""),
+    title_en: str = Form(""),
+    description_th: str = Form(""),
+    description_en: str = Form(""),
+    detail_th: str = Form(""),
+    detail_en: str = Form(""),
+    slug: str = Form(...),
+    image_file: UploadFile = File(None),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/services", status_code=303)
+
+    slug = normalize_slug(slug)
+
+    if not title_th.strip() and not title_en.strip():
+        return admin_redirect_with_message(
+            "/admin/services",
+            error="กรุณาใส่ชื่อหมวดบริการภาษาไทยหรืออังกฤษอย่างน้อย 1 ภาษา",
+        )
+
+    if not slug:
+        return admin_redirect_with_message(
+            "/admin/services",
+            error="กรุณาใส่ Slug เป็นภาษาอังกฤษ เช่น skin-treatment",
+        )
+
+    try:
+        title_i18n = ai_translate_5_languages(th_text=title_th, en_text=title_en)
+        desc_i18n = ai_translate_5_languages(th_text=description_th, en_text=description_en)
+        detail_i18n = ai_translate_5_languages(th_text=detail_th, en_text=detail_en)
+        img = save_uploaded_image(SERVICE_IMAGE_DIR, f"service-{slug}", image_file)
+
+        conn = get_db()
+        exists = conn.execute("SELECT id FROM services WHERE slug = ?", (slug,)).fetchone()
+        if exists:
+            conn.close()
+            return admin_redirect_with_message("/admin/services", error=f"Slug '{slug}' มีอยู่แล้ว กรุณาเปลี่ยนชื่อ")
+
+        conn.execute(
+            """
+            INSERT INTO services (
+                title, slug, description, detail, image_file, is_active, created_at,
+                title_th, title_en, title_zh, title_ja, title_ko,
+                description_th, description_en, description_zh, description_ja, description_ko,
+                detail_th, detail_en, detail_zh, detail_ja, detail_ko
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                title_i18n["th"], slug, desc_i18n["th"], detail_i18n["th"], img,
+                is_active, datetime.now().isoformat(timespec="seconds"),
+                title_i18n["th"], title_i18n["en"], title_i18n["zh"], title_i18n["ja"], title_i18n["ko"],
+                desc_i18n["th"], desc_i18n["en"], desc_i18n["zh"], desc_i18n["ja"], desc_i18n["ko"],
+                detail_i18n["th"], detail_i18n["en"], detail_i18n["zh"], detail_i18n["ja"], detail_i18n["ko"],
+            ),
+        )
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message("/admin/services", success="เพิ่มหมวดบริการสำเร็จ")
+
+    except Exception as e:
+        print("SERVICE CREATE ERROR:", repr(e))
+        return admin_redirect_with_message("/admin/services", error=f"เพิ่มหมวดบริการไม่สำเร็จ: {str(e)}")
+
+
+@app.post("/admin/services/{service_id}/update")
+def admin_update_service(
+    request: Request,
+    service_id: int,
+    title_th: str = Form(""),
+    title_en: str = Form(""),
+    description_th: str = Form(""),
+    description_en: str = Form(""),
+    detail_th: str = Form(""),
+    detail_en: str = Form(""),
+    slug: str = Form(...),
+    image_file: UploadFile = File(None),
+    existing_image_file: str = Form(""),
+    remove_image: str = Form("0"),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/services", status_code=303)
+
+    slug = normalize_slug(slug)
+
+    if not title_th.strip() and not title_en.strip():
+        return admin_redirect_with_message("/admin/services", error="ชื่อหมวดบริการห้ามว่างทั้งหมด")
+
+    if not slug:
+        return admin_redirect_with_message("/admin/services", error="Slug ห้ามว่าง")
+
+    try:
+        conn = get_db()
+        exists = conn.execute(
+            "SELECT id FROM services WHERE slug = ? AND id != ?",
+            (slug, service_id),
+        ).fetchone()
+
+        if exists:
+            conn.close()
+            return admin_redirect_with_message("/admin/services", error=f"Slug '{slug}' ซ้ำกับหมวดบริการอื่น")
+
+        title_i18n = ai_translate_5_languages(th_text=title_th, en_text=title_en)
+        desc_i18n = ai_translate_5_languages(th_text=description_th, en_text=description_en)
+        detail_i18n = ai_translate_5_languages(th_text=detail_th, en_text=detail_en)
+
+        img = "" if remove_image == "1" else existing_image_file
+        new_img = save_uploaded_image(SERVICE_IMAGE_DIR, f"service-{slug}", image_file)
+        if new_img:
+            img = new_img
+
+        conn.execute(
+            """
+            UPDATE services
+            SET title = ?, slug = ?, description = ?, detail = ?, image_file = ?, is_active = ?,
+                title_th = ?, title_en = ?, title_zh = ?, title_ja = ?, title_ko = ?,
+                description_th = ?, description_en = ?, description_zh = ?, description_ja = ?, description_ko = ?,
+                detail_th = ?, detail_en = ?, detail_zh = ?, detail_ja = ?, detail_ko = ?
+            WHERE id = ?
+            """,
+            (
+                title_i18n["th"], slug, desc_i18n["th"], detail_i18n["th"], img, is_active,
+                title_i18n["th"], title_i18n["en"], title_i18n["zh"], title_i18n["ja"], title_i18n["ko"],
+                desc_i18n["th"], desc_i18n["en"], desc_i18n["zh"], desc_i18n["ja"], desc_i18n["ko"],
+                detail_i18n["th"], detail_i18n["en"], detail_i18n["zh"], detail_i18n["ja"], detail_i18n["ko"],
+                service_id,
+            ),
+        )
+        conn.commit()
+        conn.close()
+        return admin_redirect_with_message("/admin/services", success="บันทึกหมวดบริการสำเร็จ")
+
+    except Exception as e:
+        print("SERVICE UPDATE ERROR:", repr(e))
+        return admin_redirect_with_message("/admin/services", error=f"บันทึกหมวดบริการไม่สำเร็จ: {str(e)}")
+
+
+@app.post("/admin/services/{service_id}/programs")
+def admin_create_service_program(
+    request: Request,
+    service_id: int,
+    title: str = Form(...),
+    slug: str = Form(""),
+    short_description: str = Form(""),
+    detail: str = Form(""),
+    cover_image_file: UploadFile = File(None),
+    sort_order: int = Form(0),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+    if not admin:
+        return RedirectResponse("/login?next=/admin/services", status_code=303)
+
+    title = title.strip()
+    if not title:
+        return admin_redirect_with_message("/admin/services", error="กรุณาใส่ชื่อ Program")
+
+    slug = normalize_slug(slug or title)
+
+    try:
+        cover = save_uploaded_image(SERVICE_IMAGE_DIR, f"program-{slug}", cover_image_file)
+        conn = get_db()
+        conn.execute(
+            """
+            INSERT INTO service_programs (
+                service_id, title, slug, short_description, detail,
+                cover_image_file, sort_order, is_active, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                service_id, title, slug, short_description.strip(), detail.strip(),
+                cover or "", sort_order, is_active,
+                datetime.now().isoformat(timespec="seconds"),
+            ),
+        )
+        conn.commit()
+        conn.close()
+        return admin_redirect_with_message("/admin/services", success="เพิ่ม Program สำเร็จ")
+
+    except Exception as e:
+        print("PROGRAM CREATE ERROR:", repr(e))
+        return admin_redirect_with_message("/admin/services", error=f"เพิ่ม Program ไม่สำเร็จ: {str(e)}")
+
+
+@app.post("/admin/service-programs/{program_id}/update")
+def admin_update_service_program(
+    request: Request,
+    program_id: int,
+    title: str = Form(...),
+    slug: str = Form(""),
+    short_description: str = Form(""),
+    detail: str = Form(""),
+    cover_image_file: UploadFile = File(None),
+    existing_cover_image_file: str = Form(""),
+    remove_cover: str = Form("0"),
+    sort_order: int = Form(0),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+    if not admin:
+        return RedirectResponse("/login?next=/admin/services", status_code=303)
+
+    title = title.strip()
+    if not title:
+        return admin_redirect_with_message("/admin/services", error="ชื่อ Program ห้ามว่าง")
+
+    slug = normalize_slug(slug or title)
+
+    try:
+        cover = "" if remove_cover == "1" else existing_cover_image_file
+        new_cover = save_uploaded_image(SERVICE_IMAGE_DIR, f"program-{slug}", cover_image_file)
+        if new_cover:
+            cover = new_cover
+
+        conn = get_db()
+        conn.execute(
+            """
+            UPDATE service_programs
+            SET title = ?, slug = ?, short_description = ?, detail = ?,
+                cover_image_file = ?, sort_order = ?, is_active = ?
+            WHERE id = ?
+            """,
+            (
+                title, slug, short_description.strip(), detail.strip(),
+                cover, sort_order, is_active, program_id,
+            ),
+        )
+        conn.commit()
+        conn.close()
+        return admin_redirect_with_message("/admin/services", success="บันทึก Program สำเร็จ")
+
+    except Exception as e:
+        print("PROGRAM UPDATE ERROR:", repr(e))
+        return admin_redirect_with_message("/admin/services", error=f"บันทึก Program ไม่สำเร็จ: {str(e)}")
+
+
+@app.post("/admin/service-programs/{program_id}/media")
+def admin_add_program_media(
+    request: Request,
+    program_id: int,
+    media_type: str = Form("image"),
+    image_file: UploadFile = File(None),
+    video_file: UploadFile = File(None),
+    video_url: str = Form(""),
+    caption: str = Form(""),
+    sort_order: int = Form(0),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+    if not admin:
+        return RedirectResponse("/login?next=/admin/services", status_code=303)
+
+    try:
+        image_name = save_uploaded_image(SERVICE_IMAGE_DIR, f"program-media-{program_id}", image_file)
+        video_name = save_uploaded_video(SERVICE_VIDEO_DIR, f"program-video-{program_id}", video_file)
+        video_url = (video_url or "").strip()
+
+        if image_name:
+            media_type = "image"
+        elif video_name or video_url:
+            media_type = "video"
+        else:
+            return admin_redirect_with_message("/admin/services", error="กรุณาอัปโหลดรูป/วิดีโอ หรือใส่ลิงก์วิดีโอก่อน")
+
+        conn = get_db()
+        conn.execute(
+            """
+            INSERT INTO program_media (
+                program_id, media_type, image_file, video_file, video_url,
+                caption, sort_order, is_active, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                program_id, media_type, image_name or "", video_name or "",
+                video_url, caption.strip(), sort_order, is_active,
+                datetime.now().isoformat(timespec="seconds"),
+            ),
+        )
+        conn.commit()
+        conn.close()
+        return admin_redirect_with_message("/admin/services", success="เพิ่มรูป/วิดีโอให้ Program สำเร็จ")
+
+    except Exception as e:
+        print("PROGRAM MEDIA CREATE ERROR:", repr(e))
+        return admin_redirect_with_message("/admin/services", error=f"เพิ่มรูป/วิดีโอไม่สำเร็จ: {str(e)}")
+
+
+@app.post("/admin/program-media/{media_id}/update")
+def admin_update_program_media(
+    request: Request,
+    media_id: int,
+    caption: str = Form(""),
+    sort_order: int = Form(0),
+    is_active: int = Form(1),
+):
+    admin = require_admin(request)
+    if not admin:
+        return RedirectResponse("/login?next=/admin/services", status_code=303)
+
+    conn = get_db()
+    conn.execute(
+        """
+        UPDATE program_media
+        SET caption = ?, sort_order = ?, is_active = ?
+        WHERE id = ?
+        """,
+        (caption.strip(), sort_order, is_active, media_id),
+    )
+    conn.commit()
+    conn.close()
+    return admin_redirect_with_message("/admin/services", success="บันทึกรูป/วิดีโอสำเร็จ")
+
+
+@app.post("/admin/program-media/{media_id}/delete")
+def admin_delete_program_media(request: Request, media_id: int):
+    admin = require_admin(request)
+    if not admin:
+        return RedirectResponse("/login?next=/admin/services", status_code=303)
+
+    conn = get_db()
+    conn.execute("DELETE FROM program_media WHERE id = ?", (media_id,))
+    conn.commit()
+    conn.close()
+    return admin_redirect_with_message("/admin/services", success="ลบรูป/วิดีโอสำเร็จ")
+
+
+@app.post("/admin/service-programs/{program_id}/delete")
+def admin_delete_service_program(request: Request, program_id: int):
+    admin = require_admin(request)
+    if not admin:
+        return RedirectResponse("/login?next=/admin/services", status_code=303)
+
+    conn = get_db()
+    conn.execute("DELETE FROM program_media WHERE program_id = ?", (program_id,))
+    conn.execute("DELETE FROM service_programs WHERE id = ?", (program_id,))
+    conn.commit()
+    conn.close()
+    return admin_redirect_with_message("/admin/services", success="ลบ Program สำเร็จ")
+
+
+@app.post("/admin/services/{service_id}/delete")
+def admin_delete_service(request: Request, service_id: int):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/services", status_code=303)
+
+    try:
+        conn = get_db()
+        program_ids = [row["id"] for row in conn.execute("SELECT id FROM service_programs WHERE service_id = ?", (service_id,)).fetchall()]
+        for pid in program_ids:
+            conn.execute("DELETE FROM program_media WHERE program_id = ?", (pid,))
+        conn.execute("DELETE FROM service_programs WHERE service_id = ?", (service_id,))
+        conn.execute("DELETE FROM service_media WHERE service_id = ?", (service_id,))
+        conn.execute("DELETE FROM services WHERE id = ?", (service_id,))
+        conn.commit()
+        conn.close()
+        return admin_redirect_with_message("/admin/services", success="ลบหมวดบริการสำเร็จ")
+
+    except Exception as e:
+        print("SERVICE DELETE ERROR:", repr(e))
+        return admin_redirect_with_message("/admin/services", error=f"ลบหมวดบริการไม่สำเร็จ: {str(e)}")
 
 @app.get("/packages/{slug}")
 def package_detail(request: Request, slug: str):

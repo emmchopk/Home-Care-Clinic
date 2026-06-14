@@ -6,763 +6,474 @@
 
   <title>{% block title %}Home Care Clinic{% endblock %}</title>
 
-  <link
-    rel="stylesheet"
-    href="{{ url_for('static', path='css/style.css') }}?v=20260601-line-booking-final"
-  />
-</head>
-
-<body>
-  <header class="site-header">
-    <div class="topbar">
-      <div>
-        <a
-          href="{{ clinic_google_map_url | default('https://maps.google.com/?q=Home+Care+Clinic+Bangkok') }}"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="top-location-link"
-        >
-          📍 {{ clinic_location_name | default('Home Care Clinic, Bangkok') }}
-        </a>
-      </div>
-
-      <div>
-        <span data-i18n="topbar_hours">🕘 เปิดทุกวัน: 10:00 - 20:00</span>
-        <span style="margin: 0 10px;">|</span>
-        ☎ 092-264-8248
-        <span style="margin: 0 10px;">|</span>
-        💬 Line: @homecare
-      </div>
-    </div>
-
-    <nav class="navbar">
-      <a href="/home" class="logo-with-image">
-        <img
-          src="{{ url_for('static', path='images/homecare-logo.jpg') }}?v=20260601"
-          alt="Home Care Clinic Logo"
-          class="site-logo-img"
-        />
-
-        <div class="logo-text">
-          <strong>Home Care</strong>
-          <small>AESTHETIC CLINIC</small>
-        </div>
-      </a>
-
-      <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open menu">
-        ☰
-      </button>
-
-      <div class="nav-menu" id="navMenu">
-        <a href="/home" class="{% if request.url.path == '/home' %}active{% endif %}" data-i18n="nav_home">หน้าแรก</a>
-        <a href="/home#packages" data-i18n="nav_packages">แพ็กเกจ</a>
-        <a href="/home#promotions" data-i18n="nav_promotions">โปรโมชั่น</a>
-        <a href="/home#doctors" data-i18n="nav_doctors">คุณหมอ</a>
-        <a href="/home#location" data-i18n="nav_location">แผนที่</a>
-
-        {% if user %}
-          {% if user.role == 'ADMIN' %}
-            <a href="/admin/dashboard">Dashboard</a>
-            <a href="/admin/line-leads">LINE Leads</a>
-            <a href="/admin/packages">Packages</a>
-            <a href="/admin/promotions">Promotions</a>
-            <a href="/admin/reviews">Reviews</a>
-            <a href="/admin/doctors">Doctors</a>
-          {% endif %}
-
-          <a href="/logout" data-i18n="nav_logout">ออกจากระบบ</a>
-        {% else %}
-          <a href="/login" data-i18n="nav_login">เข้าสู่ระบบ</a>
-        {% endif %}
-
-        <a
-          href="https://line.me/R/ti/p/@homecare"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="booking-btn"
-          data-i18n="nav_booking"
-        >
-          จองผ่าน LINE
-        </a>
-
-        <select class="language-select" id="languageSelect">
-          <option value="th">TH</option>
-          <option value="en">EN</option>
-          <option value="zh">中文</option>
-          <option value="ja">日本語</option>
-          <option value="ko">한국어</option>
-        </select>
-      </div>
-    </nav>
-  </header>
-
-  <main>
-    {% block content %}{% endblock %}
-  </main>
-
-  <div class="floating-contact">
-    <button class="floating-main-btn" id="floatingMainBtn" type="button">
-      💬
-    </button>
-
-    <div class="floating-contact-panel" id="floatingContactPanel">
-      <div class="floating-contact-head">
-        <b data-i18n="contact_popup_title">ติดต่อ Home Care Clinic</b>
-        <button type="button" id="floatingCloseBtn">×</button>
-      </div>
-
-      <p data-i18n="contact_popup_desc">
-        สอบถามโปรโมชั่น จองคิว หรือปรึกษาแพ็กเกจได้เลยค่ะ
-      </p>
-
-      <a href="tel:0922648248" class="floating-contact-link phone">
-        <span data-i18n="contact_phone_label">โทรศัพท์</span>
-        <small data-i18n="contact_phone">โทร 092-264-8248</small>
-      </a>
-
-      <a
-        href="https://line.me/R/ti/p/@homecare"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="floating-contact-link line"
-      >
-        <span>LINE</span>
-        <small data-i18n="contact_line">ทัก LINE Official</small>
-      </a>
-
-      <a
-        href="https://www.facebook.com/profile.php?id=100068067455609"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="floating-contact-link facebook"
-      >
-        <span>Facebook</span>
-        <small data-i18n="contact_facebook">เปิดเพจ Facebook</small>
-      </a>
-    </div>
-  </div>
-
-  <footer class="footer">
-    <div class="footer-grid">
-      <div>
-        <h4>Home Care Clinic</h4>
-        <p data-i18n="footer_about">
-          คลินิกความงามและดูแลสุขภาพผิว เน้นบริการที่ปลอดภัย สุภาพ และดูแลแบบเฉพาะบุคคล
-        </p>
-      </div>
-
-      <div>
-        <h4 data-i18n="footer_package_title">หมวดหมู่แพ็กเกจ</h4>
-        <ul>
-          <li data-i18n="footer_package_1">แพ็กเกจดูแลผิวหน้า</li>
-          <li data-i18n="footer_package_2">แพ็กเกจดูแลสิว</li>
-          <li data-i18n="footer_package_3">แพ็กเกจเลเซอร์</li>
-          <li data-i18n="footer_package_4">สกินบูสเตอร์</li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 data-i18n="footer_quick_menu">เมนูลัด</h4>
-        <ul>
-          <li><a href="/home" data-i18n="nav_home">หน้าแรก</a></li>
-          <li><a href="/home#packages" data-i18n="nav_packages">แพ็กเกจ</a></li>
-          <li><a href="/home#promotions" data-i18n="nav_promotions">โปรโมชั่น</a></li>
-          <li><a href="/home#doctors" data-i18n="nav_doctors">คุณหมอ</a></li>
-          <li>
-            <a
-              href="https://line.me/R/ti/p/@homecare"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-i18n="nav_booking"
-            >
-              จองผ่าน LINE
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <div>
-        <h4>Admin Menu</h4>
-        <ul>
-          {% if user and user.role == 'ADMIN' %}
-            <li><a href="/admin/dashboard">Dashboard</a></li>
-            <li><a href="/admin/line-leads">LINE Leads</a></li>
-            <li><a href="/admin/bookings">Web Bookings</a></li>
-            <li><a href="/admin/packages">Manage Packages</a></li>
-            <li><a href="/admin/promotions">Manage Promotions</a></li>
-            <li><a href="/admin/reviews">Manage Reviews</a></li>
-            <li><a href="/admin/doctors">Manage Doctors</a></li>
-          {% else %}
-            <li><a href="/login">Admin Login</a></li>
-          {% endif %}
-        </ul>
-      </div>
-
-      <div>
-        <h4 data-i18n="footer_contact">ติดต่อเรา</h4>
-        <ul>
-          <li>
-            <a
-              href="{{ clinic_google_map_url | default('https://maps.google.com/?q=Home+Care+Clinic+Bangkok') }}"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="footer-map-link"
-            >
-              📍 {{ clinic_location_name | default('Home Care Clinic, Bangkok') }}
-            </a>
-          </li>
-          <li>☎ 092-264-8248</li>
-          <li>💬 Line: @homecare</li>
-          <li data-i18n="footer_hours">🕘 10:00 - 20:00</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="copyright">
-      © 2026 Home Care Clinic. All Rights Reserved.
-    </div>
-  </footer>
-
-  <script>
-    const translations = {
-      th: {
-        topbar_hours: "🕘 เปิดทุกวัน: 10:00 - 20:00",
-        nav_home: "หน้าแรก",
-        nav_packages: "แพ็กเกจ",
-        nav_promotions: "โปรโมชั่น",
-        nav_doctors: "คุณหมอ",
-        nav_location: "แผนที่",
-        nav_login: "เข้าสู่ระบบ",
-        nav_logout: "ออกจากระบบ",
-        nav_booking: "จองผ่าน LINE",
-
-        contact_popup_title: "ติดต่อ Home Care Clinic",
-        contact_popup_desc: "สอบถามโปรโมชั่น จองคิว หรือปรึกษาแพ็กเกจได้เลยค่ะ",
-        contact_phone_label: "โทรศัพท์",
-        contact_phone: "โทร 092-264-8248",
-        contact_line: "ทัก LINE Official",
-        contact_facebook: "เปิดเพจ Facebook",
-
-        footer_about: "คลินิกความงามและดูแลสุขภาพผิว เน้นบริการที่ปลอดภัย สุภาพ และดูแลแบบเฉพาะบุคคล",
-        footer_package_title: "หมวดหมู่แพ็กเกจ",
-        footer_package_1: "แพ็กเกจดูแลผิวหน้า",
-        footer_package_2: "แพ็กเกจดูแลสิว",
-        footer_package_3: "แพ็กเกจเลเซอร์",
-        footer_package_4: "สกินบูสเตอร์",
-        footer_quick_menu: "เมนูลัด",
-        footer_contact: "ติดต่อเรา",
-        footer_hours: "🕘 10:00 - 20:00",
-
-        hero_kicker: "HOME CARE AESTHETIC CLINIC",
-        hero_title: "ดูแลผิวเฉพาะบุคคล",
-        hero_title_span: "เพื่อความงามที่เป็นธรรมชาติ",
-        hero_desc: "แพ็กเกจดูแลผิวและสุขภาพความงาม ออกแบบตามปัญหาผิวของแต่ละบุคคล ดูแลโดยทีมผู้เชี่ยวชาญ เพื่อผลลัพธ์ที่ปลอดภัย ดูเป็นธรรมชาติ และน่าเชื่อถือ",
-        hero_btn_booking: "จองผ่าน LINE",
-        hero_btn_packages: "ดูแพ็กเกจ",
-        hero_card_1_title: "ปรึกษาปัญหาผิว",
-        hero_card_1_text: "วิเคราะห์ผิวก่อนเริ่มดูแล",
-        hero_card_2_title: "จองผ่าน LINE",
-        hero_card_2_text: "ทัก LINE Official เพื่อจองคิว",
-
-        trust_certified: "Certified",
-        trust_doctors: "Doctors",
-        trust_safe: "Safe",
-        trust_treatment: "Treatment",
-        trust_custom: "Custom",
-        trust_skin_plan: "Skin Plan",
-
-        intro_kicker: "CUSTOMIZED TECHNIQUES",
-        intro_title: "ดูแลแบบเฉพาะบุคคล เพื่อผิวที่ดูดีอย่างเป็นธรรมชาติ",
-        intro_desc: "Home Care Clinic ให้ความสำคัญกับการประเมินปัญหาผิวอย่างละเอียด เลือกแพ็กเกจและวางแผนการดูแลให้เหมาะกับแต่ละคน ตั้งแต่การดูแลสิว เติมความชุ่มชื้น ปรับผิวให้กระจ่างใส ไปจนถึงการฟื้นฟูผิวให้ดูสุขภาพดี",
-        intro_link: "ปรึกษาผ่าน LINE →",
-
-        packages_kicker: "OUR SERVICES",
-        packages_title: "Featured Packages",
-        packages_subtitle: "แพ็กเกจยอดนิยมที่ลูกค้าเลือกใช้บริการมากที่สุด",
-        package_default_badge: "แพ็กเกจ",
-        package_default_desc: "แพ็กเกจดูแลผิวและความงามโดยทีมผู้เชี่ยวชาญ",
-        detail_link: "ดูรายละเอียด →",
-
-        promotions_kicker: "PROMOTIONS",
-        promotions_title: "Current Promotions",
-        promotions_subtitle: "โปรโมชั่นพิเศษสำหรับลูกค้า Home Care Clinic",
-        promotion_default_badge: "พิเศษ",
-        promotion_default_desc: "โปรโมชั่นพิเศษสำหรับการดูแลผิวและสุขภาพความงาม",
-
-        doctors_kicker: "OUR DOCTORS",
-        doctors_title: "Meet Our Doctors",
-        doctors_subtitle: "ทีมคุณหมอของ Home Care Clinic และความเชี่ยวชาญของแต่ละท่าน",
-        doctor_label: "HOME CARE DOCTOR",
-        doctor_default_desc: "ดูแลและให้คำปรึกษาด้านผิวพรรณและความงามแบบเฉพาะบุคคล",
-
-        reviews_kicker: "CLIENT EXPERIENCE",
-        reviews_title: "Why Clients Choose Us",
-        reviews_subtitle: "รีวิวและความประทับใจจากลูกค้าของ Home Care Clinic",
-
-        location_kicker: "LOCATION",
-        location_desc: "กดปุ่มด้านขวาเพื่อเปิด Google Map และนำทางมายังคลินิกได้ทันที",
-        location_btn: "เปิด Google Map →",
-
-        final_kicker: "BOOK YOUR APPOINTMENT",
-        final_title: "พร้อมเริ่มดูแลผิวของคุณแล้วหรือยัง?",
-        final_desc: "เลือกแพ็กเกจที่เหมาะกับคุณ แล้วทัก LINE Official เพื่อสอบถามและจองคิวได้ทันที",
-        final_btn: "จองผ่าน LINE →",
-
-        detail_price: "ราคา",
-        detail_description: "รายละเอียดแพ็กเกจ",
-        detail_book: "จองผ่าน LINE",
-        detail_back: "กลับหน้าแรก"
-      },
-
-      en: {
-        topbar_hours: "🕘 Mon - Sun: 10:00 - 20:00",
-        nav_home: "Home",
-        nav_packages: "Packages",
-        nav_promotions: "Promotions",
-        nav_doctors: "Doctors",
-        nav_location: "Location",
-        nav_login: "Login",
-        nav_logout: "Logout",
-        nav_booking: "Book via LINE",
-
-        contact_popup_title: "Contact Home Care Clinic",
-        contact_popup_desc: "Ask about promotions, book an appointment, or consult our team.",
-        contact_phone_label: "Phone",
-        contact_phone: "Call 092-264-8248",
-        contact_line: "Chat on LINE Official",
-        contact_facebook: "Open Facebook Page",
-
-        footer_about: "Aesthetic and skin care clinic focused on safe, polite, and personalized treatments.",
-        footer_package_title: "Package Categories",
-        footer_package_1: "Facial Packages",
-        footer_package_2: "Acne Care Packages",
-        footer_package_3: "Laser Packages",
-        footer_package_4: "Skin Booster",
-        footer_quick_menu: "Quick Menu",
-        footer_contact: "Contact",
-        footer_hours: "🕘 10:00 - 20:00",
-
-        hero_kicker: "HOME CARE AESTHETIC CLINIC",
-        hero_title: "Personalized Skin Care",
-        hero_title_span: "Designed For Your Natural Beauty",
-        hero_desc: "Skin care and aesthetic packages designed for each client’s skin concerns, guided by experienced specialists for safe, natural-looking, and trustworthy results.",
-        hero_btn_booking: "Book via LINE",
-        hero_btn_packages: "View Packages",
-        hero_card_1_title: "Skin Consultation",
-        hero_card_1_text: "Skin analysis before treatment",
-        hero_card_2_title: "Book via LINE",
-        hero_card_2_text: "Chat with LINE Official",
-
-        trust_certified: "Certified",
-        trust_doctors: "Doctors",
-        trust_safe: "Safe",
-        trust_treatment: "Treatment",
-        trust_custom: "Custom",
-        trust_skin_plan: "Skin Plan",
-
-        intro_kicker: "CUSTOMIZED TECHNIQUES",
-        intro_title: "Personalized care for naturally healthy-looking skin",
-        intro_desc: "Home Care Clinic focuses on detailed skin assessment and customized treatment planning, from acne care and hydration to brightening and skin recovery.",
-        intro_link: "Consult via LINE →",
-
-        packages_kicker: "OUR SERVICES",
-        packages_title: "Featured Packages",
-        packages_subtitle: "Our most popular treatment packages selected by clients.",
-        package_default_badge: "PACKAGE",
-        package_default_desc: "Skin and beauty care package by our specialist team.",
-        detail_link: "See Details →",
-
-        promotions_kicker: "PROMOTIONS",
-        promotions_title: "Current Promotions",
-        promotions_subtitle: "Special promotions for Home Care Clinic clients.",
-        promotion_default_badge: "SPECIAL",
-        promotion_default_desc: "Special promotion for skin care and aesthetic treatment.",
-
-        doctors_kicker: "OUR DOCTORS",
-        doctors_title: "Meet Our Doctors",
-        doctors_subtitle: "Our medical team and each doctor’s area of expertise.",
-        doctor_label: "HOME CARE DOCTOR",
-        doctor_default_desc: "Personalized consultation and care for skin and aesthetic concerns.",
-
-        reviews_kicker: "CLIENT EXPERIENCE",
-        reviews_title: "Why Clients Choose Us",
-        reviews_subtitle: "Reviews and impressions from Home Care Clinic clients.",
-
-        location_kicker: "LOCATION",
-        location_desc: "Open Google Map for directions to our clinic.",
-        location_btn: "Open Google Map →",
-
-        final_kicker: "BOOK YOUR APPOINTMENT",
-        final_title: "Ready to start your skin care journey?",
-        final_desc: "Choose the right package and chat with us on LINE Official to book your appointment.",
-        final_btn: "Book via LINE →",
-
-        detail_price: "Price",
-        detail_description: "Package Details",
-        detail_book: "Book via LINE",
-        detail_back: "Back to Home"
-      },
-
-      zh: {
-        topbar_hours: "🕘 每天营业：10:00 - 20:00",
-        nav_home: "首页",
-        nav_packages: "护理套餐",
-        nav_promotions: "优惠活动",
-        nav_doctors: "医生团队",
-        nav_location: "位置",
-        nav_login: "登录",
-        nav_logout: "退出",
-        nav_booking: "通过 LINE 预约",
-
-        contact_popup_title: "联系 Home Care Clinic",
-        contact_popup_desc: "咨询优惠、预约或了解适合您的护理套餐。",
-        contact_phone_label: "电话",
-        contact_phone: "拨打 092-264-8248",
-        contact_line: "通过 LINE 咨询",
-        contact_facebook: "打开 Facebook 页面",
-
-        footer_about: "专注于安全、贴心和个性化护理的医美与皮肤管理诊所。",
-        footer_package_title: "套餐分类",
-        footer_package_1: "面部护理套餐",
-        footer_package_2: "痘痘护理套餐",
-        footer_package_3: "激光护理套餐",
-        footer_package_4: "水光/肌肤营养护理",
-        footer_quick_menu: "快速菜单",
-        footer_contact: "联系我们",
-        footer_hours: "🕘 10:00 - 20:00",
-
-        hero_kicker: "HOME CARE AESTHETIC CLINIC",
-        hero_title: "个性化肌肤护理",
-        hero_title_span: "打造自然美感",
-        hero_desc: "根据每位顾客的肌肤问题设计护理套餐，由专业团队提供安全、自然、值得信赖的护理体验。",
-        hero_btn_booking: "通过 LINE 预约",
-        hero_btn_packages: "查看套餐",
-        hero_card_1_title: "肌肤咨询",
-        hero_card_1_text: "护理前进行肌肤分析",
-        hero_card_2_title: "通过 LINE 预约",
-        hero_card_2_text: "通过 LINE Official 咨询",
-
-        trust_certified: "认证",
-        trust_doctors: "医生团队",
-        trust_safe: "安全",
-        trust_treatment: "护理方案",
-        trust_custom: "定制",
-        trust_skin_plan: "肌肤计划",
-
-        intro_kicker: "个性化技术",
-        intro_title: "为自然健康肌肤提供专属护理",
-        intro_desc: "Home Care Clinic 注重详细的肌肤评估，并为每位顾客制定适合的护理计划，包括痘痘护理、补水、提亮和肌肤修复。",
-        intro_link: "通过 LINE 咨询 →",
-
-        packages_kicker: "我们的服务",
-        packages_title: "精选套餐",
-        packages_subtitle: "最受顾客欢迎的护理套餐。",
-        package_default_badge: "套餐",
-        package_default_desc: "由专业团队提供的肌肤与美容护理套餐。",
-        detail_link: "查看详情 →",
-
-        promotions_kicker: "优惠活动",
-        promotions_title: "当前优惠",
-        promotions_subtitle: "Home Care Clinic 顾客专属优惠。",
-        promotion_default_badge: "特别优惠",
-        promotion_default_desc: "肌肤护理与美容项目特别优惠。",
-
-        doctors_kicker: "医生团队",
-        doctors_title: "认识我们的医生",
-        doctors_subtitle: "Home Care Clinic 医生团队及各自专业领域。",
-        doctor_label: "HOME CARE 医生",
-        doctor_default_desc: "提供个性化肌肤与美容咨询护理。",
-
-        reviews_kicker: "客户体验",
-        reviews_title: "客户选择我们的原因",
-        reviews_subtitle: "来自 Home Care Clinic 客户的评价与体验。",
-
-        location_kicker: "位置",
-        location_desc: "打开 Google Map 查看路线并前往诊所。",
-        location_btn: "打开 Google Map →",
-
-        final_kicker: "预约护理",
-        final_title: "准备开始您的肌肤护理了吗？",
-        final_desc: "选择适合您的套餐，并通过 LINE Official 咨询与预约。",
-        final_btn: "通过 LINE 预约 →",
-
-        detail_price: "价格",
-        detail_description: "套餐详情",
-        detail_book: "通过 LINE 预约",
-        detail_back: "返回首页"
-      },
-
-      ja: {
-        topbar_hours: "🕘 毎日営業：10:00 - 20:00",
-        nav_home: "ホーム",
-        nav_packages: "パッケージ",
-        nav_promotions: "プロモーション",
-        nav_doctors: "医師紹介",
-        nav_location: "アクセス",
-        nav_login: "ログイン",
-        nav_logout: "ログアウト",
-        nav_booking: "LINEで予約",
-
-        contact_popup_title: "Home Care Clinic に問い合わせ",
-        contact_popup_desc: "プロモーション、予約、パッケージ相談はこちらから。",
-        contact_phone_label: "電話",
-        contact_phone: "092-264-8248 に電話",
-        contact_line: "LINE Officialで相談",
-        contact_facebook: "Facebookページを開く",
-
-        footer_about: "安全で丁寧、そして一人ひとりに合わせた美容・スキンケアクリニックです。",
-        footer_package_title: "パッケージカテゴリー",
-        footer_package_1: "フェイシャルパッケージ",
-        footer_package_2: "ニキビケアパッケージ",
-        footer_package_3: "レーザーパッケージ",
-        footer_package_4: "スキンブースター",
-        footer_quick_menu: "クイックメニュー",
-        footer_contact: "お問い合わせ",
-        footer_hours: "🕘 10:00 - 20:00",
-
-        hero_kicker: "HOME CARE AESTHETIC CLINIC",
-        hero_title: "パーソナルスキンケア",
-        hero_title_span: "自然な美しさのために",
-        hero_desc: "一人ひとりの肌悩みに合わせた美容・スキンケアパッケージを、専門チームが安全で自然な仕上がりを目指してご提案します。",
-        hero_btn_booking: "LINEで予約",
-        hero_btn_packages: "パッケージを見る",
-        hero_card_1_title: "肌相談",
-        hero_card_1_text: "施術前に肌を分析",
-        hero_card_2_title: "LINEで予約",
-        hero_card_2_text: "LINE Officialで相談",
-
-        trust_certified: "認定",
-        trust_doctors: "医師",
-        trust_safe: "安全",
-        trust_treatment: "施術",
-        trust_custom: "個別",
-        trust_skin_plan: "肌プラン",
-
-        intro_kicker: "カスタマイズ技術",
-        intro_title: "自然で健康的な肌のための個別ケア",
-        intro_desc: "Home Care Clinicでは、丁寧な肌診断を行い、ニキビケア、保湿、トーンアップ、肌回復まで一人ひとりに合ったケアプランを提案します。",
-        intro_link: "LINEで相談 →",
-
-        packages_kicker: "サービス",
-        packages_title: "おすすめパッケージ",
-        packages_subtitle: "お客様に人気の高い施術パッケージです。",
-        package_default_badge: "パッケージ",
-        package_default_desc: "専門チームによるスキンケア・美容パッケージです。",
-        detail_link: "詳細を見る →",
-
-        promotions_kicker: "プロモーション",
-        promotions_title: "現在のプロモーション",
-        promotions_subtitle: "Home Care Clinicのお客様向け特別プロモーション。",
-        promotion_default_badge: "特別",
-        promotion_default_desc: "スキンケアと美容施術の特別プロモーションです。",
-
-        doctors_kicker: "医師紹介",
-        doctors_title: "医師チーム",
-        doctors_subtitle: "Home Care Clinicの医師と専門分野をご紹介します。",
-        doctor_label: "HOME CARE DOCTOR",
-        doctor_default_desc: "肌と美容のお悩みに合わせた個別相談とケアを行います。",
-
-        reviews_kicker: "お客様の声",
-        reviews_title: "選ばれる理由",
-        reviews_subtitle: "Home Care Clinicのお客様からのレビューと感想。",
-
-        location_kicker: "アクセス",
-        location_desc: "Google Mapを開いてクリニックまでのルートを確認できます。",
-        location_btn: "Google Mapを開く →",
-
-        final_kicker: "予約",
-        final_title: "肌ケアを始める準備はできましたか？",
-        final_desc: "最適なパッケージを選び、LINE Officialで相談・予約できます。",
-        final_btn: "LINEで予約 →",
-
-        detail_price: "価格",
-        detail_description: "パッケージ詳細",
-        detail_book: "LINEで予約",
-        detail_back: "ホームへ戻る"
-      },
-
-      ko: {
-        topbar_hours: "🕘 매일 운영: 10:00 - 20:00",
-        nav_home: "홈",
-        nav_packages: "패키지",
-        nav_promotions: "프로모션",
-        nav_doctors: "의료진",
-        nav_location: "위치",
-        nav_login: "로그인",
-        nav_logout: "로그아웃",
-        nav_booking: "LINE으로 예약",
-
-        contact_popup_title: "Home Care Clinic 문의",
-        contact_popup_desc: "프로모션, 예약, 패키지 상담을 문의하세요.",
-        contact_phone_label: "전화",
-        contact_phone: "092-264-8248 전화",
-        contact_line: "LINE Official 문의",
-        contact_facebook: "Facebook 페이지 열기",
-
-        footer_about: "안전하고 친절하며 개인 맞춤 케어를 제공하는 에스테틱·스킨케어 클리닉입니다.",
-        footer_package_title: "패키지 카테고리",
-        footer_package_1: "페이셜 패키지",
-        footer_package_2: "여드름 케어 패키지",
-        footer_package_3: "레이저 패키지",
-        footer_package_4: "스킨 부스터",
-        footer_quick_menu: "빠른 메뉴",
-        footer_contact: "문의",
-        footer_hours: "🕘 10:00 - 20:00",
-
-        hero_kicker: "HOME CARE AESTHETIC CLINIC",
-        hero_title: "맞춤형 스킨케어",
-        hero_title_span: "자연스러운 아름다움을 위해",
-        hero_desc: "개개인의 피부 고민에 맞춘 스킨케어 및 에스테틱 패키지를 전문 팀이 안전하고 자연스러운 결과를 목표로 제공합니다.",
-        hero_btn_booking: "LINE으로 예약",
-        hero_btn_packages: "패키지 보기",
-        hero_card_1_title: "피부 상담",
-        hero_card_1_text: "시술 전 피부 분석",
-        hero_card_2_title: "LINE으로 예약",
-        hero_card_2_text: "LINE Official 상담",
-
-        trust_certified: "인증",
-        trust_doctors: "의료진",
-        trust_safe: "안전",
-        trust_treatment: "시술",
-        trust_custom: "맞춤",
-        trust_skin_plan: "피부 플랜",
-
-        intro_kicker: "맞춤 기술",
-        intro_title: "자연스럽고 건강한 피부를 위한 개인 맞춤 케어",
-        intro_desc: "Home Care Clinic은 세심한 피부 진단을 바탕으로 여드름 케어, 보습, 피부 톤 개선, 피부 회복까지 개인에게 맞는 케어 플랜을 제공합니다.",
-        intro_link: "LINE 상담하기 →",
-
-        packages_kicker: "서비스",
-        packages_title: "추천 패키지",
-        packages_subtitle: "고객들이 가장 많이 선택한 인기 케어 패키지입니다.",
-        package_default_badge: "패키지",
-        package_default_desc: "전문 팀이 제공하는 스킨케어 및 뷰티 케어 패키지입니다.",
-        detail_link: "자세히 보기 →",
-
-        promotions_kicker: "프로모션",
-        promotions_title: "현재 프로모션",
-        promotions_subtitle: "Home Care Clinic 고객을 위한 특별 프로모션입니다.",
-        promotion_default_badge: "특별",
-        promotion_default_desc: "스킨케어와 에스테틱 시술을 위한 특별 프로모션입니다.",
-
-        doctors_kicker: "의료진",
-        doctors_title: "의료진 소개",
-        doctors_subtitle: "Home Care Clinic 의료진과 각 전문 분야를 소개합니다.",
-        doctor_label: "HOME CARE DOCTOR",
-        doctor_default_desc: "피부와 미용 고민에 맞춘 개인 상담과 케어를 제공합니다.",
-
-        reviews_kicker: "고객 경험",
-        reviews_title: "고객이 선택하는 이유",
-        reviews_subtitle: "Home Care Clinic 고객들의 후기와 경험입니다.",
-
-        location_kicker: "위치",
-        location_desc: "Google Map을 열어 클리닉까지의 길을 확인하세요.",
-        location_btn: "Google Map 열기 →",
-
-        final_kicker: "예약하기",
-        final_title: "피부 관리를 시작할 준비가 되셨나요?",
-        final_desc: "나에게 맞는 패키지를 선택하고 LINE Official로 상담 및 예약하세요.",
-        final_btn: "LINE으로 예약 →",
-
-        detail_price: "가격",
-        detail_description: "패키지 상세",
-        detail_book: "LINE으로 예약",
-        detail_back: "홈으로 돌아가기"
+  <link rel="stylesheet" href="/static/css/style.css" />
+
+  <style>
+    :root {
+      --hc-bg: #fff7f4;
+      --hc-card: #fffaf3;
+      --hc-text: #2f2926;
+      --hc-muted: #8a7d75;
+      --hc-green: #8fa184;
+      --hc-green-dark: #66785f;
+      --hc-gold: #c7a46b;
+      --hc-line: rgba(199, 164, 107, 0.28);
+      --hc-shadow: 0 14px 34px rgba(100, 70, 60, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans Thai", sans-serif;
+      background: var(--hc-bg);
+      color: var(--hc-text);
+    }
+
+    a {
+      color: inherit;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      background: #fffaf3;
+      border-bottom: 1px solid var(--hc-line);
+      font-size: 12px;
+      color: var(--hc-muted);
+    }
+
+    .top-bar-inner {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 8px 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .top-bar-right {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* HEADER */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      background: rgba(255, 250, 243, 0.95);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--hc-line);
+    }
+
+    .site-header-inner {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      min-height: 78px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+    }
+
+    .site-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--hc-text);
+    }
+
+    .site-logo-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background:
+        linear-gradient(135deg, #e9a6ad, #f4d4d8);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 18px;
+      box-shadow: var(--hc-shadow);
+      overflow: hidden;
+    }
+
+    .site-logo-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .site-logo-text strong {
+      display: block;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 28px;
+      color: var(--hc-gold);
+      line-height: 1;
+      letter-spacing: 0.3px;
+    }
+
+    .site-logo-text span {
+      display: block;
+      margin-top: 4px;
+      font-size: 10px;
+      letter-spacing: 2.4px;
+      color: var(--hc-muted);
+      text-transform: uppercase;
+    }
+
+    .site-nav {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      font-size: 14px;
+      color: #4b403b;
+    }
+
+    .site-nav a {
+      text-decoration: none;
+      font-weight: 700;
+      padding: 10px 0;
+      border-bottom: 2px solid transparent;
+    }
+
+    .site-nav a:hover {
+      color: var(--hc-green-dark);
+      border-bottom-color: var(--hc-gold);
+    }
+
+    .site-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .line-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 20px;
+      border-radius: 999px;
+      background: var(--hc-green);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 900;
+      font-size: 13px;
+      box-shadow: 0 10px 24px rgba(102, 120, 95, 0.2);
+    }
+
+    .lang-select {
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--hc-line);
+      background: #fff;
+      color: var(--hc-text);
+      font-weight: 800;
+    }
+
+    /* ADMIN QUICK */
+    .admin-quick-bar {
+      background: #2f2926;
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .admin-quick-inner {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 10px 0;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+
+    .admin-quick-inner strong {
+      color: #f5d49b;
+      margin-right: 6px;
+    }
+
+    .admin-quick-inner a {
+      color: #fff;
+      text-decoration: none;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      font-weight: 700;
+    }
+
+    .admin-quick-inner a:hover {
+      background: var(--hc-green);
+    }
+
+    /* MAIN */
+    .page-main {
+      min-height: 65vh;
+    }
+
+    /* FLOAT CHAT */
+    .floating-chat {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 9998;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      text-decoration: none;
+      background: var(--hc-green);
+      color: #fff;
+      font-size: 24px;
+      box-shadow: 0 18px 44px rgba(77, 100, 72, 0.28);
+    }
+
+    /* FOOTER */
+    .site-footer {
+      background: #fffaf3;
+      border-top: 1px solid var(--hc-line);
+      padding: 46px 0 24px;
+      color: var(--hc-muted);
+    }
+
+    .site-footer-inner {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr 1fr;
+      gap: 34px;
+    }
+
+    .footer-col h3 {
+      margin: 0 0 14px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 24px;
+      font-weight: 400;
+      color: var(--hc-gold);
+    }
+
+    .footer-col h4 {
+      margin: 0 0 14px;
+      color: var(--hc-gold);
+      font-size: 18px;
+    }
+
+    .footer-col p {
+      margin: 0;
+      line-height: 1.8;
+    }
+
+    .footer-links {
+      display: grid;
+      gap: 9px;
+    }
+
+    .footer-links a {
+      color: var(--hc-muted);
+      text-decoration: none;
+    }
+
+    .footer-links a:hover {
+      color: var(--hc-green-dark);
+    }
+
+    .footer-bottom {
+      width: min(1180px, calc(100% - 32px));
+      margin: 34px auto 0;
+      padding-top: 18px;
+      border-top: 1px solid var(--hc-line);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--hc-muted);
+    }
+
+    @media (max-width: 980px) {
+      .site-header-inner {
+        flex-wrap: wrap;
+        padding: 14px 0;
       }
-    };
 
-    function applyLanguage(lang) {
-      const dict = translations[lang] || translations.th;
+      .site-nav {
+        order: 3;
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
 
-      document.documentElement.lang = lang;
-
-      document.querySelectorAll("[data-i18n]").forEach(function (el) {
-        const key = el.getAttribute("data-i18n");
-
-        if (dict[key]) {
-          el.textContent = dict[key];
-        }
-      });
-
-      document.querySelectorAll(".db-i18n").forEach(function (el) {
-        const value = el.getAttribute("data-" + lang);
-
-        if (value && value.trim() !== "") {
-          el.textContent = value;
-        }
-      });
-
-      localStorage.setItem("homecare_language", lang);
-
-      const select = document.getElementById("languageSelect");
-      if (select) {
-        select.value = lang;
+      .site-footer-inner {
+        grid-template-columns: repeat(2, 1fr);
       }
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-      const savedLang = localStorage.getItem("homecare_language") || "th";
-      applyLanguage(savedLang);
-
-      const languageSelect = document.getElementById("languageSelect");
-
-      if (languageSelect) {
-        languageSelect.addEventListener("change", function () {
-          applyLanguage(this.value);
-        });
+    @media (max-width: 640px) {
+      .site-logo-text strong {
+        font-size: 22px;
       }
 
-      const mobileMenuBtn = document.getElementById("mobileMenuBtn");
-      const navMenu = document.getElementById("navMenu");
-
-      if (mobileMenuBtn && navMenu) {
-        mobileMenuBtn.addEventListener("click", function () {
-          navMenu.classList.toggle("show-mobile-menu");
-        });
-
-        navMenu.querySelectorAll("a").forEach(function (link) {
-          link.addEventListener("click", function () {
-            navMenu.classList.remove("show-mobile-menu");
-          });
-        });
+      .site-nav {
+        gap: 16px;
+        font-size: 13px;
       }
 
-      const floatingBtn = document.getElementById("floatingMainBtn");
-      const floatingPanel = document.getElementById("floatingContactPanel");
-      const floatingCloseBtn = document.getElementById("floatingCloseBtn");
-
-      if (floatingBtn && floatingPanel) {
-        floatingBtn.addEventListener("click", function () {
-          floatingPanel.classList.toggle("show");
-        });
+      .site-footer-inner {
+        grid-template-columns: 1fr;
       }
 
-      if (floatingCloseBtn && floatingPanel) {
-        floatingCloseBtn.addEventListener("click", function () {
-          floatingPanel.classList.remove("show");
-        });
+      .site-actions {
+        width: 100%;
       }
 
-      document.addEventListener("click", function (event) {
-        if (
-          floatingPanel &&
-          floatingBtn &&
-          !floatingPanel.contains(event.target) &&
-          !floatingBtn.contains(event.target)
-        ) {
-          floatingPanel.classList.remove("show");
-        }
+      .line-btn {
+        flex: 1;
+      }
+    }
+  </style>
 
-        if (
-          navMenu &&
-          mobileMenuBtn &&
-          !navMenu.contains(event.target) &&
-          !mobileMenuBtn.contains(event.target)
-        ) {
-          navMenu.classList.remove("show-mobile-menu");
-        }
-      });
-    });
-  </script>
+  {% block head %}{% endblock %}
+</head>
+
+<body>
+
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div>📍 Home Care Clinic, Bangkok</div>
+
+      <div class="top-bar-right">
+        <span>🕘 เปิดทุกวัน 10:00 - 20:00</span>
+        <span>☎ 092 264 8240</span>
+        <span>LINE: @homecare</span>
+      </div>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="/home" class="site-logo">
+        <div class="site-logo-mark">
+          <img src="/static/images/homecare-logo.jpg" alt="Home Care">
+        </div>
+
+        <div class="site-logo-text">
+          <strong>Home Care</strong>
+          <span>Aesthetic Clinic</span>
+        </div>
+      </a>
+
+      <nav class="site-nav">
+        <a href="/home">หน้าแรก</a>
+        <a href="/home#promotions">โปรโมชั่น</a>
+        <a href="/home#services">บริการของเรา</a>
+        <a href="/home#doctors">คุณหมอ</a>
+        <a href="/home#reviews">รีวิว</a>
+        <a href="/home#about">เกี่ยวกับเรา</a>
+        <a href="/contact">ติดต่อเรา</a>
+      </nav>
+
+      <div class="site-actions">
+        <a href="https://line.me/R/ti/p/@homecare" target="_blank" class="line-btn">
+          จองผ่าน LINE
+        </a>
+
+        <select class="lang-select" onchange="if(this.value){ window.location.href=this.value; }">
+          <option value="">TH</option>
+          <option value="/home?lang=th">TH</option>
+          <option value="/home?lang=en">EN</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  {% if user and user.role == "ADMIN" %}
+  <div class="admin-quick-bar">
+    <div class="admin-quick-inner">
+      <strong>Admin Menu</strong>
+      <a href="/admin/dashboard">Dashboard</a>
+      <a href="/admin/bookings">Booking</a>
+      <a href="/admin/promotions">โปรโมชั่น</a>
+      <a href="/admin/reviews">รีวิว</a>
+      <a href="/admin/doctors">คุณหมอ</a>
+      <a href="/admin/services">บริการของเรา</a>
+      <a href="/admin/line-leads">LINE Leads</a>
+      <a href="/logout">ออกจากระบบ</a>
+    </div>
+  </div>
+  {% endif %}
+
+  <main class="page-main">
+    {% block content %}{% endblock %}
+  </main>
+
+  <a href="https://line.me/R/ti/p/@homecare" target="_blank" class="floating-chat" title="แชท LINE">
+    💬
+  </a>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="footer-col">
+        <h3>Home Care Clinic</h3>
+        <p>
+          คลินิกความงามและดูแลสุขภาพผิว
+          เน้นบริการที่ปลอดภัย สุภาพ และดูแลแบบเฉพาะบุคคล
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4>เมนูหลัก</h4>
+        <div class="footer-links">
+          <a href="/home">หน้าแรก</a>
+          <a href="/home#promotions">โปรโมชั่น</a>
+          <a href="/home#services">บริการของเรา</a>
+          <a href="/home#doctors">คุณหมอ</a>
+          <a href="/home#reviews">รีวิวลูกค้า</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>บริการของเรา</h4>
+        <div class="footer-links">
+          <a href="/home#services">ปรึกษาปัญหาผิว</a>
+          <a href="/home#services">ทรีตเมนต์ผิวหน้า</a>
+          <a href="/home#services">เลเซอร์ผิว</a>
+          <a href="/home#services">คอร์สดูแลต่อเนื่อง</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Admin</h4>
+        <div class="footer-links">
+          {% if user and user.role == "ADMIN" %}
+            <a href="/admin/dashboard">Admin Dashboard</a>
+            <a href="/admin/promotions">แก้ไขโปรโมชั่น</a>
+            <a href="/admin/services">แก้ไขบริการของเรา</a>
+            <a href="/logout">ออกจากระบบ</a>
+          {% else %}
+            <a href="/login">Admin Login</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 Home Care Clinic. All rights reserved.</span>
+      <span>Powered by Home Care Booking System</span>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+
 </body>
 </html>

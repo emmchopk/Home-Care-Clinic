@@ -4,169 +4,243 @@
 
 {% block content %}
 
-<section class="admin-page">
-  <div class="admin-head">
-    <div>
-      <p class="eyebrow">Back Office</p>
-      <h1>Admin Dashboard</h1>
-      <p>ดูภาพรวมรายได้และการจองของ Home Care Clinic</p>
-    </div>
+<style>
+  .admin-dashboard-page {
+    max-width: 1180px;
+    margin: 34px auto 70px;
+    padding: 0 20px;
+  }
 
-    <div class="admin-actions">
-      <a href="/admin/bookings" class="btn-primary">Bookings</a>
-      <a href="/admin/packages" class="btn-outline">Packages</a>
-      <a href="/admin/doctors" class="btn-outline">Doctor Schedule</a>
-    </div>
-  </div>
+  .admin-dashboard-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 24px;
+  }
 
-  <div class="admin-stats">
-    <div class="stat-card">
-      <span>Revenue Today</span>
-      <b>฿{{ "{:,.0f}".format(revenue_stats.daily) }}</b>
-    </div>
+  .admin-dashboard-head h1 {
+    margin: 0;
+    color: #2f2926;
+    font-size: 34px;
+  }
 
-    <div class="stat-card">
-      <span>Revenue This Month</span>
-      <b>฿{{ "{:,.0f}".format(revenue_stats.monthly) }}</b>
-    </div>
+  .admin-dashboard-head p {
+    color: #8a7d75;
+    margin: 8px 0 0;
+  }
 
-    <div class="stat-card">
-      <span>Revenue This Year</span>
-      <b>฿{{ "{:,.0f}".format(revenue_stats.yearly) }}</b>
-    </div>
+  .admin-logout-btn {
+    display: inline-flex;
+    min-height: 42px;
+    padding: 0 18px;
+    align-items: center;
+    border-radius: 999px;
+    background: #2f2926;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 800;
+  }
 
-    <div class="stat-card">
-      <span>Total Bookings</span>
-      <b>{{ stats.total_bookings }}</b>
-    </div>
-  </div>
+  .admin-card {
+    background: #fffaf3;
+    border: 1px solid #f0d8bd;
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: 0 14px 34px rgba(100, 70, 60, 0.08);
+    margin-bottom: 24px;
+  }
 
-  <div
-    id="revenueStats"
-    data-daily="{{ revenue_stats.daily }}"
-    data-monthly="{{ revenue_stats.monthly }}"
-    data-yearly="{{ revenue_stats.yearly }}"
-  ></div>
+  .admin-card h2 {
+    margin: 0 0 16px;
+    color: #2f2926;
+  }
 
-  <div class="admin-panel">
-    <div class="panel-head">
-      <h2>Revenue Graph</h2>
-      <span>Daily / Monthly / Yearly</span>
-    </div>
+  .admin-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
 
-    <canvas id="revenueChart" height="110"></canvas>
-  </div>
+  .admin-menu-card {
+    display: block;
+    padding: 22px;
+    border-radius: 18px;
+    background: #fff;
+    border: 1px solid #f0d8bd;
+    text-decoration: none;
+    color: #2f2926;
+    transition: 0.2s ease;
+  }
 
-  <div class="admin-panel">
-    <div class="panel-head">
-      <h2>Latest Bookings</h2>
-      <a href="/admin/bookings">ดูทั้งหมด</a>
-    </div>
+  .admin-menu-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 38px rgba(100, 70, 60, 0.12);
+  }
 
-    <div class="table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Customer</th>
-            <th>Phone</th>
-            <th>Package</th>
-            <th>Revenue</th>
-            <th>Doctor</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Email</th>
-            <th>LINE</th>
-            <th>Status</th>
-          </tr>
-        </thead>
+  .admin-menu-card small {
+    display: block;
+    color: #c7a46b;
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
 
-        <tbody>
-          {% for booking in bookings %}
-          <tr>
-            <td>{{ booking.full_name }}</td>
-            <td>{{ booking.customer_phone or "-" }}</td>
-            <td>{{ booking.package_name }}</td>
-            <td>฿{{ "{:,.0f}".format(booking.revenue_amount or 0) }}</td>
-            <td>{{ booking.doctor_name or "-" }}</td>
-            <td>{{ booking.appointment_date }}</td>
-            <td>{{ booking.appointment_time }}</td>
+  .admin-menu-card strong {
+    display: block;
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
 
-            <td>
-              {% if booking.email_sent %}
-                <span class="status ok">Sent</span>
-              {% else %}
-                <span class="status bad">Fail</span>
-              {% endif %}
-            </td>
+  .admin-menu-card span {
+    color: #8a7d75;
+    font-size: 14px;
+    line-height: 1.6;
+  }
 
-            <td>
-              {% if booking.line_sent %}
-                <span class="status ok">Sent</span>
-              {% else %}
-                <span class="status bad">Fail</span>
-              {% endif %}
-            </td>
+  .admin-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
 
-            <td>
-              <span class="status pending">{{ booking.status }}</span>
-            </td>
-          </tr>
-          {% else %}
-          <tr>
-            <td colspan="10">ยังไม่มีรายการจอง</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
+  .admin-stat {
+    padding: 22px;
+    border-radius: 18px;
+    background: #fff;
+    border: 1px solid #f0d8bd;
+  }
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  .admin-stat span {
+    color: #8a7d75;
+    font-size: 14px;
+  }
 
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const canvas = document.getElementById("revenueChart");
-    const statsBox = document.getElementById("revenueStats");
+  .admin-stat b {
+    display: block;
+    margin-top: 8px;
+    color: #66785f;
+    font-size: 32px;
+  }
 
-    if (!canvas || !statsBox || typeof Chart === "undefined") {
-      return;
+  @media (max-width: 980px) {
+    .admin-menu-grid,
+    .admin-stat-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 620px) {
+    .admin-dashboard-head {
+      flex-direction: column;
+      align-items: flex-start;
     }
 
-    const dailyRevenue = Number(statsBox.dataset.daily || 0);
-    const monthlyRevenue = Number(statsBox.dataset.monthly || 0);
-    const yearlyRevenue = Number(statsBox.dataset.yearly || 0);
+    .admin-menu-grid,
+    .admin-stat-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 
-    new Chart(canvas, {
-      type: "bar",
-      data: {
-        labels: ["Today", "This Month", "This Year"],
-        datasets: [
-          {
-            label: "Revenue",
-            data: [dailyRevenue, monthlyRevenue, yearlyRevenue],
-            borderWidth: 1
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: false
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              precision: 0
-            }
-          }
-        }
-      }
-    });
-  });
-</script>
+<div class="admin-dashboard-page">
+
+  <div class="admin-dashboard-head">
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p>จัดการระบบ Home Care Clinic</p>
+    </div>
+
+    <a href="/logout" class="admin-logout-btn">ออกจากระบบ</a>
+  </div>
+
+  <div class="admin-card">
+    <h2>เมนูจัดการหน้าเว็บไซต์</h2>
+
+    <div class="admin-menu-grid">
+      <a href="/admin/promotions" class="admin-menu-card">
+        <small>Home Content</small>
+        <strong>โปรโมชั่นประจำเดือน</strong>
+        <span>เพิ่ม / แก้ไข / ลบ โปรโมชั่นที่แสดงเป็น Slide บนหน้า Home</span>
+      </a>
+
+      <a href="/admin/reviews" class="admin-menu-card">
+        <small>Home Content</small>
+        <strong>รีวิวจากลูกค้า</strong>
+        <span>จัดการรีวิวที่แสดงใต้โปรโมชั่นในหน้า Home</span>
+      </a>
+
+      <a href="/admin/doctors" class="admin-menu-card">
+        <small>Home Content</small>
+        <strong>คุณหมอของเรา</strong>
+        <span>เพิ่ม / แก้ไข / ลบ รูปและข้อมูลคุณหมอ</span>
+      </a>
+
+      <a href="/admin/services" class="admin-menu-card">
+        <small>Home Content</small>
+        <strong>บริการของเรา</strong>
+        <span>เพิ่ม / แก้ไข / ลบ บริการ พร้อมรูปและรายละเอียด</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="admin-card">
+    <h2>เมนูระบบ</h2>
+
+    <div class="admin-menu-grid">
+      <a href="/admin/bookings" class="admin-menu-card">
+        <small>Booking</small>
+        <strong>รายการจอง</strong>
+        <span>ตรวจสอบและจัดการรายการจองของลูกค้า</span>
+      </a>
+
+      <a href="/admin/line-leads" class="admin-menu-card">
+        <small>LINE</small>
+        <strong>LINE Leads</strong>
+        <span>ข้อมูลลูกค้าที่ติดต่อผ่าน LINE</span>
+      </a>
+
+      <a href="/admin/schedule" class="admin-menu-card">
+        <small>Schedule</small>
+        <strong>ตารางงาน</strong>
+        <span>จัดการตารางนัดหมายและเวลาของคลินิก</span>
+      </a>
+
+      <a href="/home" class="admin-menu-card">
+        <small>Website</small>
+        <strong>ดูหน้าเว็บไซต์</strong>
+        <span>กลับไปตรวจหน้า Home หลังแก้ไขข้อมูล</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="admin-card">
+    <h2>ภาพรวมระบบ</h2>
+
+    <div class="admin-stat-grid">
+      <div class="admin-stat">
+        <span>Booking</span>
+        <b>{{ booking_count if booking_count is defined else "-" }}</b>
+      </div>
+
+      <div class="admin-stat">
+        <span>Promotion</span>
+        <b>{{ promotion_count if promotion_count is defined else "-" }}</b>
+      </div>
+
+      <div class="admin-stat">
+        <span>Review</span>
+        <b>{{ review_count if review_count is defined else "-" }}</b>
+      </div>
+
+      <div class="admin-stat">
+        <span>Doctor</span>
+        <b>{{ doctor_count if doctor_count is defined else "-" }}</b>
+      </div>
+    </div>
+  </div>
+
+</div>
 
 {% endblock %}

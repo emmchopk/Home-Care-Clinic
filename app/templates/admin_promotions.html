@@ -4,337 +4,301 @@
 
 {% block content %}
 
-<section class="admin-page">
-  <div class="admin-container">
-    <div class="admin-header">
-      <div>
-        <p class="blossom-kicker">ADMIN PANEL</p>
-        <h1>Manage Promotions</h1>
-        <p>
-          Admin กรอกภาษาไทยหรืออังกฤษ ระบบจะใช้ AI แปลโปรโมชั่นให้อัตโนมัติครบ 5 ภาษา
-        </p>
-      </div>
+<style>
+  .admin-page {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px 60px;
+  }
 
-      <a href="/admin/dashboard" class="blossom-btn-light">
-        ← Dashboard
-      </a>
+  .admin-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 22px;
+  }
+
+  .admin-head h1 {
+    margin: 0;
+    color: #2f2926;
+  }
+
+  .admin-head a {
+    color: #66785f;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .admin-card {
+    background: #fffaf3;
+    border: 1px solid #f0d8bd;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 14px 34px rgba(100, 70, 60, 0.08);
+    margin-bottom: 24px;
+  }
+
+  .admin-alert-success {
+    background: #eaf4e6;
+    color: #4d6448;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  .admin-alert-error {
+    background: #ffe9e9;
+    color: #9d3434;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+
+  .admin-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .admin-form-grid .full {
+    grid-column: 1 / -1;
+  }
+
+  .admin-form-grid label {
+    font-weight: 700;
+    font-size: 14px;
+    color: #554943;
+  }
+
+  .admin-form-grid input,
+  .admin-form-grid textarea,
+  .admin-form-grid select {
+    width: 100%;
+    margin-top: 6px;
+    padding: 11px 12px;
+    border-radius: 12px;
+    border: 1px solid #e5cdb1;
+    background: #fff;
+  }
+
+  .admin-form-grid textarea {
+    min-height: 90px;
+  }
+
+  .admin-btn {
+    border: none;
+    background: #8fa184;
+    color: #fff;
+    border-radius: 999px;
+    padding: 11px 20px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .admin-btn-danger {
+    border: none;
+    background: #b85c5c;
+    color: #fff;
+    border-radius: 999px;
+    padding: 9px 16px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .promo-list {
+    display: grid;
+    gap: 18px;
+  }
+
+  .promo-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 18px;
+    background: #fff;
+    border: 1px solid #f0d8bd;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .promo-img {
+    min-height: 220px;
+    background: #f8d8dc;
+    background-size: cover;
+    background-position: center;
+  }
+
+  @media (max-width: 760px) {
+    .admin-head,
+    .admin-form-grid,
+    .promo-row {
+      grid-template-columns: 1fr;
+      display: grid;
+    }
+  }
+</style>
+
+<div class="admin-page">
+  <div class="admin-head">
+    <div>
+      <h1>โปรโมชั่นประจำเดือน</h1>
+      <p>เพิ่ม / แก้ไข / ลบ โปรโมชั่นที่จะแสดงเป็น Slide หน้า Home ใช้รูปเดียวต่อโปรโมชั่น</p>
     </div>
 
-    {% if success %}
-      <div class="admin-alert success">{{ success }}</div>
-    {% endif %}
+    <a href="/admin/dashboard">กลับ Dashboard</a>
+  </div>
 
-    {% if error %}
-      <div class="admin-alert error">{{ error }}</div>
-    {% endif %}
+  {% if success %}
+    <div class="admin-alert-success">{{ success }}</div>
+  {% endif %}
 
+  {% if error %}
+    <div class="admin-alert-error">{{ error }}</div>
+  {% endif %}
 
-    <div class="admin-card">
-      <h2>Add New Promotion</h2>
+  <div class="admin-card">
+    <h2>เพิ่มโปรโมชั่นใหม่</h2>
 
-      <form
-        action="/admin/promotions"
-        method="post"
-        enctype="multipart/form-data"
-        class="admin-form-grid"
-      >
-        <div>
-          <label>Promotion Title TH</label>
-          <input
-            type="text"
-            name="title_th"
-            placeholder="เช่น โปรโมชั่นหน้าใส"
-          />
-        </div>
+    <form method="post" action="/admin/promotions" enctype="multipart/form-data">
+      <div class="admin-form-grid">
+        <label>
+          ชื่อโปรโมชั่นภาษาไทย
+          <input type="text" name="title_th" placeholder="เช่น Facial Radiance">
+        </label>
 
-        <div>
-          <label>Promotion Title EN</label>
-          <input
-            type="text"
-            name="title_en"
-            placeholder="Example: Glow Skin Promotion"
-          />
-        </div>
+        <label>
+          ชื่อโปรโมชั่นภาษาอังกฤษ
+          <input type="text" name="title_en" placeholder="Facial Radiance">
+        </label>
 
-        <div>
-          <label>Slug</label>
-          <input
-            type="text"
-            name="slug"
-            placeholder="glow-skin-promotion"
-            required
-          />
-        </div>
+        <label>
+          ราคา
+          <input type="text" name="price" placeholder="เช่น ฿2,890">
+        </label>
 
-        <div>
-          <label>Price Text</label>
-          <input
-            type="text"
-            name="price"
-            placeholder="฿1,990"
-          />
-        </div>
+        <label>
+          Slug
+          <input type="text" name="slug" required placeholder="facial-radiance">
+        </label>
 
-        <div>
-          <label>Badge</label>
-          <input
-            type="text"
-            name="badge"
-            placeholder="SPECIAL / NEW / SALE"
-          />
-        </div>
+        <label>
+          รายละเอียดภาษาไทย
+          <textarea name="description_th"></textarea>
+        </label>
 
-        <div class="full">
-          <label>Description TH</label>
-          <textarea
-            name="description_th"
-            rows="4"
-            placeholder="รายละเอียดโปรโมชั่นภาษาไทย"
-          ></textarea>
-        </div>
+        <label>
+          รายละเอียดภาษาอังกฤษ
+          <textarea name="description_en"></textarea>
+        </label>
 
-        <div class="full">
-          <label>Description EN</label>
-          <textarea
-            name="description_en"
-            rows="4"
-            placeholder="Promotion description in English"
-          ></textarea>
-        </div>
+        <label>
+          รูปโปรโมชั่น 1 รูป
+          <input type="file" name="image_file_1" accept="image/*">
+        </label>
 
-        <div>
-          <label>Image 1</label>
-          <input type="file" name="image_file_1" accept="image/*" />
-        </div>
-
-        <div>
-          <label>Image 2</label>
-          <input type="file" name="image_file_2" accept="image/*" />
-        </div>
-
-        <div>
-          <label>Image 3</label>
-          <input type="file" name="image_file_3" accept="image/*" />
-        </div>
-
-        <div>
-          <label>Image 4</label>
-          <input type="file" name="image_file_4" accept="image/*" />
-        </div>
-
-        <div>
-          <label>Status</label>
+        <label>
+          สถานะ
           <select name="is_active">
-            <option value="1">Active</option>
-            <option value="0">Hidden</option>
+            <option value="1">แสดงหน้า Home</option>
+            <option value="0">ซ่อน</option>
           </select>
-        </div>
+        </label>
 
         <div class="full">
-          <button type="submit" class="blossom-btn-primary">
-            Save Promotion + AI Translate
-          </button>
+          <button class="admin-btn" type="submit">เพิ่มโปรโมชั่น</button>
         </div>
-      </form>
-    </div>
+      </div>
+    </form>
+  </div>
 
+  <div class="promo-list">
+    {% for promo in promotions %}
+    <div class="promo-row">
+      <div
+        class="promo-img"
+        {% if promo.image_file_1 %}
+          style="background-image:url('/static/images/promotions/{{ promo.image_file_1 }}')"
+        {% endif %}
+      ></div>
 
-    <div class="admin-list">
-      <h2>Promotion List</h2>
+      <div class="admin-card" style="margin:0; box-shadow:none; border:0;">
+        <h3>{{ promo.title }}</h3>
+        <p><strong>{{ promo.price }}</strong></p>
+        <p>{{ promo.description }}</p>
 
-      {% for promotion in promotions %}
-        <div class="admin-edit-card">
-          <div class="admin-edit-head">
-            <div>
-              <h3>{{ promotion.title_th or promotion.title }}</h3>
-              <p>
-                Slug: {{ promotion.slug }}
-                |
-                Status:
-                {% if promotion.is_active %}
-                  Active
-                {% else %}
-                  Hidden
-                {% endif %}
-              </p>
+        <form method="post" action="/admin/promotions/{{ promo.id }}/update" enctype="multipart/form-data">
+          <input type="hidden" name="existing_image_file_1" value="{{ promo.image_file_1 or '' }}">
+
+          <div class="admin-form-grid">
+            <label>
+              ชื่อภาษาไทย
+              <input type="text" name="title_th" value="{{ promo.title_th or promo.title }}">
+            </label>
+
+            <label>
+              ชื่อภาษาอังกฤษ
+              <input type="text" name="title_en" value="{{ promo.title_en or promo.title }}">
+            </label>
+
+            <label>
+              ราคา
+              <input type="text" name="price" value="{{ promo.price or '' }}">
+            </label>
+
+            <label>
+              Slug
+              <input type="text" name="slug" value="{{ promo.slug }}" required>
+            </label>
+
+            <label>
+              รายละเอียดภาษาไทย
+              <textarea name="description_th">{{ promo.description_th or promo.description }}</textarea>
+            </label>
+
+            <label>
+              รายละเอียดภาษาอังกฤษ
+              <textarea name="description_en">{{ promo.description_en or promo.description }}</textarea>
+            </label>
+
+            <label>
+              เปลี่ยนรูปโปรโมชั่น
+              <input type="file" name="image_file_1" accept="image/*">
+            </label>
+
+            <label>
+              ลบรูปเดิม
+              <select name="remove_image">
+                <option value="0">ไม่ลบ</option>
+                <option value="1">ลบรูป</option>
+              </select>
+            </label>
+
+            <label>
+              สถานะ
+              <select name="is_active">
+                <option value="1" {% if promo.is_active == 1 %}selected{% endif %}>แสดงหน้า Home</option>
+                <option value="0" {% if promo.is_active == 0 %}selected{% endif %}>ซ่อน</option>
+              </select>
+            </label>
+
+            <div class="full">
+              <button class="admin-btn" type="submit">บันทึก</button>
             </div>
           </div>
+        </form>
 
-          <form
-            action="/admin/promotions/{{ promotion.id }}/update"
-            method="post"
-            enctype="multipart/form-data"
-            class="admin-form-grid"
-          >
-            <div>
-              <label>Promotion Title TH</label>
-              <input
-                type="text"
-                name="title_th"
-                value="{{ promotion.title_th or promotion.title or '' }}"
-              />
-            </div>
-
-            <div>
-              <label>Promotion Title EN</label>
-              <input
-                type="text"
-                name="title_en"
-                value="{{ promotion.title_en or '' }}"
-              />
-            </div>
-
-            <div>
-              <label>Slug</label>
-              <input
-                type="text"
-                name="slug"
-                value="{{ promotion.slug }}"
-                required
-              />
-            </div>
-
-            <div>
-              <label>Price Text</label>
-              <input
-                type="text"
-                name="price"
-                value="{{ promotion.price or '' }}"
-              />
-            </div>
-
-            <div>
-              <label>Badge</label>
-              <input
-                type="text"
-                name="badge"
-                value="{{ promotion.badge or '' }}"
-              />
-            </div>
-
-            <div class="full">
-              <label>Description TH</label>
-              <textarea name="description_th" rows="4">{{ promotion.description_th or promotion.description or '' }}</textarea>
-            </div>
-
-            <div class="full">
-              <label>Description EN</label>
-              <textarea name="description_en" rows="4">{{ promotion.description_en or '' }}</textarea>
-            </div>
-
-            <input
-              type="hidden"
-              name="existing_image_file_1"
-              value="{{ promotion.image_file_1 or '' }}"
-            />
-            <input
-              type="hidden"
-              name="existing_image_file_2"
-              value="{{ promotion.image_file_2 or '' }}"
-            />
-            <input
-              type="hidden"
-              name="existing_image_file_3"
-              value="{{ promotion.image_file_3 or '' }}"
-            />
-            <input
-              type="hidden"
-              name="existing_image_file_4"
-              value="{{ promotion.image_file_4 or '' }}"
-            />
-
-            <div class="full">
-              <label>Current Images</label>
-
-              <div class="admin-image-preview-grid">
-                {% set promo_images = [
-                  promotion.image_file_1,
-                  promotion.image_file_2,
-                  promotion.image_file_3,
-                  promotion.image_file_4
-                ] %}
-
-                {% for img in promo_images %}
-                  <div class="admin-image-preview">
-                    {% if img %}
-                      <img
-                        src="/static/images/promotions/{{ img }}?v={{ promotion.id }}"
-                        alt="Promotion image"
-                      />
-                    {% else %}
-                      <div class="admin-no-image">No Image</div>
-                    {% endif %}
-                  </div>
-                {% endfor %}
-              </div>
-            </div>
-
-            <div>
-              <label>Replace Image 1</label>
-              <input type="file" name="image_file_1" accept="image/*" />
-
-              <label class="admin-checkbox">
-                <input type="checkbox" name="remove_image_1" value="1" />
-                Remove image 1
-              </label>
-            </div>
-
-            <div>
-              <label>Replace Image 2</label>
-              <input type="file" name="image_file_2" accept="image/*" />
-
-              <label class="admin-checkbox">
-                <input type="checkbox" name="remove_image_2" value="1" />
-                Remove image 2
-              </label>
-            </div>
-
-            <div>
-              <label>Replace Image 3</label>
-              <input type="file" name="image_file_3" accept="image/*" />
-
-              <label class="admin-checkbox">
-                <input type="checkbox" name="remove_image_3" value="1" />
-                Remove image 3
-              </label>
-            </div>
-
-            <div>
-              <label>Replace Image 4</label>
-              <input type="file" name="image_file_4" accept="image/*" />
-
-              <label class="admin-checkbox">
-                <input type="checkbox" name="remove_image_4" value="1" />
-                Remove image 4
-              </label>
-            </div>
-
-            <div>
-              <label>Status</label>
-              <select name="is_active">
-                <option value="1" {% if promotion.is_active %}selected{% endif %}>
-                  Active
-                </option>
-                <option value="0" {% if not promotion.is_active %}selected{% endif %}>
-                  Hidden
-                </option>
-              </select>
-            </div>
-
-            <div class="full admin-form-actions">
-              <button type="submit" class="blossom-btn-primary">
-                Update + AI Translate
-              </button>
-            </div>
-          </form>
-        </div>
-      {% else %}
-        <div class="admin-empty">
-          ยังไม่มี Promotion
-        </div>
-      {% endfor %}
+        <form
+          method="post"
+          action="/admin/promotions/{{ promo.id }}/delete"
+          onsubmit="return confirm('ต้องการลบโปรโมชั่นนี้ใช่ไหม?')"
+          style="margin-top:14px;"
+        >
+          <button class="admin-btn-danger" type="submit">ลบโปรโมชั่น</button>
+        </form>
+      </div>
     </div>
+    {% endfor %}
   </div>
-</section>
+</div>
 
 {% endblock %}
