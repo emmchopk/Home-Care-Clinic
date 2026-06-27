@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}{{ program.title }} | Home Care Clinic{% endblock %}
+
+{% block content %}
+<style>
+  .program-detail-page{background:#fffaf5;color:#2f2926;min-height:70vh;}
+  .program-hero{position:relative;min-height:560px;display:flex;align-items:flex-end;overflow:hidden;background:#2f2926;}
+  .program-hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.72);transform:scale(1.02);}
+  .program-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(47,41,38,.82),rgba(47,41,38,.46),rgba(47,41,38,.12));}
+  .program-hero-inner{position:relative;z-index:2;width:min(1180px,calc(100% - 40px));margin:0 auto;padding:90px 0;color:#fff;}
+  .program-kicker{margin:0 0 14px;color:#f5d49b;font-size:12px;font-weight:900;letter-spacing:2px;text-transform:uppercase;}
+  .program-hero h1{width:min(760px,100%);margin:0 0 18px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(42px,6vw,82px);font-weight:400;line-height:1.02;color:#fff;}
+  .program-hero p{width:min(650px,100%);margin:0;color:rgba(255,255,255,.9);font-size:16px;line-height:1.9;}
+  .program-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px;}
+  .program-btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 22px;border-radius:999px;background:#8fa184;color:#fff;text-decoration:none;font-weight:900;}
+  .program-btn.light{background:#fff;color:#66785f;}
+  .program-body{width:min(1180px,calc(100% - 40px));margin:0 auto;padding:70px 0 90px;display:grid;grid-template-columns:1fr 360px;gap:32px;align-items:start;}
+  .program-main,.program-side{background:#fff;border:1px solid rgba(199,164,107,.28);border-radius:30px;box-shadow:0 18px 45px rgba(108,77,65,.08);}
+  .program-main{padding:34px;}
+  .program-main h2,.program-side h3{margin:0 0 18px;font-family:Georgia,"Times New Roman",serif;font-size:36px;font-weight:400;color:#7a303b;}
+  .program-text{color:#8a7d75;line-height:1.9;font-size:15px;white-space:pre-line;}
+  .program-media{display:grid;gap:18px;margin-top:28px;}
+  .program-media-item{overflow:hidden;border-radius:24px;background:#fffaf3;border:1px solid rgba(199,164,107,.25);}
+  .program-media-item img,.program-media-item video{display:block;width:100%;max-height:520px;object-fit:cover;}
+  .program-media-item iframe{display:block;width:100%;height:520px;border:0;background:#111;}
+  .program-caption{padding:14px 18px;color:#7b716b;line-height:1.65;}
+  .program-side{position:sticky;top:110px;padding:26px;}
+  .related-list{display:grid;gap:12px;}
+  .related-card{display:grid;grid-template-columns:86px 1fr;gap:12px;align-items:center;padding:10px;border-radius:18px;background:#fffaf5;text-decoration:none;color:#2f2926;border:1px solid rgba(199,164,107,.18);}
+  .related-img{height:74px;border-radius:14px;background-size:cover;background-position:center;background-color:#f8d8dc;}
+  .related-card b{display:block;font-size:15px;color:#2f2926;}
+  .related-card span{display:block;margin-top:4px;color:#8a7d75;font-size:12px;line-height:1.4;}
+  .empty-media{padding:22px;border-radius:18px;background:#fff3f4;color:#8a7d75;margin-top:22px;}
+  @media(max-width:900px){.program-body{grid-template-columns:1fr}.program-side{position:static}.program-hero{min-height:460px}.program-main{padding:24px}.program-media-item iframe{height:360px;}}
+</style>
+
+<section class="program-detail-page">
+  <div class="program-hero">
+    <div class="program-hero-bg" style="background-image:url('{{ program.cover_image_url }}')"></div>
+    <div class="program-hero-inner">
+      <p class="program-kicker">{{ program.service_title or 'OUR SERVICES' }}</p>
+      <h1>{{ program.title }}</h1>
+      <p>{{ program.short_description or program.detail or 'รายละเอียดโปรแกรม' }}</p>
+      <div class="program-actions">
+        <a href="/booking?program={{ program.title }}" class="program-btn">จองคิวโปรแกรมนี้</a>
+        <a href="/home#services" class="program-btn light">กลับไปบริการของเรา</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="program-body">
+    <main class="program-main">
+      <h2>รายละเอียดโปรแกรม</h2>
+      <div class="program-text">{{ program.detail or program.short_description or 'ยังไม่มีรายละเอียด ให้ Admin เพิ่มรายละเอียดในหน้า Services' }}</div>
+
+      {% if medias and medias|length > 0 %}
+        <div class="program-media">
+          {% for media in medias %}
+            <div class="program-media-item">
+              {% if media.media_type == 'video' %}
+                {% if media.video_src and media.video_src.startswith('/static/') %}
+                  <video src="{{ media.video_src }}" controls></video>
+                {% elif media.video_src %}
+                  <iframe src="{{ media.video_src }}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+                {% endif %}
+              {% else %}
+                {% if media.image_url %}<img src="{{ media.image_url }}" alt="{{ media.caption or program.title }}">{% endif %}
+              {% endif %}
+              {% if media.caption %}<div class="program-caption">{{ media.caption }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-media">ยังไม่มีรูป/วิดีโอใน Program นี้ ให้ Admin เพิ่ม Media ได้ในหน้า Admin Services</div>
+      {% endif %}
+    </main>
+
+    <aside class="program-side">
+      <h3>Program อื่นในหมวดนี้</h3>
+      {% if related_programs and related_programs|length > 0 %}
+        <div class="related-list">
+          {% for item in related_programs %}
+            <a class="related-card" href="/services/{{ item.slug or item.id }}">
+              <div class="related-img" style="background-image:url('{{ item.cover_image_url }}')"></div>
+              <div>
+                <b>{{ item.title }}</b>
+                <span>{{ item.short_description or 'ดูรายละเอียดเพิ่มเติม' }}</span>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-media">ยังไม่มี Program อื่น</div>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+{% endblock %}

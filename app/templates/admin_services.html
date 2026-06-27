@@ -540,9 +540,9 @@
 <div class="svc-admin">
   <div class="svc-head">
     <div>
-      <h1>บริการของเรา / Program</h1>
+      <h1>บริการของเรา / หมวดหมู่ / โปรแกรม</h1>
       <p>
-        จัดการแบบใช้งานง่าย: สร้าง Program ใหญ่ 1 รูปหลัก → เพิ่ม Program ย่อย → เพิ่มรูป/วิดีโอ/คำบรรยายของแต่ละ Program ย่อย
+        จัดการแบบใช้งานง่าย: สร้างหมวดหมู่บริการ 1 รูปหลัก → เพิ่มโปรแกรมในหมวดนั้น → ใส่รายละเอียด/รูป/วิดีโอของแต่ละโปรแกรม
       </p>
     </div>
 
@@ -562,96 +562,35 @@
 
   <div class="svc-flow">
     <div class="svc-flow-card">
-      <b>1) Program ใหญ่</b>
+      <b>1) หมวดหมู่บริการ</b>
       <span>คือการ์ดที่ขึ้นหน้าเว็บ เช่น “ยกกระชับผิว” ใส่รูปหลัก 1 รูป</span>
     </div>
     <div class="svc-flow-card">
-      <b>2) Program ย่อย</b>
+      <b>2) โปรแกรมในหมวดหมู่</b>
       <span>คือรายการที่เด้งขึ้นมาตอนเอาเมาส์ไปชี้ เช่น Ulthera / Oligio</span>
     </div>
     <div class="svc-flow-card">
       <b>3) Detail</b>
-      <span>คือรูป วิดีโอ YouTube และคำบรรยาย เมื่อคลิก Program ย่อย</span>
-    </div>
-  </div>
-
-
-  <div class="svc-card" id="example-guide">
-    <h2>ตัวอย่างวิธีเพิ่ม / แก้ไข / ลบ Program</h2>
-    <div class="svc-hint">
-      ใช้ตัวอย่างนี้เป็นแนวทางในการกรอกข้อมูลจริง: <b>Program ใหญ่</b> คือรูปหลักบนหน้าเว็บ, <b>Program ย่อย</b> คือเมนูที่เด้งตอนเอาเมาส์ไปชี้, และ <b>Detail</b> คือรูป/วิดีโอ/คำบรรยายหลังคลิก Program ย่อย
-    </div>
-
-    <div class="svc-flow">
-      <div class="svc-flow-card">
-        <b>ตัวอย่าง Program ใหญ่</b>
-        <span>
-          ชื่อ: ยกกระชับผิวหน้า<br>
-          Slug: face-lifting<br>
-          รายละเอียดสั้น: รวมโปรแกรมยกกระชับ ลดแก้ม ลดเหนียง ปรับกรอบหน้าให้ชัดขึ้น<br>
-          รูปหลัก: เลือกรูปหน้าคน / คลินิก / เครื่องมือ 1 รูป
-        </span>
-      </div>
-
-      <div class="svc-flow-card">
-        <b>ตัวอย่าง Program ย่อย</b>
-        <span>
-          1. Ulthera Prime<br>
-          2. Oligio X<br>
-          3. Ultraformer III<br><br>
-          Program ย่อยจะอยู่ในกล่องเด้งตอนเอาเมาส์ไปชี้ Program ใหญ่
-        </span>
-      </div>
-
-      <div class="svc-flow-card">
-        <b>ตัวอย่าง Detail</b>
-        <span>
-          หัวข้อ: Ulthera Prime คืออะไร<br>
-          ประเภท: รูปภาพ / วิดีโอ / YouTube<br>
-          คำบรรยาย: อธิบายจุดเด่น วิธีทำ เหมาะกับใคร และการดูแลหลังทำ<br>
-          ลำดับ: 1, 2, 3
-        </span>
-      </div>
-    </div>
-
-    <div class="svc-form-grid">
-      <div class="svc-hint">
-        <b>วิธีเพิ่ม</b><br>
-        1) กรอก Program ใหญ่ด้านล่างแล้วกด “เพิ่ม Program ใหญ่”<br>
-        2) เปิด Program ใหญ่ที่สร้างไว้ แล้วกรอก “เพิ่ม Program ย่อย”<br>
-        3) เปิด Program ย่อย แล้วกดแท็บ “เพิ่ม Detail” เพื่อใส่รูป/วิดีโอ/YouTube/คำบรรยาย
-      </div>
-
-      <div class="svc-hint">
-        <b>วิธีลบ</b><br>
-        - ลบ Detail: กดปุ่ม “ลบ Detail” ใต้รายการ Detail นั้น<br>
-        - ลบ Program ย่อย: กดปุ่ม “ลบ Program ย่อย” ใต้ Program ย่อยนั้น<br>
-        - ลบ Program ใหญ่: กดปุ่ม “ลบ Program ใหญ่” ใต้ Program ใหญ่นั้น ระบบจะลบ Program ย่อยและ Detail ข้างในไปด้วย
-      </div>
-    </div>
-
-    <div class="svc-actions-row" style="margin-top:14px;">
-      <button type="button" class="svc-btn-soft" onclick="fillMainProgramExample()">ใส่ตัวอย่าง Program ใหญ่ให้ทันที</button>
-      <a class="svc-btn-soft" href="#create-main-program">ไปที่ฟอร์มเพิ่ม Program ใหญ่</a>
+      <span>คือรูป วิดีโอ YouTube และคำบรรยาย เมื่อคลิกเข้าโปรแกรมนั้น</span>
     </div>
   </div>
 
   <div class="svc-card" id="create-main-program">
-    <h2>เพิ่ม Program ใหญ่</h2>
+    <h2>เพิ่มหมวดหมู่บริการ</h2>
     <div class="svc-hint">
-      Program ใหญ่จะขึ้นเป็นรูปหลักในหน้าเว็บ และเมื่อเอาเมาส์ไปชี้จะมี Program ย่อยเด้งขึ้นมา
+      หมวดหมู่บริการจะเป็นรูปหลักหน้าเว็บ และเมื่อเอาเมาส์ไปชี้จะขึ้นรายชื่อโปรแกรมในหมวดนั้น
     </div>
 
     <form method="post" action="/admin/services" enctype="multipart/form-data">
       <div class="svc-form-grid">
         <label>
-          ชื่อ Program ใหญ่ ภาษาไทย
+          ชื่อหมวดหมู่บริการ ภาษาไทย
           <input type="text" name="title_th" placeholder="เช่น ยกกระชับผิว" required>
         </label>
 
         <label>
-          ชื่อ Program ใหญ่ ภาษาอังกฤษ
-          <input type="text" name="title_en" placeholder="Lifting Program">
+          ชื่อหมวดหมู่บริการ ภาษาอังกฤษ
+          <input type="text" name="title_en" placeholder="Skin Lifting">
         </label>
 
         <label>
@@ -694,14 +633,14 @@
         </label>
 
         <div class="full svc-actions-row">
-          <button class="svc-btn" type="submit">+ เพิ่ม Program ใหญ่</button>
+          <button class="svc-btn" type="submit">+ เพิ่มหมวดหมู่บริการ</button>
         </div>
       </div>
     </form>
   </div>
 
   <div class="svc-toolbar">
-    <input class="svc-search" type="text" id="serviceSearchInput" placeholder="ค้นหา Program ใหญ่ / Program ย่อย...">
+    <input class="svc-search" type="text" id="serviceSearchInput" placeholder="ค้นหาหมวดหมู่ / โปรแกรม...">
     <div class="svc-actions-row">
       <button class="svc-btn-soft" type="button" onclick="openAllPanels()">เปิดทั้งหมด</button>
       <button class="svc-btn-soft" type="button" onclick="closeAllPanels()">ปิดทั้งหมด</button>
@@ -709,8 +648,8 @@
   </div>
 
   <div class="svc-section-title">
-    <h2>รายการ Program ใหญ่</h2>
-    <a class="svc-link-btn" href="#create-main-program">+ เพิ่ม Program ใหญ่</a>
+    <h2>รายการหมวดหมู่บริการ</h2>
+    <a class="svc-link-btn" href="#create-main-program">+ เพิ่มหมวดหมู่บริการ</a>
   </div>
 
   {% if services and services|length > 0 %}
@@ -727,7 +666,7 @@
               {% else %}
                 <span class="badge badge-off">ซ่อนอยู่</span>
               {% endif %}
-              <span class="badge badge-count">Program ย่อย {{ programs|length }} รายการ</span>
+              <span class="badge badge-count">โปรแกรม {{ programs|length }} รายการ</span>
             </div>
 
             <h3>{{ service.title }}</h3>
@@ -740,7 +679,7 @@
         <div class="service-panel-body">
           <div class="edit-box">
             <div class="box-title">
-              <h4>แก้ไข Program ใหญ่: {{ service.title }}</h4>
+              <h4>แก้ไขหมวดหมู่บริการ: {{ service.title }}</h4>
               <span class="badge badge-count">รูปนี้ขึ้นหน้าเว็บ</span>
             </div>
 
@@ -806,26 +745,26 @@
                 </label>
 
                 <div class="full svc-actions-row">
-                  <button class="svc-btn" type="submit">บันทึก Program ใหญ่</button>
+                  <button class="svc-btn" type="submit">บันทึกหมวดหมู่บริการ</button>
                 </div>
               </div>
             </form>
 
-            <form method="post" action="/admin/services/{{ service.id }}/delete" onsubmit="return confirm('ต้องการลบ Program ใหญ่นี้ พร้อม Program ย่อยและ Detail ทั้งหมดใช่ไหม?')" style="margin-top:12px;">
-              <button class="svc-btn-danger" type="submit">ลบ Program ใหญ่นี้ทั้งหมด</button>
+            <form method="post" action="/admin/services/{{ service.id }}/delete" onsubmit="return confirm('ต้องการต้องการลบหมวดหมู่นี้ พร้อมโปรแกรมและรายละเอียดทั้งหมดใช่ไหม?')" style="margin-top:12px;">
+              <button class="svc-btn-danger" type="submit">ลบหมวดหมู่นี้ทั้งหมด</button>
             </form>
           </div>
 
           <div class="add-box">
             <div class="box-title">
-              <h4>+ เพิ่ม Program ย่อยใน “{{ service.title }}”</h4>
+              <h4>+ เพิ่มโปรแกรมใน “{{ service.title }}”</h4>
               <span class="badge badge-count">ขึ้นตอนเอาเมาส์ชี้</span>
             </div>
 
             <form method="post" action="/admin/services/{{ service.id }}/programs" enctype="multipart/form-data">
               <div class="svc-form-grid">
                 <label>
-                  ชื่อ Program ย่อย
+                  ชื่อโปรแกรม
                   <input type="text" name="title" required placeholder="เช่น Ulthera Prime">
                 </label>
 
@@ -835,7 +774,7 @@
                 </label>
 
                 <label>
-                  รูปปก Program ย่อย
+                  รูปปกโปรแกรม
                   <input type="file" name="cover_image_file" accept="image/*" data-preview="program-create-preview-{{ service.id }}">
                   <img id="program-create-preview-{{ service.id }}" class="preview-img" alt="preview">
                 </label>
@@ -851,8 +790,8 @@
                 </label>
 
                 <label>
-                  รายละเอียด Program ย่อย
-                  <textarea name="detail" placeholder="รายละเอียดเมื่อคลิก Program ย่อย"></textarea>
+                  รายละเอียดโปรแกรม
+                  <textarea name="detail" placeholder="รายละเอียดเมื่อคลิกเข้าโปรแกรม"></textarea>
                 </label>
 
                 <label>
@@ -864,7 +803,7 @@
                 </label>
 
                 <div class="full svc-actions-row">
-                  <button class="svc-btn-dark" type="submit">+ เพิ่ม Program ย่อย</button>
+                  <button class="svc-btn-dark" type="submit">+ เพิ่มโปรแกรม</button>
                 </div>
               </div>
             </form>
@@ -881,9 +820,9 @@
                     <div>
                       <div class="badge-row">
                         {% if program.is_active == 1 %}
-                          <span class="badge badge-on">Program แสดงอยู่</span>
+                          <span class="badge badge-on">โปรแกรมแสดงอยู่</span>
                         {% else %}
-                          <span class="badge badge-off">Program ซ่อนอยู่</span>
+                          <span class="badge badge-off">โปรแกรมซ่อนอยู่</span>
                         {% endif %}
                         <span class="badge badge-count">Detail {{ medias|length }} รายการ</span>
                       </div>
@@ -897,7 +836,7 @@
 
                   <div class="program-body">
                     <div class="mini-tabs">
-                      <button type="button" class="mini-tab active" onclick="switchPane(this, 'edit-program-{{ program.id }}')">แก้ไข Program ย่อย</button>
+                      <button type="button" class="mini-tab active" onclick="switchPane(this, 'edit-program-{{ program.id }}')">แก้ไขโปรแกรม</button>
                       <button type="button" class="mini-tab" onclick="switchPane(this, 'add-media-{{ program.id }}')">เพิ่ม Detail</button>
                       <button type="button" class="mini-tab" onclick="switchPane(this, 'list-media-{{ program.id }}')">รายการ Detail</button>
                     </div>
@@ -908,7 +847,7 @@
 
                         <div class="svc-form-grid">
                           <label>
-                            ชื่อ Program ย่อย
+                            ชื่อโปรแกรม
                             <input type="text" name="title" value="{{ program.title }}" required>
                           </label>
 
@@ -934,7 +873,7 @@
                           </label>
 
                           <label>
-                            รายละเอียด Program ย่อย
+                            รายละเอียดโปรแกรม
                             <textarea name="detail">{{ program.detail }}</textarea>
                           </label>
 
@@ -960,14 +899,14 @@
                         </div>
                       </form>
 
-                      <form method="post" action="/admin/service-programs/{{ program.id }}/delete" onsubmit="return confirm('ลบ Program ย่อยนี้ พร้อม Detail ทั้งหมดใช่ไหม?')" style="margin-top:12px;">
-                        <button class="svc-btn-danger" type="submit">ลบ Program ย่อยนี้</button>
+                      <form method="post" action="/admin/service-programs/{{ program.id }}/delete" onsubmit="return confirm('ต้องการลบโปรแกรมนี้ พร้อมรายละเอียดทั้งหมดใช่ไหม?')" style="margin-top:12px;">
+                        <button class="svc-btn-danger" type="submit">ลบโปรแกรมนี้</button>
                       </form>
                     </div>
 
                     <div id="add-media-{{ program.id }}" class="tab-pane">
                       <div class="svc-hint">
-                        Detail คือรูป/วิดีโอ/YouTube/คำบรรยาย ที่จะแสดงหลังลูกค้าคลิก Program ย่อยนี้
+                        รายละเอียดคือรูป/วิดีโอ/YouTube/คำบรรยาย ที่จะแสดงหลังลูกค้าคลิกโปรแกรมนี้
                       </div>
 
                       <form method="post" action="/admin/service-programs/{{ program.id }}/media" enctype="multipart/form-data">
@@ -1082,7 +1021,7 @@
                           {% endfor %}
                         </div>
                       {% else %}
-                        <div class="empty-box">Program ย่อยนี้ยังไม่มี Detail ให้กดแท็บ “เพิ่ม Detail” เพื่อใส่รูป/วิดีโอ/คำบรรยาย</div>
+                        <div class="empty-box">โปรแกรมนี้ยังไม่มีรายละเอียด ให้กดแท็บ “เพิ่มรายละเอียด” เพื่อใส่รูป/วิดีโอ/คำบรรยาย</div>
                       {% endif %}
                     </div>
                   </div>
@@ -1090,43 +1029,19 @@
               {% endfor %}
             </div>
           {% else %}
-            <div class="empty-box">Program ใหญ่นี้ยังไม่มี Program ย่อย ให้เพิ่ม Program ย่อยด้านบนก่อน</div>
+            <div class="empty-box">หมวดหมู่นี้ยังไม่มีโปรแกรม ให้เพิ่มโปรแกรมด้านบนก่อน</div>
           {% endif %}
         </div>
       </div>
     {% endfor %}
   {% else %}
     <div class="empty-box">
-      ยังไม่มี Program ใหญ่ ให้เริ่มจากปุ่ม “เพิ่ม Program ใหญ่” ด้านบน
+      ยังไม่มี Program ใหญ่ ให้เริ่มจากปุ่ม “เพิ่มหมวดหมู่บริการ” ด้านบน
     </div>
   {% endif %}
 </div>
 
 <script>
-
-    function fillMainProgramExample() {
-      var box = document.getElementById("create-main-program");
-      if (!box) return;
-
-      var titleTh = box.querySelector('input[name="title_th"]');
-      var titleEn = box.querySelector('input[name="title_en"]');
-      var slug = box.querySelector('input[name="slug"]');
-      var descTh = box.querySelector('textarea[name="description_th"]');
-      var descEn = box.querySelector('textarea[name="description_en"]');
-      var detailTh = box.querySelector('textarea[name="detail_th"]');
-      var detailEn = box.querySelector('textarea[name="detail_en"]');
-
-      if (titleTh) titleTh.value = "ยกกระชับผิวหน้า";
-      if (titleEn) titleEn.value = "Face Lifting";
-      if (slug) slug.value = "face-lifting";
-      if (descTh) descTh.value = "รวมโปรแกรมยกกระชับ ลดแก้ม ลดเหนียง และปรับกรอบหน้าให้ชัดขึ้น";
-      if (descEn) descEn.value = "Non-surgical lifting programs for a firmer and more defined facial contour.";
-      if (detailTh) detailTh.value = "เหมาะสำหรับผู้ที่ต้องการดูแลความหย่อนคล้อย กรอบหน้าไม่ชัด แก้มตก หรือเหนียง โดยเลือก Program ย่อยให้เหมาะกับสภาพผิวและปัญหาของแต่ละคน";
-      if (detailEn) detailEn.value = "Suitable for clients who want to improve sagging skin, facial contour, cheeks, or double chin with personalized program selection.";
-
-      box.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-
   (function () {
     function closest(el, selector) {
       while (el && el !== document) {

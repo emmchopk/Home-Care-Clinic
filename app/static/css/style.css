@@ -4939,3 +4939,695 @@ body {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* =========================
+   HOME - MONTHLY PROMOTION
+   FIX OVERFLOW / OUT OF FRAME
+========================= */
+
+.home-promo-final {
+  padding: 90px 0 40px;
+}
+
+.home-promo-final .home-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.home-promo-header {
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.home-promo-eyebrow {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #9b8a6b;
+}
+
+.home-promo-title-main {
+  margin: 0 0 12px;
+  font-size: clamp(36px, 5vw, 70px);
+  line-height: 1.05;
+  font-weight: 700;
+  color: #332a28;
+}
+
+.home-promo-subtitle {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #8b7d75;
+}
+
+.home-promo-slider-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.home-promo-slider {
+  position: relative;
+  width: 100%;
+  min-height: 420px;
+}
+
+.home-promo-slide {
+  display: none;
+  grid-template-columns: 1.15fr 1fr;
+  align-items: stretch;
+  background: transparent;
+  border-radius: 34px;
+  overflow: hidden; /* สำคัญมาก กันหลุดกรอบ */
+  box-shadow: 0 12px 32px rgba(49, 36, 31, 0.08);
+}
+
+.home-promo-slide.active {
+  display: grid;
+}
+
+.home-promo-image-wrap {
+  position: relative;
+  min-width: 0;
+  height: 420px;
+  overflow: hidden; /* กันรูปทะลุ */
+  border-radius: 34px 0 0 34px;
+  background: #f3ece6;
+}
+
+.home-promo-image-wrap img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover; /* ให้รูปพอดีกรอบ */
+}
+
+.home-promo-content {
+  min-width: 0;
+  height: 420px;
+  padding: 42px 42px 38px;
+  background: #f5f1ea;
+  border-radius: 0 34px 34px 0;
+  overflow: hidden; /* กันข้อความล้น */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.home-promo-label {
+  margin: 0 0 18px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8f7d63;
+}
+
+.home-promo-name {
+  margin: 0 0 18px;
+  font-size: clamp(34px, 4vw, 62px);
+  line-height: 1.05;
+  font-weight: 700;
+  color: #332a28;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.home-promo-price {
+  margin: 0 0 18px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #8ea07a;
+}
+
+.home-promo-desc {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #786d66;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* ตัดไม่ให้ยาวเกิน */
+  -webkit-box-orient: vertical;
+}
+
+.home-promo-dots {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.home-promo-dot {
+  width: 14px;
+  height: 14px;
+  border: 0;
+  border-radius: 999px;
+  background: #d8d1c8;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.home-promo-dot.active {
+  width: 36px;
+  background: #8ea07a;
+}
+
+/* Tablet */
+@media (max-width: 991px) {
+  .home-promo-slide {
+    grid-template-columns: 1fr;
+  }
+
+  .home-promo-image-wrap {
+    height: 320px;
+    border-radius: 28px 28px 0 0;
+  }
+
+  .home-promo-content {
+    height: auto;
+    min-height: 280px;
+    border-radius: 0 0 28px 28px;
+    padding: 32px 28px;
+  }
+
+  .home-promo-name {
+    font-size: 42px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .home-promo-final {
+    padding: 70px 0 24px;
+  }
+
+  .home-promo-final .home-container {
+    padding: 0 16px;
+  }
+
+  .home-promo-image-wrap {
+    height: 240px;
+  }
+
+  .home-promo-content {
+    padding: 24px 20px;
+  }
+
+  .home-promo-name {
+    font-size: 30px;
+  }
+
+  .home-promo-price {
+    font-size: 22px;
+  }
+
+  .home-promo-desc {
+    font-size: 15px;
+    -webkit-line-clamp: 5;
+  }
+}
+
+/* =====================================================
+   FORCE FIX PROMOTION OVERFLOW
+   แก้ Promotion รูป/ข้อความหลุดกรอบแบบบังคับ
+===================================================== */
+
+.home-promo-final {
+  padding: 70px 0 40px !important;
+  overflow: hidden !important;
+}
+
+.home-promo-slider-wrap {
+  width: min(960px, 100%) !important;
+  max-width: 960px !important;
+  margin: 0 auto !important;
+  border-radius: 32px !important;
+  overflow: hidden !important;
+  background: #fffaf3 !important;
+  border: 1px solid rgba(199, 164, 107, 0.28) !important;
+  box-shadow: 0 18px 45px rgba(108, 77, 65, 0.13) !important;
+}
+
+.home-promo-slider {
+  position: relative !important;
+  width: 100% !important;
+  height: 360px !important;
+  min-height: 360px !important;
+  max-height: 360px !important;
+  overflow: hidden !important;
+}
+
+.home-promo-slide {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 360px !important;
+  max-height: 360px !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  overflow: hidden !important;
+  border-radius: 32px !important;
+  background: #fffaf3 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateX(100%) !important;
+  transition: opacity 0.6s ease, transform 0.6s ease, visibility 0.6s ease !important;
+}
+
+.home-promo-slide.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateX(0) !important;
+  z-index: 2 !important;
+}
+
+.home-promo-slide.prev {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateX(-100%) !important;
+  z-index: 1 !important;
+}
+
+.home-promo-slide-img {
+  width: 100% !important;
+  height: 360px !important;
+  min-height: 360px !important;
+  max-height: 360px !important;
+  border-radius: 32px 0 0 32px !important;
+  overflow: hidden !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+.home-promo-slide-content {
+  width: 100% !important;
+  height: 360px !important;
+  min-height: 360px !important;
+  max-height: 360px !important;
+  padding: 34px 38px !important;
+  overflow: hidden !important;
+  border-radius: 0 32px 32px 0 !important;
+  background: #fffaf3 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.home-promo-slide-content small {
+  display: block !important;
+  margin-bottom: 12px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.18em !important;
+  line-height: 1.2 !important;
+}
+
+.home-promo-slide-content h3 {
+  margin: 0 0 12px !important;
+  font-size: clamp(30px, 3.6vw, 52px) !important;
+  line-height: 1.05 !important;
+  max-height: 115px !important;
+  overflow: hidden !important;
+  word-break: break-word !important;
+}
+
+.home-promo-slide-content .promo-price {
+  margin: 0 0 12px !important;
+  font-size: 20px !important;
+  line-height: 1.3 !important;
+  color: #66785f !important;
+}
+
+.home-promo-slide-content p {
+  margin: 0 !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  max-height: 80px !important;
+  overflow: hidden !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.home-promo-dots {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 18px !important;
+  transform: translateX(-50%) !important;
+  z-index: 20 !important;
+  display: flex !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.home-promo-dot {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 999px !important;
+  border: none !important;
+  background: rgba(102, 120, 95, 0.35) !important;
+}
+
+.home-promo-dot.active {
+  width: 32px !important;
+  background: #8fa184 !important;
+}
+
+@media (max-width: 900px) {
+  .home-promo-slider {
+    height: 560px !important;
+    max-height: 560px !important;
+  }
+
+  .home-promo-slide {
+    height: 560px !important;
+    max-height: 560px !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .home-promo-slide-img {
+    height: 260px !important;
+    min-height: 260px !important;
+    max-height: 260px !important;
+    border-radius: 32px 32px 0 0 !important;
+  }
+
+  .home-promo-slide-content {
+    height: 300px !important;
+    min-height: 300px !important;
+    max-height: 300px !important;
+    border-radius: 0 0 32px 32px !important;
+    padding: 26px !important;
+  }
+
+  .home-promo-slide-content h3 {
+    font-size: 36px !important;
+    max-height: 80px !important;
+  }
+}
+
+/* =========================================================
+   FINAL FIX 2026-06 - MONTHLY PROMOTION ไม่ให้หลุดกรอบ
+   ใช้ได้กับ home.html หลายเวอร์ชัน:
+   .home-promo-slide-img / .home-promo-slide-content
+   .home-promo-image-wrap / .home-promo-content
+========================================================= */
+
+.home-promo-final,
+section.home-promo-final,
+#promotions {
+  width: 100% !important;
+  padding: 64px 16px 42px !important;
+  overflow: hidden !important;
+}
+
+.home-promo-final .home-container,
+#promotions .home-container {
+  width: min(1180px, 100%) !important;
+  max-width: 1180px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  overflow: visible !important;
+}
+
+.home-promo-slider-wrap {
+  position: relative !important;
+  width: min(920px, 100%) !important;
+  max-width: 920px !important;
+  height: 340px !important;
+  min-height: 340px !important;
+  max-height: 340px !important;
+  margin: 34px auto 0 !important;
+  border-radius: 30px !important;
+  overflow: hidden !important;
+  background: #fffaf3 !important;
+  border: 1px solid rgba(199, 164, 107, 0.28) !important;
+  box-shadow: 0 18px 45px rgba(108, 77, 65, 0.13) !important;
+}
+
+.home-promo-slider {
+  position: relative !important;
+  width: 100% !important;
+  height: 340px !important;
+  min-height: 340px !important;
+  max-height: 340px !important;
+  overflow: hidden !important;
+  border-radius: 30px !important;
+}
+
+.home-promo-slide {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 340px !important;
+  min-height: 340px !important;
+  max-height: 340px !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  align-items: stretch !important;
+  overflow: hidden !important;
+  border-radius: 30px !important;
+  background: #fffaf3 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateX(100%) !important;
+  transition: opacity 0.55s ease, transform 0.55s ease, visibility 0.55s ease !important;
+  box-shadow: none !important;
+}
+
+.home-promo-slide.active,
+.home-promo-slide.is-active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: translateX(0) !important;
+  z-index: 3 !important;
+}
+
+.home-promo-slide.prev,
+.home-promo-slide.is-prev {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateX(-100%) !important;
+  z-index: 2 !important;
+}
+
+.home-promo-slide-img,
+.home-promo-image-wrap {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 340px !important;
+  min-height: 340px !important;
+  max-height: 340px !important;
+  overflow: hidden !important;
+  border-radius: 30px 0 0 30px !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-color: #f3ece6 !important;
+}
+
+.home-promo-image-wrap img,
+.home-promo-slide-img img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+.home-promo-slide-content,
+.home-promo-content {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 340px !important;
+  min-height: 340px !important;
+  max-height: 340px !important;
+  padding: 30px 34px !important;
+  overflow: hidden !important;
+  border-radius: 0 30px 30px 0 !important;
+  background: #fffaf3 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+.home-promo-slide-content small,
+.home-promo-label {
+  display: block !important;
+  margin: 0 0 10px !important;
+  color: #8f7d63 !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.18em !important;
+  line-height: 1.2 !important;
+  text-transform: uppercase !important;
+}
+
+.home-promo-slide-content h3,
+.home-promo-name {
+  margin: 0 0 10px !important;
+  color: #332a28 !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: clamp(28px, 3.3vw, 48px) !important;
+  line-height: 1.06 !important;
+  font-weight: 600 !important;
+  max-height: 105px !important;
+  overflow: hidden !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+
+.home-promo-slide-content .promo-price,
+.home-promo-price {
+  margin: 0 0 10px !important;
+  color: #66785f !important;
+  font-size: 19px !important;
+  line-height: 1.25 !important;
+  font-weight: 900 !important;
+  max-height: 32px !important;
+  overflow: hidden !important;
+}
+
+.home-promo-slide-content p,
+.home-promo-desc {
+  margin: 0 !important;
+  color: #786d66 !important;
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+  max-height: 70px !important;
+  overflow: hidden !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 3 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.home-promo-dots {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 14px !important;
+  transform: translateX(-50%) !important;
+  z-index: 30 !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 !important;
+}
+
+.home-promo-dot {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 999px !important;
+  border: none !important;
+  padding: 0 !important;
+  background: rgba(102, 120, 95, 0.35) !important;
+  cursor: pointer !important;
+}
+
+.home-promo-dot.active {
+  width: 30px !important;
+  background: #8fa184 !important;
+}
+
+/* กัน CSS เก่าทำ slide ซ้อน */
+.home-promo-slide:not(.active):not(.is-active) {
+  pointer-events: none !important;
+}
+
+@media (max-width: 900px) {
+  .home-promo-slider-wrap,
+  .home-promo-slider {
+    height: 540px !important;
+    min-height: 540px !important;
+    max-height: 540px !important;
+  }
+
+  .home-promo-slide {
+    height: 540px !important;
+    min-height: 540px !important;
+    max-height: 540px !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .home-promo-slide-img,
+  .home-promo-image-wrap {
+    height: 250px !important;
+    min-height: 250px !important;
+    max-height: 250px !important;
+    border-radius: 30px 30px 0 0 !important;
+  }
+
+  .home-promo-slide-content,
+  .home-promo-content {
+    height: 290px !important;
+    min-height: 290px !important;
+    max-height: 290px !important;
+    border-radius: 0 0 30px 30px !important;
+    padding: 24px 24px 46px !important;
+  }
+
+  .home-promo-slide-content h3,
+  .home-promo-name {
+    font-size: 34px !important;
+    max-height: 76px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .home-promo-final {
+    padding: 52px 12px 30px !important;
+  }
+
+  .home-promo-slider-wrap,
+  .home-promo-slider {
+    height: 500px !important;
+    min-height: 500px !important;
+    max-height: 500px !important;
+    border-radius: 24px !important;
+  }
+
+  .home-promo-slide {
+    height: 500px !important;
+    min-height: 500px !important;
+    max-height: 500px !important;
+    border-radius: 24px !important;
+  }
+
+  .home-promo-slide-img,
+  .home-promo-image-wrap {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+    border-radius: 24px 24px 0 0 !important;
+  }
+
+  .home-promo-slide-content,
+  .home-promo-content {
+    height: 280px !important;
+    min-height: 280px !important;
+    max-height: 280px !important;
+    padding: 22px 20px 44px !important;
+    border-radius: 0 0 24px 24px !important;
+  }
+
+  .home-promo-slide-content h3,
+  .home-promo-name {
+    font-size: 28px !important;
+    max-height: 62px !important;
+  }
+
+  .home-promo-slide-content p,
+  .home-promo-desc {
+    -webkit-line-clamp: 4 !important;
+    max-height: 92px !important;
+  }
+}
+

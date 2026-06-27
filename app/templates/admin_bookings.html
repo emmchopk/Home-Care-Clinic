@@ -1,88 +1,146 @@
 {% extends "base.html" %}
 
-{% block title %}All Bookings | Home Care Clinic{% endblock %}
+{% block title %}รายการจองทั้งหมด{% endblock %}
 
 {% block content %}
-
 <section class="admin-page">
-  <div class="admin-head">
-    <div>
-      <p class="eyebrow">Back Office</p>
-      <h1>All Bookings</h1>
-      <p>รายการจองทั้งหมดจากลูกค้าที่จองผ่านหน้าเว็บไซต์</p>
+  <div class="admin-container">
+
+    <div class="admin-header">
+      <div>
+        <p class="blossom-kicker">ADMIN BOOKING</p>
+        <h1>รายการจองทั้งหมด</h1>
+        <p>ดูรายการจอง แก้ไขวันเวลา สถานะ แพ็กเกจ และข้อมูลลูกค้า</p>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="/admin/dashboard" class="btn-outline">← Dashboard</a>
+        <a href="/admin/schedule" class="btn-primary">ดูตารางงาน</a>
+      </div>
     </div>
 
-    <a href="/admin/dashboard" class="btn-outline">Back Dashboard</a>
-  </div>
+    {% if request.query_params.get('success') %}
+      <div class="admin-alert success">{{ request.query_params.get('success') }}</div>
+    {% endif %}
 
-  <div class="admin-panel">
-    <div class="panel-head">
-      <h2>Booking List</h2>
-      <span>{{ bookings|length }} bookings</span>
+    {% if request.query_params.get('error') %}
+      <div class="admin-alert error">{{ request.query_params.get('error') }}</div>
+    {% endif %}
+
+    <div class="admin-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px;">
+        <h2 style="margin:0;">Booking List</h2>
+        <span style="color:#7b716b;font-weight:800;">ทั้งหมด {{ bookings|length }} รายการ</span>
+      </div>
+
+      {% if bookings %}
+      <div class="table-wrap" style="overflow-x:auto;">
+        <table class="admin-table" style="width:100%;min-width:1100px;border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th>รหัส</th>
+              <th>ลูกค้า</th>
+              <th>ติดต่อ</th>
+              <th>บริการ / แพ็กเกจ</th>
+              <th>คุณหมอ</th>
+              <th>วันที่ / เวลา</th>
+              <th>รายได้</th>
+              <th>สถานะ</th>
+              <th>แจ้งเตือน</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for booking in bookings %}
+            <tr>
+              <td>
+                <b>#{{ booking.id }}</b><br>
+                <small style="color:#8a7d75;">{{ booking.created_at or '-' }}</small>
+              </td>
+
+              <td>
+                <b>{{ booking.full_name or 'ลูกค้า' }}</b><br>
+                <small style="color:#8a7d75;">User ID: {{ booking.user_id }}</small>
+              </td>
+
+              <td>
+                <div>{{ booking.email or '-' }}</div>
+                <div style="color:#4d6448;font-weight:800;">{{ booking.customer_phone or booking.phone or '-' }}</div>
+              </td>
+
+              <td>
+                <b>{{ booking.package_name or '-' }}</b>
+                {% if booking.note %}
+                  <div style="margin-top:6px;color:#8a7d75;font-size:13px;line-height:1.5;">
+                    {{ booking.note }}
+                  </div>
+                {% endif %}
+              </td>
+
+              <td>{{ booking.doctor_name or '-' }}</td>
+
+              <td>
+                <b>{{ booking.appointment_date or '-' }}</b><br>
+                <span style="color:#4d6448;font-weight:900;">{{ booking.appointment_time or '-' }}</span>
+              </td>
+
+              <td>
+                {% if booking.revenue_amount %}
+                  ฿{{ "{:,.0f}".format(booking.revenue_amount) }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+
+              <td>
+                {% if booking.status == 'CONFIRMED' %}
+                  <span class="status ok">ยืนยันแล้ว</span>
+                {% elif booking.status == 'DONE' %}
+                  <span class="status ok">ใช้บริการแล้ว</span>
+                {% elif booking.status == 'CANCELLED' %}
+                  <span class="status bad">ยกเลิก</span>
+                {% else %}
+                  <span class="status pending">รอดำเนินการ</span>
+                {% endif %}
+
+                <form method="post" action="/admin/bookings/{{ booking.id }}/status" style="margin-top:8px;display:flex;gap:6px;align-items:center;">
+                  <select name="status" style="min-width:130px;border-radius:10px;border:1px solid rgba(200,164,106,.35);padding:8px;background:#fff;">
+                    <option value="PENDING" {% if booking.status == 'PENDING' %}selected{% endif %}>รอดำเนินการ</option>
+                    <option value="CONFIRMED" {% if booking.status == 'CONFIRMED' %}selected{% endif %}>ยืนยันแล้ว</option>
+                    <option value="DONE" {% if booking.status == 'DONE' %}selected{% endif %}>ใช้บริการแล้ว</option>
+                    <option value="CANCELLED" {% if booking.status == 'CANCELLED' %}selected{% endif %}>ยกเลิก</option>
+                  </select>
+                  <button type="submit" class="mini-btn" style="min-height:34px;padding:0 12px;">Save</button>
+                </form>
+              </td>
+
+              <td>
+                <small>Email: {% if booking.email_sent %}✅{% else %}❌{% endif %}</small><br>
+                <small>LINE: {% if booking.line_sent %}✅{% else %}❌{% endif %}</small>
+              </td>
+
+              <td>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <a href="/admin/bookings/{{ booking.id }}/edit" class="mini-btn">Edit</a>
+
+                  <form method="post" action="/admin/bookings/{{ booking.id }}/delete" onsubmit="return confirm('ยืนยันลบรายการจองนี้?');">
+                    <button type="submit" class="mini-btn" style="background:#b95a5a!important;">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="admin-empty">
+          ยังไม่มีรายการจอง
+        </div>
+      {% endif %}
     </div>
 
-    <div class="table-wrap">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Customer</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Package</th>
-            <th>Doctor</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Note</th>
-            <th>Email</th>
-            <th>LINE</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for booking in bookings %}
-          <tr>
-            <td>#{{ booking.id }}</td>
-            <td>{{ booking.full_name }}</td>
-            <td>{{ booking.email }}</td>
-            <td>{{ booking.customer_phone or booking.phone or "-" }}</td>
-            <td>{{ booking.package_name }}</td>
-            <td>{{ booking.doctor_name or "-" }}</td>
-            <td>{{ booking.appointment_date }}</td>
-            <td>{{ booking.appointment_time }}</td>
-            <td>{{ booking.note or "-" }}</td>
-
-            <td>
-              {% if booking.email_sent %}
-                <span class="status ok">Sent</span>
-              {% else %}
-                <span class="status bad">Fail</span>
-              {% endif %}
-            </td>
-
-            <td>
-              {% if booking.line_sent %}
-                <span class="status ok">Sent</span>
-              {% else %}
-                <span class="status bad">Fail</span>
-              {% endif %}
-            </td>
-
-            <td>
-              <span class="status pending">{{ booking.status }}</span>
-            </td>
-
-            <td>
-              <a class="mini-btn" href="/admin/bookings/{{ booking.id }}/edit">Edit</a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
   </div>
 </section>
-
 {% endblock %}

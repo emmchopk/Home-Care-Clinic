@@ -40,6 +40,7 @@ PROMOTION_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "promotions")
 REVIEW_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "reviews")
 DOCTOR_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "doctors")
 SERVICE_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "services")
+CHANNEL_IMAGE_DIR = os.path.join(STATIC_IMAGE_DIR, "homecare_channel")
 STATIC_VIDEO_DIR = os.path.join(BASE_DIR, "app", "static", "videos")
 SERVICE_VIDEO_DIR = os.path.join(STATIC_VIDEO_DIR, "services")
 
@@ -57,6 +58,7 @@ for folder in [
     REVIEW_IMAGE_DIR,
     DOCTOR_IMAGE_DIR,
     SERVICE_IMAGE_DIR,
+    CHANNEL_IMAGE_DIR,
     SERVICE_VIDEO_DIR,
 ]:
     safe_makedirs(folder)
@@ -406,6 +408,22 @@ def init_db():
             description_zh TEXT,
             description_ja TEXT,
             description_ko TEXT
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS homecare_channels (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            video_url TEXT NOT NULL,
+            platform TEXT DEFAULT 'other',
+            cover_image_file TEXT,
+            is_active INTEGER DEFAULT 1,
+            sort_order INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL
         )
         """
     )
@@ -1191,6 +1209,39 @@ def get_active_promotions():
     return rows
 
 
+def detect_video_platform(video_url: str):
+    url = (video_url or "").lower()
+    if "instagram.com" in url:
+        return "instagram"
+    if "tiktok.com" in url:
+        return "tiktok"
+    if "facebook.com" in url or "fb.watch" in url:
+        return "facebook"
+    if "youtube.com" in url or "youtu.be" in url:
+        return "youtube"
+    return "other"
+
+
+def get_active_homecare_channels():
+    conn = get_db()
+    rows = conn.execute(
+        """
+        SELECT
+            *,
+            CASE
+                WHEN cover_image_file IS NOT NULL AND cover_image_file != ''
+                THEN '/static/images/homecare_channel/' || cover_image_file
+                ELSE ''
+            END AS cover_image_url
+        FROM homecare_channels
+        WHERE is_active = 1
+        ORDER BY sort_order ASC, id DESC
+        """
+    ).fetchall()
+    conn.close()
+    return rows
+
+
 def get_active_reviews():
     conn = get_db()
     rows = conn.execute(
@@ -1740,6 +1791,7 @@ def home(request: Request):
             "reviews": get_active_reviews(),
             "doctors": get_active_doctors(),
             "services": get_active_services(),
+            "homecare_channels": get_active_homecare_channels(),
             "clinic_location_name": os.getenv(
                 "CLINIC_LOCATION_NAME",
                 "Home Care Clinic, Bangkok",
@@ -1749,6 +1801,121 @@ def home(request: Request):
                 "https://maps.google.com/?q=Home+Care+Clinic+Bangkok",
             ),
         },
+    )
+
+
+@app.get("/contact")
+def contact_page(request: Request):
+    force_load_env()
+
+    return templates.TemplateResponse(
+        "contact.html",
+        {
+            "request": request,
+            "user": current_user(request),
+            "success": request.query_params.get("success"),
+            "error": request.query_params.get("error"),
+            "clinic_location_name": os.getenv(
+                "CLINIC_LOCATION_NAME",
+                "Home Care Clinic, Bangkok",
+            ),
+            "clinic_google_map_url": os.getenv(
+                "CLINIC_GOOGLE_MAP_URL",
+                "https://maps.google.com/?q=Home+Care+Clinic+Bangkok",
+            ),
+        },
+    )
+
+
+@app.post("/contact")
+def contact_submit(
+    request: Request,
+    customer_name: str = Form(...),
+    phone: str = Form(""),
+    email: str = Form(""),
+    package_name: str = Form("ติดต่อสอบถาม"),
+    appointment_date: str = Form(""),
+    appointment_time: str = Form(""),
+    note: str = Form(""),
+):
+    force_load_env()
+
+    customer_name = (customer_name or "").strip()
+    phone = (phone or "").strip()
+    email = (email or "").strip()
+    package_name = (package_name or "ติดต่อสอบถาม").strip()
+    appointment_date = (appointment_date or "").strip()
+    appointment_time = (appointment_time or "").strip()
+    note = (note or "").strip()
+
+    if not customer_name:
+        return RedirectResponse(
+            "/contact?error=กรุณากรอกชื่อ",
+            status_code=303,
+        )
+
+    message_text = f"""ติดต่อจากหน้า Contact
+ชื่อ: {customer_name}
+เบอร์โทร: {phone or '-'}
+Email: {email or '-'}
+บริการที่สนใจ: {package_name or '-'}
+วันที่สนใจ: {appointment_date or '-'}
+เวลาที่สนใจ: {appointment_time or '-'}
+หมายเหตุ: {note or '-'}"""
+
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO line_leads (
+            line_user_id,
+            display_name,
+            message_text,
+            customer_name,
+            phone,
+            package_name,
+            appointment_date,
+            appointment_time,
+            status,
+            note,
+            created_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            "CONTACT_FORM",
+            customer_name,
+            message_text,
+            customer_name,
+            phone,
+            package_name,
+            appointment_date,
+            appointment_time,
+            "NEW",
+            note,
+            datetime.now().isoformat(timespec="seconds"),
+        ),
+    )
+    conn.commit()
+    conn.close()
+
+    try:
+        send_line_booking_alert(
+            full_name=customer_name,
+            email=email or "-",
+            package_name=package_name or "ติดต่อสอบถาม",
+            appointment_date=appointment_date or "-",
+            appointment_time=appointment_time or "-",
+            note=f"ติดต่อจากหน้า Contact: {note or '-'}",
+            doctor_name="-",
+            customer_phone=phone or "-",
+        )
+    except Exception as e:
+        print("CONTACT LINE ALERT ERROR:", repr(e))
+
+    return RedirectResponse(
+        "/contact?success=ส่งข้อมูลสำเร็จ เจ้าหน้าที่จะติดต่อกลับโดยเร็ว",
+        status_code=303,
     )
 
 
@@ -2343,6 +2510,192 @@ def admin_bookings(request: Request):
             "bookings": bookings,
         },
     )
+
+
+
+@app.get("/admin/bookings/{booking_id}/edit")
+def admin_edit_booking_page(request: Request, booking_id: int):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse(f"/login?next=/admin/bookings/{booking_id}/edit", status_code=303)
+
+    conn = get_db()
+    booking = conn.execute(
+        """
+        SELECT
+            bookings.*,
+            users.full_name AS customer_name,
+            users.email AS customer_email,
+            users.phone AS user_phone,
+            doctors.name AS doctor_name
+        FROM bookings
+        JOIN users ON users.id = bookings.user_id
+        LEFT JOIN doctors ON doctors.id = bookings.doctor_id
+        WHERE bookings.id = ?
+        """,
+        (booking_id,),
+    ).fetchone()
+
+    doctors = conn.execute(
+        """
+        SELECT *
+        FROM doctors
+        WHERE is_active = 1
+        ORDER BY id DESC
+        """
+    ).fetchall()
+
+    conn.close()
+
+    if not booking:
+        return RedirectResponse("/admin/bookings?error=ไม่พบรายการจอง", status_code=303)
+
+    return templates.TemplateResponse(
+        "admin_edit_booking.html",
+        {
+            "request": request,
+            "user": admin,
+            "booking": booking,
+            "doctors": doctors,
+        },
+    )
+
+
+@app.post("/admin/bookings/{booking_id}/edit")
+def admin_update_booking(
+    request: Request,
+    booking_id: int,
+    customer_name: str = Form(""),
+    email: str = Form(""),
+    phone: str = Form(""),
+    customer_phone: str = Form(""),
+    package_name: str = Form(""),
+    doctor_id: str = Form(""),
+    appointment_date: str = Form(""),
+    appointment_time: str = Form(""),
+    note: str = Form(""),
+    status: str = Form("PENDING"),
+    revenue_amount: str = Form("0"),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse(f"/login?next=/admin/bookings/{booking_id}/edit", status_code=303)
+
+    allowed_status = {"PENDING", "CONFIRMED", "DONE", "CANCELLED"}
+    if status not in allowed_status:
+        status = "PENDING"
+
+    try:
+        revenue_value = float(revenue_amount or 0)
+    except ValueError:
+        revenue_value = 0
+
+    doctor_value = None
+    if str(doctor_id).strip():
+        try:
+            doctor_value = int(doctor_id)
+        except ValueError:
+            doctor_value = None
+
+    conn = get_db()
+    booking = conn.execute(
+        "SELECT * FROM bookings WHERE id = ?",
+        (booking_id,),
+    ).fetchone()
+
+    if not booking:
+        conn.close()
+        return RedirectResponse("/admin/bookings?error=ไม่พบรายการจอง", status_code=303)
+
+    conn.execute(
+        """
+        UPDATE users
+        SET full_name = ?,
+            email = ?,
+            phone = ?
+        WHERE id = ?
+        """,
+        (
+            customer_name.strip() or "ลูกค้า",
+            email.strip(),
+            phone.strip(),
+            booking["user_id"],
+        ),
+    )
+
+    conn.execute(
+        """
+        UPDATE bookings
+        SET customer_phone = ?,
+            doctor_id = ?,
+            package_name = ?,
+            appointment_date = ?,
+            appointment_time = ?,
+            note = ?,
+            status = ?,
+            revenue_amount = ?
+        WHERE id = ?
+        """,
+        (
+            customer_phone.strip() or phone.strip(),
+            doctor_value,
+            package_name.strip() or "ไม่ระบุบริการ",
+            appointment_date.strip(),
+            appointment_time.strip(),
+            note.strip(),
+            status,
+            revenue_value,
+            booking_id,
+        ),
+    )
+
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse("/admin/bookings?success=แก้ไขรายการจองสำเร็จ", status_code=303)
+
+
+@app.post("/admin/bookings/{booking_id}/status")
+def admin_update_booking_status(
+    request: Request,
+    booking_id: int,
+    status: str = Form("PENDING"),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/bookings", status_code=303)
+
+    allowed_status = {"PENDING", "CONFIRMED", "DONE", "CANCELLED"}
+    if status not in allowed_status:
+        status = "PENDING"
+
+    conn = get_db()
+    conn.execute(
+        "UPDATE bookings SET status = ? WHERE id = ?",
+        (status, booking_id),
+    )
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse("/admin/bookings?success=อัปเดตสถานะสำเร็จ", status_code=303)
+
+
+@app.post("/admin/bookings/{booking_id}/delete")
+def admin_delete_booking(request: Request, booking_id: int):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/bookings", status_code=303)
+
+    conn = get_db()
+    conn.execute("DELETE FROM bookings WHERE id = ?", (booking_id,))
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse("/admin/bookings?success=ลบรายการจองสำเร็จ", status_code=303)
 
 
 @app.get("/admin/line-leads")
@@ -3949,6 +4302,406 @@ def admin_delete_service(request: Request, service_id: int):
         print("SERVICE DELETE ERROR:", repr(e))
         return admin_redirect_with_message("/admin/services", error=f"ลบหมวดบริการไม่สำเร็จ: {str(e)}")
 
+
+
+# =========================================================
+# ADMIN HOMECARE CHANNEL
+
+@app.get("/admin/homecare-channel")
+def admin_homecare_channel(request: Request):
+    admin = require_admin(request)
+    if not admin:
+        return RedirectResponse("/login?next=/admin/homecare-channel", status_code=303)
+
+    conn = get_db()
+    channels = conn.execute(
+        """
+        SELECT * FROM homecare_channels
+        ORDER BY sort_order ASC, id DESC
+        """
+    ).fetchall()
+    conn.close()
+
+    messages = get_admin_messages(request)
+    return templates.TemplateResponse(
+        "admin_homecare_channel.html",
+        {
+            "request": request,
+            "user": admin,
+            "channels": channels,
+            "success": messages["success"],
+            "error": messages["error"],
+        },
+    )
+
+
+@app.post("/admin/homecare-channel")
+def admin_create_homecare_channel(
+    request: Request,
+    title: str = Form(...),
+    description: str = Form(""),
+    video_url: str = Form(...),
+    sort_order: int = Form(0),
+    is_active: str = Form("1"),
+    cover_image: UploadFile = File(None),
+):
+    admin = require_admin(request)
+    if not admin:
+        return RedirectResponse("/login?next=/admin/homecare-channel", status_code=303)
+
+    try:
+        title = (title or "").strip()
+        video_url = (video_url or "").strip()
+        if not title or not video_url:
+            return admin_redirect_with_message(
+                "/admin/homecare-channel",
+                error="กรุณาใส่ชื่อคลิปและลิงก์วิดีโอ",
+            )
+
+        cover_image_file = save_uploaded_image(
+            CHANNEL_IMAGE_DIR,
+            f"channel-{title}",
+            cover_image,
+        )
+        platform = detect_video_platform(video_url)
+
+        conn = get_db()
+        conn.execute(
+            """
+            INSERT INTO homecare_channels (
+                title, description, video_url, platform,
+                cover_image_file, is_active, sort_order, created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                title,
+                description,
+                video_url,
+                platform,
+                cover_image_file or "",
+                1 if is_active == "1" else 0,
+                sort_order,
+                datetime.now().isoformat(timespec="seconds"),
+            ),
+        )
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message(
+            "/admin/homecare-channel",
+            success="เพิ่มคลิป HomeCare Channel สำเร็จ",
+        )
+
+    except Exception as e:
+        print("HOMECARE CHANNEL CREATE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/homecare-channel",
+            error=f"เพิ่มคลิปไม่สำเร็จ: {str(e)}",
+        )
+
+
+@app.post("/admin/homecare-channel/{channel_id}/update")
+def admin_update_homecare_channel(
+    request: Request,
+    channel_id: int,
+    title: str = Form(...),
+    description: str = Form(""),
+    video_url: str = Form(...),
+    sort_order: int = Form(0),
+    is_active: str = Form("0"),
+    cover_image: UploadFile = File(None),
+):
+    admin = require_admin(request)
+    if not admin:
+        return RedirectResponse("/login?next=/admin/homecare-channel", status_code=303)
+
+    try:
+        title = (title or "").strip()
+        video_url = (video_url or "").strip()
+        if not title or not video_url:
+            return admin_redirect_with_message(
+                "/admin/homecare-channel",
+                error="กรุณาใส่ชื่อคลิปและลิงก์วิดีโอ",
+            )
+
+        conn = get_db()
+        current = conn.execute(
+            "SELECT * FROM homecare_channels WHERE id = ?",
+            (channel_id,),
+        ).fetchone()
+
+        if not current:
+            conn.close()
+            return admin_redirect_with_message(
+                "/admin/homecare-channel",
+                error="ไม่พบคลิปนี้",
+            )
+
+        cover_image_file = current["cover_image_file"] or ""
+        new_cover = save_uploaded_image(CHANNEL_IMAGE_DIR, f"channel-{title}", cover_image)
+        if new_cover:
+            cover_image_file = new_cover
+
+        conn.execute(
+            """
+            UPDATE homecare_channels
+            SET title = ?, description = ?, video_url = ?, platform = ?,
+                cover_image_file = ?, is_active = ?, sort_order = ?
+            WHERE id = ?
+            """,
+            (
+                title,
+                description,
+                video_url,
+                detect_video_platform(video_url),
+                cover_image_file,
+                1 if is_active == "1" else 0,
+                sort_order,
+                channel_id,
+            ),
+        )
+        conn.commit()
+        conn.close()
+
+        return admin_redirect_with_message(
+            "/admin/homecare-channel",
+            success="อัปเดตคลิปสำเร็จ",
+        )
+
+    except Exception as e:
+        print("HOMECARE CHANNEL UPDATE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/homecare-channel",
+            error=f"อัปเดตคลิปไม่สำเร็จ: {str(e)}",
+        )
+
+
+@app.post("/admin/homecare-channel/{channel_id}/delete")
+def admin_delete_homecare_channel(request: Request, channel_id: int):
+    admin = require_admin(request)
+    if not admin:
+        return RedirectResponse("/login?next=/admin/homecare-channel", status_code=303)
+
+    try:
+        conn = get_db()
+        conn.execute("DELETE FROM homecare_channels WHERE id = ?", (channel_id,))
+        conn.commit()
+        conn.close()
+        return admin_redirect_with_message(
+            "/admin/homecare-channel",
+            success="ลบคลิปสำเร็จ",
+        )
+    except Exception as e:
+        print("HOMECARE CHANNEL DELETE ERROR:", repr(e))
+        return admin_redirect_with_message(
+            "/admin/homecare-channel",
+            error=f"ลบคลิปไม่สำเร็จ: {str(e)}",
+        )
+
+
+# ADMIN WEBSITE ENTRY POPUP
+# ให้ Admin อัปโหลดรูป Popup เองได้จาก /admin/popup
+# =========================================================
+import base64
+
+
+def ensure_entry_popup_table():
+    conn = get_db()
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS entry_popup_settings (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            is_active INTEGER DEFAULT 0,
+            show_once INTEGER DEFAULT 1,
+            delay_ms INTEGER DEFAULT 500,
+            image_data_url TEXT,
+            image_filename TEXT,
+            updated_at TEXT
+        )
+        """
+    )
+
+    row = conn.execute("SELECT id FROM entry_popup_settings WHERE id = 1").fetchone()
+    if not row:
+        conn.execute(
+            """
+            INSERT INTO entry_popup_settings (
+                id,
+                is_active,
+                show_once,
+                delay_ms,
+                image_data_url,
+                image_filename,
+                updated_at
+            )
+            VALUES (1, 0, 1, 500, '', '', ?)
+            """,
+            (datetime.now().isoformat(timespec="seconds"),),
+        )
+
+    conn.commit()
+    conn.close()
+
+
+def get_entry_popup_settings():
+    ensure_entry_popup_table()
+
+    conn = get_db()
+    row = conn.execute("SELECT * FROM entry_popup_settings WHERE id = 1").fetchone()
+    conn.close()
+
+    if not row:
+        return {
+            "is_active": 0,
+            "show_once": 1,
+            "delay_ms": 500,
+            "image_data_url": "",
+            "image_filename": "",
+        }
+
+    return dict(row)
+
+
+def popup_upload_to_data_url(upload: UploadFile | None):
+    if not upload or not upload.filename:
+        return "", ""
+
+    original_name = upload.filename or "popup.png"
+    lower_name = original_name.lower()
+    allowed = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".webp": "image/webp",
+    }
+
+    ext = os.path.splitext(lower_name)[1]
+    content_type = allowed.get(ext)
+
+    if not content_type:
+        raise ValueError("ไฟล์รูปต้องเป็น JPG, PNG หรือ WEBP เท่านั้น")
+
+    raw = upload.file.read()
+
+    # กันอัปโหลดรูปใหญ่เกินไป เพราะเก็บใน SQLite เป็น base64
+    max_size = 3 * 1024 * 1024
+    if len(raw) > max_size:
+        raise ValueError("รูปใหญ่เกินไป กรุณาใช้ไฟล์ไม่เกิน 3MB")
+
+    encoded = base64.b64encode(raw).decode("utf-8")
+    data_url = f"data:{content_type};base64,{encoded}"
+
+    return data_url, original_name
+
+
+@app.get("/api/entry-popup")
+def api_entry_popup():
+    popup = get_entry_popup_settings()
+    image_data_url = popup.get("image_data_url") or ""
+
+    return {
+        "is_active": bool(popup.get("is_active") == 1 and image_data_url),
+        "show_once": bool(popup.get("show_once") == 1),
+        "delay_ms": int(popup.get("delay_ms") or 500),
+        "image_url": image_data_url,
+    }
+
+
+@app.get("/admin/popup")
+def admin_popup_page(request: Request):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/popup", status_code=303)
+
+    popup = get_entry_popup_settings()
+
+    return templates.TemplateResponse(
+        "admin_popup.html",
+        {
+            "request": request,
+            "user": admin,
+            "popup": popup,
+            "success": request.query_params.get("success", ""),
+            "error": request.query_params.get("error", ""),
+        },
+    )
+
+
+@app.post("/admin/popup")
+def admin_popup_update(
+    request: Request,
+    image_file: UploadFile = File(None),
+    is_active: str = Form("0"),
+    show_once: str = Form("0"),
+    delay_ms: int = Form(500),
+    remove_image: str = Form("0"),
+):
+    admin = require_admin(request)
+
+    if not admin:
+        return RedirectResponse("/login?next=/admin/popup", status_code=303)
+
+    ensure_entry_popup_table()
+
+    try:
+        current = get_entry_popup_settings()
+        image_data_url = current.get("image_data_url") or ""
+        image_filename = current.get("image_filename") or ""
+
+        if remove_image == "1":
+            image_data_url = ""
+            image_filename = ""
+
+        new_image_data_url, new_image_filename = popup_upload_to_data_url(image_file)
+        if new_image_data_url:
+            image_data_url = new_image_data_url
+            image_filename = new_image_filename
+
+        delay_ms = int(delay_ms or 500)
+        if delay_ms < 0:
+            delay_ms = 0
+        if delay_ms > 10000:
+            delay_ms = 10000
+
+        conn = get_db()
+        conn.execute(
+            """
+            UPDATE entry_popup_settings
+            SET is_active = ?,
+                show_once = ?,
+                delay_ms = ?,
+                image_data_url = ?,
+                image_filename = ?,
+                updated_at = ?
+            WHERE id = 1
+            """,
+            (
+                1 if is_active == "1" else 0,
+                1 if show_once == "1" else 0,
+                delay_ms,
+                image_data_url,
+                image_filename,
+                datetime.now().isoformat(timespec="seconds"),
+            ),
+        )
+        conn.commit()
+        conn.close()
+
+        return RedirectResponse(
+            "/admin/popup?success=บันทึก Popup สำเร็จ",
+            status_code=303,
+        )
+
+    except Exception as e:
+        print("ENTRY POPUP UPDATE ERROR:", repr(e))
+        return RedirectResponse(
+            "/admin/popup?error=" + urlencode({"": str(e)})[1:],
+            status_code=303,
+        )
+
+
 @app.get("/packages/{slug}")
 def package_detail(request: Request, slug: str):
     package = get_package_by_slug(slug)
@@ -3964,3 +4717,246 @@ def package_detail(request: Request, slug: str):
             "package": package,
         },
     )
+
+# =========================
+# WEBSITE AUTO TRANSLATE API
+# แปลข้อความบนเว็บทั้งหน้าเป็น 5 ภาษา พร้อม cache ใน SQLite
+# =========================
+TRANSLATE_LANG_LABELS = {
+    "th": "Thai",
+    "en": "English",
+    "zh": "Simplified Chinese",
+    "ja": "Japanese",
+    "ko": "Korean",
+}
+
+
+def ensure_translation_cache_table():
+    conn = get_db()
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS translation_cache (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_text TEXT NOT NULL,
+            target_lang TEXT NOT NULL,
+            translated_text TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            UNIQUE(source_text, target_lang)
+        )
+        """
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_cached_translations(texts, target_lang: str):
+    ensure_translation_cache_table()
+    result = {}
+    if not texts:
+        return result
+
+    conn = get_db()
+    for text in texts:
+        row = conn.execute(
+            """
+            SELECT translated_text FROM translation_cache
+            WHERE source_text = ? AND target_lang = ?
+            """,
+            (text, target_lang),
+        ).fetchone()
+        if row:
+            result[text] = row["translated_text"]
+    conn.close()
+    return result
+
+
+def save_translation_cache(translations: dict, target_lang: str):
+    ensure_translation_cache_table()
+    now = datetime.now().isoformat(timespec="seconds")
+    conn = get_db()
+    for source_text, translated_text in translations.items():
+        if not source_text or not translated_text:
+            continue
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO translation_cache
+            (source_text, target_lang, translated_text, created_at)
+            VALUES (?, ?, ?, ?)
+            """,
+            (source_text, target_lang, translated_text, now),
+        )
+    conn.commit()
+    conn.close()
+
+
+def ai_translate_text_batch(texts: list[str], target_lang: str):
+    """Translate a batch of visible website texts.
+
+    Fixes:
+    - Uses Chat Completions, which is more compatible with installed OpenAI packages.
+    - Does not permanently cache failed fallback translations.
+    - If old cache contains source text = translated text for a non-Thai language,
+      it treats that item as missing and translates again.
+    """
+    target_lang = (target_lang or "th").strip().lower()
+
+    if target_lang == "th":
+        return {text: text for text in texts}
+
+    if target_lang not in TRANSLATE_LANG_LABELS:
+        return {text: text for text in texts}
+
+    clean_texts = []
+    seen = set()
+    for text in texts:
+        text = (text or "").strip()
+        if not text or text in seen:
+            continue
+        if len(text) > 900:
+            continue
+        seen.add(text)
+        clean_texts.append(text)
+
+    if not clean_texts:
+        return {}
+
+    cached = get_cached_translations(clean_texts, target_lang)
+
+    # Important: older failed attempts may have cached the original Thai text.
+    # For non-Thai languages, do not trust cache rows where translated == source.
+    for source_text in list(cached.keys()):
+        translated_text = (cached.get(source_text) or "").strip()
+        if translated_text == source_text.strip():
+            cached.pop(source_text, None)
+
+    missing = [text for text in clean_texts if text not in cached]
+
+    if not missing:
+        return cached
+
+    force_load_env()
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    model = os.getenv("OPENAI_TRANSLATE_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini"
+
+    if not api_key:
+        print("PAGE TRANSLATE ERROR: Missing OPENAI_API_KEY")
+        # Do NOT save fallback to cache.
+        cached.update({text: text for text in missing})
+        return cached
+
+    translated = {}
+
+    try:
+        client = OpenAI(api_key=api_key)
+        target_name = TRANSLATE_LANG_LABELS[target_lang]
+
+        batch_size = 50
+        for start in range(0, len(missing), batch_size):
+            batch = missing[start:start + batch_size]
+
+            messages = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a professional website translator for an aesthetic clinic. "
+                        "Return valid JSON only. No markdown."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        f"Translate every item in this JSON array into {target_name}.\n"
+                        "Rules:\n"
+                        "- Keep brand names such as Home Care, LINE, Facebook, TikTok, Instagram unchanged.\n"
+                        "- Keep URLs, phone numbers, email, prices, emojis, dates, and code-like words unchanged.\n"
+                        "- Do not add new medical claims.\n"
+                        "- Return ONLY JSON in this exact format: {\"items\":[\"...\",\"...\"]}\n"
+                        "- The items array must have the same number of items and same order as input.\n\n"
+                        f"Input JSON array:\n{json.dumps(batch, ensure_ascii=False)}"
+                    ),
+                },
+            ]
+
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                temperature=0.1,
+                response_format={"type": "json_object"},
+            )
+
+            raw = response.choices[0].message.content or "{}"
+            data = json.loads(raw.strip())
+            items = data.get("items", [])
+
+            if not isinstance(items, list):
+                items = []
+
+            for i, source_text in enumerate(batch):
+                value = items[i] if i < len(items) else source_text
+                if not isinstance(value, str) or not value.strip():
+                    value = source_text
+                translated[source_text] = value.strip()
+
+        # Save only after successful OpenAI response. This prevents failed Thai fallback cache.
+        save_translation_cache(translated, target_lang)
+
+    except Exception as e:
+        print("PAGE TRANSLATE ERROR:", repr(e))
+        # Do NOT save fallback to cache.
+        translated = {text: text for text in missing}
+
+    cached.update(translated)
+    return cached
+
+
+@app.post("/api/translate-page")
+async def api_translate_page(request: Request):
+    """Translate visible page text.
+
+    Frontend versions may send the target language as `lang`, `target_lang`,
+    or `language`, so this route accepts all three. This fixes the issue where
+    the API always returned lang=th even when the page URL was ?lang=ko/zh/etc.
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+
+    lang = (
+        body.get("target_lang")
+        or body.get("lang")
+        or body.get("language")
+        or "th"
+    )
+    lang = str(lang).strip().lower()
+
+    lang_aliases = {
+        "cn": "zh",
+        "zh-cn": "zh",
+        "zh_cn": "zh",
+        "chinese": "zh",
+        "jp": "ja",
+        "kr": "ko",
+        "thai": "th",
+        "english": "en",
+    }
+    lang = lang_aliases.get(lang, lang)
+
+    texts = body.get("texts") or []
+
+    if not isinstance(texts, list):
+        texts = []
+
+    texts = [str(text).strip() for text in texts if str(text).strip()]
+    texts = texts[:700]
+
+    if lang == "th":
+        return {
+            "ok": True,
+            "lang": lang,
+            "translations": {text: text for text in texts},
+        }
+
+    translations = ai_translate_text_batch(texts, lang)
+    return {"ok": True, "lang": lang, "translations": translations}
+

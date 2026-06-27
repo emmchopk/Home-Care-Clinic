@@ -1,60 +1,136 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Booking | Home Care Clinic{% endblock %}
+{% block title %}แก้ไขรายการจอง{% endblock %}
 
 {% block content %}
-
 <section class="admin-page">
-  <div class="admin-head">
-    <div>
-      <p class="eyebrow">Back Office</p>
-      <h1>Edit Booking</h1>
-      <p>แก้ไขวันนัดของลูกค้า และส่ง Email ยืนยันใหม่</p>
+  <div class="admin-container">
+
+    <div class="admin-header">
+      <div>
+        <p class="blossom-kicker">ADMIN BOOKING</p>
+        <h1>แก้ไขรายการจอง</h1>
+        <p>แก้ไขข้อมูลลูกค้า วันเวลา คุณหมอ แพ็กเกจ สถานะ และยอดรายได้</p>
+      </div>
+
+      <a href="/admin/bookings" class="btn-outline">← กลับรายการจอง</a>
     </div>
 
-    <a href="/admin/bookings" class="btn-outline">Back Bookings</a>
-  </div>
+    <div class="admin-card">
+      <form method="post" action="/admin/bookings/{{ booking.id }}/edit" class="admin-form-grid">
 
-  <div class="admin-panel">
-    <div class="booking-user-box">
-      <span>Customer</span>
-      <b>{{ booking.full_name }}</b>
-      <small>{{ booking.email }}</small>
+        <div>
+          <label>ชื่อลูกค้า</label>
+          <input
+            type="text"
+            name="customer_name"
+            value="{{ booking.customer_name or booking.full_name or '' }}"
+            required
+          >
+        </div>
+
+        <div>
+          <label>Email ลูกค้า</label>
+          <input
+            type="email"
+            name="email"
+            value="{{ booking.customer_email or booking.email or '' }}"
+          >
+        </div>
+
+        <div>
+          <label>เบอร์ในบัญชีลูกค้า</label>
+          <input
+            type="text"
+            name="phone"
+            value="{{ booking.user_phone or booking.phone or '' }}"
+          >
+        </div>
+
+        <div>
+          <label>เบอร์ที่ใช้ติดต่อในรายการจอง</label>
+          <input
+            type="text"
+            name="customer_phone"
+            value="{{ booking.customer_phone or booking.user_phone or booking.phone or '' }}"
+          >
+        </div>
+
+        <div>
+          <label>แพ็กเกจ / บริการ</label>
+          <input
+            type="text"
+            name="package_name"
+            value="{{ booking.package_name or '' }}"
+            required
+          >
+        </div>
+
+        <div>
+          <label>คุณหมอ</label>
+          <select name="doctor_id">
+            <option value="">ไม่ระบุคุณหมอ</option>
+            {% for doctor in doctors %}
+              <option value="{{ doctor.id }}" {% if booking.doctor_id == doctor.id %}selected{% endif %}>
+                {{ doctor.name }}{% if doctor.specialty %} - {{ doctor.specialty }}{% endif %}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label>วันที่จอง</label>
+          <input
+            type="date"
+            name="appointment_date"
+            value="{{ booking.appointment_date or '' }}"
+            required
+          >
+        </div>
+
+        <div>
+          <label>เวลาจอง</label>
+          <input
+            type="time"
+            name="appointment_time"
+            value="{{ booking.appointment_time or '' }}"
+            required
+          >
+        </div>
+
+        <div>
+          <label>สถานะ</label>
+          <select name="status">
+            <option value="PENDING" {% if booking.status == 'PENDING' %}selected{% endif %}>รอดำเนินการ</option>
+            <option value="CONFIRMED" {% if booking.status == 'CONFIRMED' %}selected{% endif %}>ยืนยันแล้ว</option>
+            <option value="DONE" {% if booking.status == 'DONE' %}selected{% endif %}>ใช้บริการแล้ว</option>
+            <option value="CANCELLED" {% if booking.status == 'CANCELLED' %}selected{% endif %}>ยกเลิก</option>
+          </select>
+        </div>
+
+        <div>
+          <label>ยอดรายได้</label>
+          <input
+            type="number"
+            step="0.01"
+            name="revenue_amount"
+            value="{{ booking.revenue_amount or 0 }}"
+          >
+        </div>
+
+        <div class="full">
+          <label>หมายเหตุ</label>
+          <textarea name="note" rows="5">{{ booking.note or '' }}</textarea>
+        </div>
+
+        <div class="full" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center;">
+          <a href="/admin/bookings" class="btn-outline">ยกเลิก</a>
+          <button type="submit" class="btn-primary">บันทึกการแก้ไข</button>
+        </div>
+
+      </form>
     </div>
 
-    <form class="admin-form" method="post" action="/admin/bookings/{{ booking.id }}/edit">
-      <label>Phone</label>
-      <input name="customer_phone" value="{{ booking.customer_phone or '' }}" />
-
-      <label>Doctor</label>
-      <select name="doctor_id" required>
-        {% for doctor in doctors %}
-          <option value="{{ doctor.id }}" {% if booking.doctor_id == doctor.id %}selected{% endif %}>
-            {{ doctor.name }} — {{ doctor.specialty }}
-          </option>
-        {% endfor %}
-      </select>
-
-      <label>Appointment Date</label>
-      <input type="date" name="appointment_date" value="{{ booking.appointment_date }}" required />
-
-      <label>Appointment Time</label>
-      <input type="time" name="appointment_time" value="{{ booking.appointment_time }}" required />
-
-      <label>Status</label>
-      <select name="status">
-        <option value="PENDING" {% if booking.status == "PENDING" %}selected{% endif %}>PENDING</option>
-        <option value="CONFIRMED" {% if booking.status == "CONFIRMED" %}selected{% endif %}>CONFIRMED</option>
-        <option value="DONE" {% if booking.status == "DONE" %}selected{% endif %}>DONE</option>
-        <option value="CANCELLED" {% if booking.status == "CANCELLED" %}selected{% endif %}>CANCELLED</option>
-      </select>
-
-      <label>Note</label>
-      <textarea name="note" rows="4">{{ booking.note or '' }}</textarea>
-
-      <button type="submit">Save & Send Email Again</button>
-    </form>
   </div>
 </section>
-
 {% endblock %}

@@ -1,105 +1,1623 @@
 {% extends "base.html" %}
 {% block title %}Home Care Clinic{% endblock %}
 {% block content %}
+
 <style>
-  .home-page{background:#fff3f4;color:#332b28;overflow-x:hidden}.home-container{width:min(1180px,calc(100% - 40px));margin:0 auto}.label{margin:0 0 8px;color:#c7a46b;font-size:12px;font-weight:900;letter-spacing:1.8px;text-transform:uppercase}.section-head{text-align:center;margin-bottom:28px}.section-head h2{margin:0 0 8px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(30px,4vw,44px);font-weight:400;color:#2f2926}.section-head p{margin:0;color:#8a7d75;line-height:1.8}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 24px;border-radius:999px;font-size:14px;font-weight:800;text-decoration:none;border:0;cursor:pointer;background:#8fa184;color:#fff}.btn-soft{background:#fff;color:#66785f;border:1px solid rgba(199,164,107,.35)}.hero{padding:34px 0 0}.hero-box{min-height:470px;border-radius:30px;overflow:hidden;border:1px solid rgba(199,164,107,.28);box-shadow:0 18px 45px rgba(108,77,65,.13);background:linear-gradient(90deg,rgba(47,41,38,.72),rgba(47,41,38,.28),rgba(255,255,255,.06)),url('/static/images/packages/facial-radiance.jpg');background-size:cover;background-position:center;display:flex;align-items:center}.hero-content{width:min(680px,100%);padding:58px;color:#fff}.hero-content .label{color:#f5e8cf}.hero-content h1{margin:0 0 18px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(42px,6vw,72px);line-height:1;font-weight:400;color:#fff}.hero-content p{margin:0;color:rgba(255,255,255,.9);line-height:1.9;font-size:16px}.hero-actions{margin-top:26px;display:flex;flex-wrap:wrap;gap:14px}.about{margin-top:34px}.about-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:24px}.about-img{min-height:260px;border-radius:24px;background:linear-gradient(120deg,rgba(255,255,255,.08),rgba(255,243,244,.34)),url('/static/images/packages/acne-care.jpg');background-size:cover;background-position:center;border:1px solid rgba(199,164,107,.28);box-shadow:0 14px 34px rgba(100,70,60,.09)}.about-text{padding:30px;border-radius:24px;background:rgba(255,250,243,.92);border:1px solid rgba(199,164,107,.28);box-shadow:0 14px 34px rgba(100,70,60,.09)}.about-text h2{margin:0 0 12px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(28px,3vw,38px);font-weight:400}.about-text p{color:#8a7d75;line-height:1.9}.promo{margin-top:56px}.promo-wrap{position:relative;width:min(960px,100%);margin:0 auto;border-radius:30px;overflow:hidden;background:#fffaf3;border:1px solid rgba(199,164,107,.28);box-shadow:0 18px 45px rgba(108,77,65,.13)}.promo-slider{position:relative;height:420px;overflow:hidden}.promo-slide{position:absolute;inset:0;display:grid;grid-template-columns:1.05fr .95fr;opacity:0;transform:translateX(100%);transition:.8s ease;background:#fffaf3}.promo-slide.active{opacity:1;transform:translateX(0);z-index:2}.promo-slide.prev{opacity:0;transform:translateX(-100%);z-index:1}.promo-img{min-height:420px;background:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('/static/images/packages/laser-glow.jpg');background-size:cover;background-position:center}.promo-content{padding:46px;display:flex;flex-direction:column;justify-content:center}.promo-content h3{margin:12px 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(30px,4vw,48px);font-weight:400}.promo-price{color:#66785f;font-weight:900;font-size:20px;margin-bottom:14px}.promo-content p{color:#8a7d75;line-height:1.85}.promo-dots{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:5;display:flex;gap:8px}.promo-dot{width:9px;height:9px;border-radius:999px;border:0;background:rgba(102,120,95,.35);cursor:pointer}.promo-dot.active{width:28px;background:#8fa184}.review,.doctors,.services{margin-top:56px}.review-wrap{display:grid;grid-template-columns:48px 1fr 48px;gap:14px;align-items:center}.review-slider{display:flex;gap:18px;overflow-x:auto;scroll-behavior:smooth;padding:8px 4px 18px}.review-card{min-width:300px;max-width:300px;padding:24px;border-radius:22px;background:#fffaf3;border:1px solid rgba(199,164,107,.28);box-shadow:0 14px 34px rgba(100,70,60,.08)}.stars{color:#c7a46b;letter-spacing:2px;margin-bottom:12px}.review-card p{color:#8a7d75;line-height:1.7}.review-card b{color:#66785f}.arrow{width:48px;height:48px;border:0;border-radius:999px;cursor:pointer;background:#fff;color:#66785f;font-size:34px;box-shadow:0 12px 30px rgba(100,70,60,.12)}.doctor-grid{width:min(920px,100%);margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.doctor-card{overflow:hidden;border-radius:22px;background:#fffaf3;border:1px solid rgba(199,164,107,.28);box-shadow:0 12px 28px rgba(100,70,60,.07)}.doctor-img{height:190px;background:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('/static/images/doctors/doctor-default.jpg');background-size:cover;background-position:center top}.doctor-body{padding:15px 17px 17px}.doctor-body h3{margin:8px 0 5px;font-family:Georgia,"Times New Roman",serif;font-size:23px;font-weight:400}.doctor-body b{color:#66785f;font-size:13px}.doctor-body p{color:#8a7d75;line-height:1.55;font-size:13px}.services{padding-bottom:70px}.service-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}.service-card{position:relative;border:0;padding:0;width:100%;height:360px;text-align:left;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 18px 45px rgba(100,70,60,.11);cursor:pointer}.service-card:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.54));z-index:1}.service-card:hover{transform:translateY(-8px);box-shadow:0 26px 70px rgba(100,70,60,.22)}.service-img{position:absolute;inset:0;background:#f8d8dc;background-size:cover;background-position:center;transition:.3s ease}.service-card:hover .service-img{transform:scale(1.06)}.service-overlay{position:absolute;z-index:2;inset:auto 0 0;padding:24px;color:#fff}.service-overlay h3{font-family:Georgia,"Times New Roman",serif;font-size:30px;font-weight:400;margin:0 0 8px}.service-overlay p{margin:0;line-height:1.65;color:rgba(255,255,255,.88)}.empty{padding:34px;text-align:center;border-radius:24px;background:#fffaf3;border:1px solid rgba(199,164,107,.28);color:#8a7d75}.program-popover{position:fixed;z-index:99999;width:min(920px,calc(100vw - 28px));max-height:min(620px,calc(100vh - 28px));background:#fff;border:1px solid rgba(199,164,107,.35);border-radius:28px;overflow:hidden;box-shadow:0 26px 90px rgba(47,41,38,.26);display:grid;grid-template-columns:260px 1fr;opacity:0;visibility:hidden;transform:translateY(14px) scale(.98);transition:opacity .18s ease,transform .18s ease,visibility .18s ease;pointer-events:none}.program-popover.show{opacity:1;visibility:visible;transform:translateY(0) scale(1);pointer-events:auto}.popover-sidebar{background:#f3e8df;padding:24px;overflow-y:auto}.popover-sidebar h3{margin:0 0 10px;color:#7a303b;font-size:24px}.popover-sidebar p{margin:0 0 18px;color:#8a7d75;line-height:1.6;font-size:14px}.program-list{display:grid;gap:8px}.program-btn{border:0;background:transparent;text-align:left;padding:11px 12px;border-radius:14px;cursor:pointer;font-size:15px;color:#2f2926;font-weight:800}.program-btn:hover,.program-btn.active{background:#fff;color:#7a303b}.popover-main{padding:24px;overflow-y:auto;max-height:min(620px,calc(100vh - 28px))}.popover-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}.popover-head small{color:#9b6b70;font-weight:800}.popover-head h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(30px,4vw,48px);line-height:1.05;margin:6px 0 0;color:#7a303b}.popover-close{width:36px;height:36px;border:0;border-radius:999px;background:#f3e8df;font-size:24px;cursor:pointer;color:#7a303b;flex:0 0 auto}.program-detail{color:#8a7d75;line-height:1.75;margin:0 0 16px}.media-view{display:grid;gap:14px}.media-item{border-radius:22px;overflow:hidden;background:#fffaf3;border:1px solid #f0d8bd}.media-item img,.media-item video{display:block;width:100%;max-height:360px;object-fit:cover}.media-item iframe{display:block;width:100%;height:360px;border:0}.media-caption{padding:12px 16px;color:#554943;line-height:1.6}.recommend-box{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}.recommend-card{position:relative;min-height:180px;border-radius:22px;overflow:hidden;background:#f8d8dc;background-size:cover;background-position:center;border:0;cursor:pointer}.recommend-card:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.55))}.recommend-card h3{position:absolute;left:18px;right:18px;bottom:18px;color:#fff;font-size:24px;margin:0}.no-media{padding:22px;border-radius:18px;background:#fff3f4;color:#8a7d75}@media(max-width:1020px){.promo-slide{grid-template-columns:1fr}.promo-img{min-height:240px}.promo-slider{height:620px}.doctor-grid,.service-grid{grid-template-columns:repeat(2,1fr)}.about-grid{grid-template-columns:1fr}.program-popover{grid-template-columns:1fr;left:14px!important;right:14px!important;top:80px!important;width:calc(100vw - 28px)}.popover-sidebar{max-height:190px}.recommend-box{grid-template-columns:1fr}}@media(max-width:700px){.home-container{width:calc(100% - 28px)}.hero-content{padding:34px 24px}.hero-content h1{font-size:40px}.hero-actions{flex-direction:column}.btn{width:100%}.promo-slider{height:660px}.doctor-grid,.service-grid{grid-template-columns:1fr}.review-wrap{grid-template-columns:40px 1fr 40px}.arrow{width:40px;height:40px;font-size:28px}.review-card{min-width:260px;max-width:260px}.popover-main{padding:20px}.service-card{height:300px}}
+/* =====================================================
+   HOME RESTORE SAFE - ใช้เฉพาะหน้า home.html
+   ไม่ชน style.css เดิม และไม่ทำ layout หน้าอื่นพัง
+===================================================== */
+.home-restore-page{
+  background:#fff3f4;
+  color:#332b28;
+  overflow-x:hidden;
+  font-family:"Segoe UI", Arial, sans-serif;
+}
+.home-restore-container{
+  width:min(1180px, calc(100% - 40px));
+  margin:0 auto;
+  box-sizing:border-box;
+}
+.home-restore-label{
+  margin:0 0 10px;
+  color:#c7a46b;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+.home-restore-section-head{
+  text-align:center;
+  margin-bottom:30px;
+}
+.home-restore-section-head h2{
+  margin:0 0 8px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(30px,4vw,46px);
+  line-height:1.08;
+  font-weight:400;
+  color:#332b28;
+}
+.home-restore-section-head p{
+  margin:0 auto;
+  max-width:760px;
+  color:#8a7d75;
+  font-size:14px;
+  line-height:1.8;
+}
+.home-restore-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:0 24px;
+  border-radius:999px;
+  font-size:14px;
+  font-weight:900;
+  text-decoration:none;
+  border:0;
+  cursor:pointer;
+  background:#8fa184;
+  color:#fff;
+  box-shadow:0 12px 28px rgba(77,100,72,.18);
+}
+.home-restore-btn-light{
+  background:#fffaf3;
+  color:#66785f;
+  border:1px solid rgba(199,164,107,.35);
+  box-shadow:none;
+}
+
+/* HERO: หน้าปก + ข้อความใต้รูป */
+.home-restore-hero{
+  padding:28px 0 44px;
+}
+.home-restore-hero-shell{
+  width:100%;
+  overflow:hidden;
+  border-radius:30px;
+  border:1px solid rgba(199,164,107,.34);
+  background:linear-gradient(135deg,#fffaf3 0%,#fff3f4 100%);
+  box-shadow:0 18px 48px rgba(108,77,65,.10);
+}
+.home-restore-hero-image{
+  width:100%;
+  height:clamp(250px,31vw,430px);
+  overflow:hidden;
+  background:#fff;
+}
+.home-restore-hero-image img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center center;
+}
+.home-restore-hero-text{
+  padding:42px 48px 44px;
+  background:linear-gradient(135deg,#fffaf3 0%,#fff3f4 100%);
+}
+.home-restore-hero-text h1{
+  margin:0 0 18px;
+  color:#332b28;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(42px,5vw,68px);
+  line-height:1.04;
+  font-weight:400;
+}
+.home-restore-hero-text p:not(.home-restore-label){
+  max-width:860px;
+  margin:0;
+  color:#5d514c;
+  font-size:15px;
+  line-height:1.9;
+}
+.home-restore-hero-actions{
+  margin-top:24px;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+/* ABOUT */
+.home-restore-about{
+  padding:0 0 52px;
+}
+.home-restore-about-grid{
+  display:grid;
+  grid-template-columns:320px 1fr;
+  gap:18px;
+  align-items:stretch;
+}
+.home-restore-about-img,
+.home-restore-about-card{
+  border-radius:26px;
+  overflow:hidden;
+  border:1px solid rgba(199,164,107,.34);
+  background:#fffaf3;
+  box-shadow:0 14px 34px rgba(100,70,60,.08);
+}
+.home-restore-about-img{
+  aspect-ratio:1/1;
+  background:#fff;
+}
+.home-restore-about-img img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center top;
+}
+.home-restore-about-card{
+  padding:34px 42px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.home-restore-about-card h2{
+  margin:0 0 16px;
+  color:#332b28;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(26px,3vw,40px);
+  line-height:1.14;
+  font-weight:400;
+}
+.home-restore-about-card p:not(.home-restore-label){
+  margin:0;
+  color:#5d514c;
+  font-size:13.5px;
+  line-height:1.85;
+}
+
+
+.home-restore-about-img{
+  width:320px !important;
+  max-width:320px !important;
+  justify-self:start !important;
+}
+.home-restore-about-card{
+  width:100% !important;
+  min-width:0 !important;
+}
+
+/* PROMOTION */
+.home-restore-promo{
+  padding:72px 0 60px;
+  background:#fff3f4;
+}
+.home-restore-promo-frame{
+  position:relative;
+  width:min(960px,100%);
+  height:430px;
+  margin:0 auto;
+  overflow:hidden;
+  border-radius:32px;
+  background:#fffaf3;
+  border:1px solid rgba(199,164,107,.34);
+  box-shadow:0 18px 48px rgba(108,77,65,.10);
+}
+.home-restore-promo-slider{
+  position:relative;
+  width:100%;
+  height:100%;
+}
+.home-restore-promo-slide{
+  position:absolute;
+  inset:0;
+  display:grid;
+  grid-template-columns:1.08fr .92fr;
+  opacity:0;
+  visibility:hidden;
+  transform:translateX(100%);
+  transition:.65s ease;
+  background:#fffaf3;
+}
+.home-restore-promo-slide.active{
+  opacity:1;
+  visibility:visible;
+  transform:translateX(0);
+  z-index:2;
+}
+.home-restore-promo-slide.prev{
+  opacity:0;
+  visibility:hidden;
+  transform:translateX(-100%);
+  z-index:1;
+}
+.home-restore-promo-photo{
+  width:100%;
+  height:430px;
+  background:#f5e8cf;
+  background-size:cover;
+  background-position:center;
+}
+.home-restore-promo-info{
+  height:430px;
+  padding:40px 44px 56px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  overflow:hidden;
+}
+.home-restore-promo-info small{
+  color:#8a7d75;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:2.6px;
+  text-transform:uppercase;
+}
+.home-restore-promo-info h3{
+  margin:12px 0 12px;
+  color:#332b28;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(30px,3.4vw,46px);
+  line-height:1.08;
+  font-weight:400;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.home-restore-promo-price{
+  color:#66785f;
+  font-weight:900;
+  font-size:20px;
+  margin-bottom:12px;
+}
+.home-restore-promo-desc{
+  margin:0;
+  color:#8a7d75;
+  font-size:15px;
+  line-height:1.7;
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.home-restore-promo-dots{
+  position:absolute;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  z-index:10;
+  display:flex;
+  gap:8px;
+}
+.home-restore-promo-dot{
+  width:10px;
+  height:10px;
+  border:0;
+  border-radius:999px;
+  background:rgba(102,120,95,.35);
+  cursor:pointer;
+}
+.home-restore-promo-dot.active{
+  width:32px;
+  background:#8fa184;
+}
+
+/* CHANNEL */
+.homecare-channel{
+  padding:70px 0 62px;
+  background:#fffaf5;
+  overflow:hidden;
+}
+.homecare-channel .channel-wrap{
+  position:relative;
+  width:min(1180px,calc(100% - 40px));
+  margin:0 auto;
+}
+.channel-head{
+  text-align:center;
+  margin-bottom:32px;
+}
+.channel-head h2{
+  margin:0 0 8px;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:clamp(34px,4.6vw,56px);
+  font-weight:400;
+  color:#2f2926;
+}
+.channel-head p{
+  margin:0;
+  color:#8a7d75;
+  line-height:1.8;
+}
+.channel-track{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:22px;
+}
+.channel-card{
+  position:relative;
+  height:410px;
+  border:0;
+  border-radius:24px;
+  overflow:hidden;
+  background:#f5e8cf;
+  cursor:pointer;
+  box-shadow:0 18px 45px rgba(108,77,65,.14);
+  padding:0;
+  text-align:left;
+}
+.channel-card-bg{
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+  transition:.3s ease;
+}
+.channel-card:hover .channel-card-bg{transform:scale(1.06);filter:brightness(.78)}
+.channel-card:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.62));
+}
+.channel-play{
+  position:absolute;
+  z-index:2;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:64px;
+  height:64px;
+  border-radius:999px;
+  background:rgba(255,255,255,.88);
+  display:grid;
+  place-items:center;
+  color:#b25c68;
+  font-size:28px;
+  padding-left:4px;
+}
+.channel-info{
+  position:absolute;
+  z-index:2;
+  left:20px;
+  right:20px;
+  bottom:22px;
+  color:#fff;
+}
+.channel-info small{
+  display:inline-flex;
+  padding:5px 10px;
+  border-radius:999px;
+  background:rgba(0,0,0,.30);
+  text-transform:uppercase;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+.channel-info h3{
+  margin:12px 0 6px;
+  font-size:22px;
+  line-height:1.2;
+  color:#fff;
+}
+.channel-info p{
+  margin:0;
+  color:rgba(255,255,255,.86);
+  line-height:1.55;
+  font-size:13px;
+  display:-webkit-box;
+  -webkit-line-clamp:2;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+.channel-arrow{
+  position:absolute;
+  z-index:5;
+  top:58%;
+  transform:translateY(-50%);
+  width:48px;
+  height:48px;
+  border-radius:999px;
+  border:0;
+  color:#fff;
+  background:#b25c68;
+  font-size:34px;
+  cursor:pointer;
+  box-shadow:0 14px 30px rgba(112,50,61,.26);
+}
+.channel-arrow.left{left:-24px}.channel-arrow.right{right:-24px}
+.channel-video-modal{
+  position:fixed;
+  inset:0;
+  z-index:999999;
+  background:rgba(0,0,0,.72);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.channel-video-modal.show{display:flex}
+.channel-video-box{
+  position:relative;
+  width:min(900px,94vw);
+  max-height:92vh;
+  background:#111;
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 28px 90px rgba(0,0,0,.42);
+}
+.channel-video-close{
+  position:absolute;
+  right:14px;
+  top:14px;
+  z-index:3;
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:999px;
+  background:rgba(255,255,255,.86);
+  color:#222;
+  font-size:28px;
+  cursor:pointer;
+}
+.channel-video-frame{
+  width:100%;
+  aspect-ratio:16/9;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  text-align:center;
+  padding:24px;
+}
+.channel-video-frame.vertical{aspect-ratio:9/16;width:min(420px,88vw);margin:0 auto}
+.channel-video-frame iframe,
+.channel-video-frame video{
+  width:100%;
+  height:100%;
+  border:0;
+  display:block;
+}
+.channel-video-open-btn{
+  display:inline-flex;
+  margin-top:18px;
+  padding:12px 26px;
+  border-radius:999px;
+  background:#8fa184;
+  color:#fff;
+  font-weight:900;
+  text-decoration:none;
+}
+
+/* REVIEWS / DOCTORS / SERVICES */
+.home-restore-review,
+.home-restore-doctors,
+.home-restore-services{
+  padding:60px 0;
+}
+.home-restore-review-wrap{
+  display:grid;
+  grid-template-columns:44px 1fr 44px;
+  gap:14px;
+  align-items:center;
+}
+.home-restore-review-slider{
+  display:flex;
+  gap:18px;
+  overflow-x:auto;
+  scroll-behavior:smooth;
+  padding:8px 4px 18px;
+}
+.home-restore-review-card{
+  min-width:300px;
+  max-width:300px;
+  padding:24px;
+  border-radius:22px;
+  background:#fffaf3;
+  border:1px solid rgba(199,164,107,.28);
+  box-shadow:0 14px 34px rgba(100,70,60,.08);
+}
+.home-restore-stars{color:#c7a46b;letter-spacing:2px;margin-bottom:12px}
+.home-restore-review-card p{color:#8a7d75;line-height:1.7}.home-restore-review-card b{color:#66785f}
+.home-restore-arrow{
+  width:44px;
+  height:44px;
+  border:0;
+  border-radius:999px;
+  cursor:pointer;
+  background:#fff;
+  color:#66785f;
+  font-size:30px;
+  box-shadow:0 12px 30px rgba(100,70,60,.12);
+}
+.home-restore-doctor-grid{
+  width:min(920px,100%);
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+.home-restore-doctor-card{
+  overflow:hidden;
+  border-radius:22px;
+  background:#fffaf3;
+  border:1px solid rgba(199,164,107,.28);
+  box-shadow:0 12px 28px rgba(100,70,60,.07);
+}
+.home-restore-doctor-img{
+  height:190px;
+  background:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32));
+  background-size:cover;
+  background-position:center top;
+}
+.home-restore-doctor-body{padding:15px 17px 17px}.home-restore-doctor-body h3{margin:8px 0 5px;font-family:Georgia,"Times New Roman",serif;font-size:23px;font-weight:400}.home-restore-doctor-body b{color:#66785f;font-size:13px}.home-restore-doctor-body p{color:#8a7d75;line-height:1.55;font-size:13px}
+.home-restore-service-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.home-restore-service-card{
+  position:relative;
+  display:block;
+  height:430px;
+  border-radius:28px;
+  overflow:hidden;
+  background:#f8d8dc;
+  box-shadow:0 18px 45px rgba(100,70,60,.14);
+  border:1px solid rgba(199,164,107,.22);
+  color:#fff;
+  text-decoration:none;
+}
+.home-restore-service-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:.35s ease}
+.home-restore-service-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.16),rgba(0,0,0,.42) 42%,rgba(0,0,0,.68));opacity:.78;transition:.25s ease}
+.home-restore-service-card:hover .home-restore-service-bg{transform:scale(1.06);filter:brightness(.8)}
+.home-restore-service-card:hover:after{opacity:.94}
+.home-restore-service-content{position:absolute;z-index:2;inset:0;padding:28px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.home-restore-service-title{margin:0 0 18px;color:#fff;font-size:clamp(28px,3vw,38px);line-height:1.15;font-weight:900;text-shadow:0 3px 10px rgba(0,0,0,.35)}
+.home-restore-program-menu{display:grid;gap:10px;opacity:0;transform:translateY(12px);max-height:0;overflow:hidden;transition:.28s ease;width:100%}
+.home-restore-service-card:hover .home-restore-program-menu{opacity:1;transform:translateY(0);max-height:280px}
+.home-restore-program-link{display:block;color:#fff;font-size:18px;font-weight:900;line-height:1.25;text-shadow:0 3px 10px rgba(0,0,0,.38);text-decoration:none;padding:4px 10px;border-radius:999px}
+.home-restore-program-link:hover{background:rgba(255,255,255,.18);color:#ffe8c6}
+.home-restore-service-desc{margin:8px 0 0;color:rgba(255,255,255,.88);line-height:1.65;font-size:14px;max-width:330px}.home-restore-service-card:hover .home-restore-service-desc{display:none}
+.home-restore-empty{padding:34px;text-align:center;border-radius:24px;background:#fffaf3;border:1px solid rgba(199,164,107,.28);color:#8a7d75}
+
+@media(max-width:1020px){
+  .home-restore-about-grid{grid-template-columns:1fr}.home-restore-about-img{max-width:420px;width:100%;margin:0 auto}.home-restore-promo-frame{height:650px}.home-restore-promo-slide{grid-template-columns:1fr}.home-restore-promo-photo{height:300px}.home-restore-promo-info{height:350px;padding:32px 26px 62px}.channel-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:14px}.channel-card{min-width:310px;scroll-snap-align:start}.home-restore-doctor-grid,.home-restore-service-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){
+  .home-restore-container{width:calc(100% - 28px)}.home-restore-hero{padding:18px 0 34px}.home-restore-hero-shell{border-radius:22px}.home-restore-hero-image{height:220px}.home-restore-hero-text{padding:28px 22px 32px}.home-restore-hero-text h1{font-size:36px}.home-restore-hero-actions{flex-direction:column}.home-restore-btn{width:100%}.home-restore-about-card{padding:28px 22px}.home-restore-promo-frame{height:620px;border-radius:26px}.home-restore-promo-photo{height:250px}.home-restore-promo-info{height:370px;padding:26px 22px 58px}.home-restore-promo-info h3{font-size:32px}.channel-card{min-width:78vw;height:390px}.home-restore-review-wrap{grid-template-columns:38px 1fr 38px}.home-restore-arrow{width:38px;height:38px;font-size:26px}.home-restore-review-card{min-width:260px;max-width:260px}.home-restore-doctor-grid,.home-restore-service-grid{grid-template-columns:1fr}.home-restore-service-card{height:330px}
+}
+
+
+/* =====================================================
+   HOME RESTORE COMPACT OVERRIDE
+   ย่อหัวข้อ + ย่อรูปทุกส่วน โดยไม่แตะโครงสร้างเดิม
+===================================================== */
+.home-restore-container{
+  width:min(1060px, calc(100% - 44px)) !important;
+  max-width:1060px !important;
+}
+.home-restore-label{
+  font-size:10.5px !important;
+  letter-spacing:1.8px !important;
+  margin-bottom:8px !important;
+}
+.home-restore-section-head{
+  margin-bottom:22px !important;
+}
+.home-restore-section-head h2{
+  font-size:clamp(25px, 2.8vw, 36px) !important;
+  line-height:1.15 !important;
+  margin-bottom:7px !important;
+}
+.home-restore-section-head p{
+  font-size:13px !important;
+  line-height:1.65 !important;
+}
+.home-restore-btn{
+  min-height:36px !important;
+  padding:0 18px !important;
+  font-size:12.5px !important;
+}
+
+/* HERO */
+.home-restore-hero{
+  padding:20px 0 30px !important;
+}
+.home-restore-hero-shell{
+  border-radius:24px !important;
+}
+.home-restore-hero-image{
+  height:clamp(210px, 26vw, 330px) !important;
+}
+.home-restore-hero-image img{
+  object-fit:cover !important;
+  object-position:center center !important;
+}
+.home-restore-hero-text{
+  padding:30px 38px 32px !important;
+}
+.home-restore-hero-text h1{
+  font-size:clamp(34px, 3.8vw, 52px) !important;
+  line-height:1.05 !important;
+  margin-bottom:12px !important;
+}
+.home-restore-hero-text p:not(.home-restore-label){
+  max-width:760px !important;
+  font-size:13.5px !important;
+  line-height:1.75 !important;
+}
+.home-restore-hero-actions{
+  margin-top:20px !important;
+  gap:10px !important;
+}
+
+/* ABOUT */
+.home-restore-about{
+  padding:0 0 36px !important;
+}
+.home-restore-about-grid{
+  gap:20px !important;
+  grid-template-columns:.78fr 1.22fr !important;
+}
+.home-restore-about-img,
+.home-restore-about-card{
+  border-radius:22px !important;
+}
+.home-restore-about-img{
+  max-height:300px !important;
+}
+.home-restore-about-card{
+  padding:30px 34px !important;
+}
+.home-restore-about-card h2{
+  font-size:clamp(25px, 2.8vw, 38px) !important;
+  line-height:1.16 !important;
+  margin-bottom:12px !important;
+}
+.home-restore-about-card p:not(.home-restore-label){
+  font-size:13.5px !important;
+  line-height:1.78 !important;
+}
+
+
+.home-restore-about-img{
+  width:320px !important;
+  max-width:320px !important;
+  justify-self:start !important;
+}
+.home-restore-about-card{
+  width:100% !important;
+  min-width:0 !important;
+}
+
+/* PROMOTION */
+.home-restore-promo{
+  padding:44px 0 44px !important;
+}
+.home-restore-promo-frame{
+  width:min(860px,100%) !important;
+  height:340px !important;
+  border-radius:24px !important;
+}
+.home-restore-promo-photo,
+.home-restore-promo-info{
+  height:340px !important;
+}
+.home-restore-promo-info{
+  padding:30px 34px 44px !important;
+}
+.home-restore-promo-info small{
+  font-size:10.5px !important;
+  letter-spacing:2px !important;
+}
+.home-restore-promo-info h3{
+  font-size:clamp(24px, 2.8vw, 34px) !important;
+  line-height:1.12 !important;
+  margin:10px 0 !important;
+}
+.home-restore-promo-price{
+  font-size:17px !important;
+  margin-bottom:8px !important;
+}
+.home-restore-promo-desc{
+  font-size:13px !important;
+  line-height:1.6 !important;
+}
+.home-restore-promo-dots{
+  bottom:13px !important;
+}
+
+/* CHANNEL */
+.homecare-channel{
+  padding:46px 0 44px !important;
+}
+.homecare-channel .channel-wrap{
+  width:min(1060px,calc(100% - 44px)) !important;
+}
+.channel-head{
+  margin-bottom:22px !important;
+}
+.channel-head h2{
+  font-size:clamp(25px, 2.8vw, 38px) !important;
+  margin-bottom:6px !important;
+}
+.channel-head p{
+  font-size:13px !important;
+  line-height:1.65 !important;
+}
+.channel-track{
+  gap:16px !important;
+}
+.channel-card{
+  height:315px !important;
+  border-radius:20px !important;
+}
+.channel-play{
+  width:52px !important;
+  height:52px !important;
+  font-size:22px !important;
+}
+.channel-info{
+  left:16px !important;
+  right:16px !important;
+  bottom:18px !important;
+}
+.channel-info h3{
+  font-size:17px !important;
+  margin:9px 0 5px !important;
+}
+.channel-info p{
+  font-size:12px !important;
+  line-height:1.45 !important;
+}
+.channel-arrow{
+  width:40px !important;
+  height:40px !important;
+  font-size:28px !important;
+}
+.channel-arrow.left{left:-18px !important;}
+.channel-arrow.right{right:-18px !important;}
+
+/* REVIEW / DOCTORS / SERVICES */
+.home-restore-review,
+.home-restore-doctors,
+.home-restore-services{
+  padding:42px 0 !important;
+}
+.home-restore-review-card{
+  min-width:260px !important;
+  max-width:260px !important;
+  padding:19px !important;
+  border-radius:18px !important;
+}
+.home-restore-review-card p{
+  font-size:13px !important;
+  line-height:1.6 !important;
+}
+.home-restore-doctor-grid{
+  width:min(820px,100%) !important;
+  gap:16px !important;
+}
+.home-restore-doctor-card{
+  border-radius:18px !important;
+}
+.home-restore-doctor-img{
+  height:155px !important;
+}
+.home-restore-doctor-body{
+  padding:13px 15px 15px !important;
+}
+.home-restore-doctor-body h3{
+  font-size:19px !important;
+}
+.home-restore-doctor-body b,
+.home-restore-doctor-body p{
+  font-size:12.5px !important;
+}
+.home-restore-service-grid{
+  gap:16px !important;
+}
+.home-restore-service-card{
+  height:320px !important;
+  border-radius:22px !important;
+}
+.home-restore-service-content{
+  padding:22px 18px !important;
+}
+.home-restore-service-title{
+  font-size:clamp(22px, 2.4vw, 30px) !important;
+  margin-bottom:12px !important;
+}
+.home-restore-program-link{
+  font-size:15px !important;
+  line-height:1.2 !important;
+}
+.home-restore-service-desc{
+  font-size:12.5px !important;
+  line-height:1.55 !important;
+}
+.home-restore-empty{
+  padding:26px !important;
+  border-radius:20px !important;
+}
+
+/* MODAL / POPUP */
+.channel-video-box{
+  width:min(760px,92vw) !important;
+  border-radius:22px !important;
+}
+.channel-video-frame{
+  max-height:70vh !important;
+}
+.channel-video-frame.vertical{
+  width:min(340px,84vw) !important;
+}
+
+@media(max-width:1020px){
+  .home-restore-container,
+  .homecare-channel .channel-wrap{
+    width:calc(100% - 32px) !important;
+  }
+  .home-restore-about-grid{grid-template-columns:1fr !important;}
+  .home-restore-about-img{width:100% !important;max-width:360px !important;justify-self:center !important;}
+  .home-restore-about-img{max-width:340px !important;max-height:340px !important;margin:0 auto !important;}
+  .home-restore-promo-frame{height:560px !important;}
+  .home-restore-promo-slide{grid-template-columns:1fr !important;}
+  .home-restore-promo-photo{height:235px !important;}
+  .home-restore-promo-info{height:325px !important;padding:25px 24px 50px !important;}
+  .channel-card{min-width:250px !important;height:330px !important;}
+  .home-restore-doctor-grid,.home-restore-service-grid{grid-template-columns:repeat(2,1fr) !important;}
+}
+@media(max-width:700px){
+  .home-restore-container,
+  .homecare-channel .channel-wrap{width:calc(100% - 24px) !important;}
+  .home-restore-hero-image{height:180px !important;}
+  .home-restore-hero-text{padding:24px 20px 26px !important;}
+  .home-restore-hero-text h1{font-size:31px !important;}
+  .home-restore-hero-text p:not(.home-restore-label){font-size:13px !important;}
+  .home-restore-about-card{padding:24px 20px !important;}
+  .home-restore-about-img{max-width:300px !important;max-height:300px !important;}
+  .home-restore-promo-frame{height:545px !important;border-radius:22px !important;}
+  .home-restore-promo-photo{height:210px !important;}
+  .home-restore-promo-info{height:335px !important;}
+  .home-restore-promo-info h3{font-size:27px !important;}
+  .channel-card{min-width:72vw !important;height:310px !important;}
+  .home-restore-review-wrap{grid-template-columns:34px 1fr 34px !important;}
+  .home-restore-arrow{width:34px !important;height:34px !important;font-size:24px !important;}
+  .home-restore-review-card{min-width:230px !important;max-width:230px !important;}
+  .home-restore-doctor-grid,.home-restore-service-grid{grid-template-columns:1fr !important;}
+  .home-restore-service-card{height:280px !important;}
+}
+
+
+/* =====================================================
+   ABOUT + HEAD DESCRIPTION FINAL OVERRIDE
+   วางในไฟล์เต็มแล้ว ไม่ต้องแก้เพิ่ม
+===================================================== */
+.home-restore-about{
+  width:100% !important;
+  padding:24px 0 42px !important;
+}
+.home-restore-about .home-restore-container{
+  width:min(1180px, calc(100% - 40px)) !important;
+  max-width:1180px !important;
+}
+.home-restore-about-grid{
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:320px minmax(0, 1fr) !important;
+  gap:14px !important;
+  align-items:stretch !important;
+}
+.home-restore-about-img{
+  width:320px !important;
+  height:320px !important;
+  min-width:320px !important;
+  max-width:320px !important;
+  border-radius:24px !important;
+}
+.home-restore-about-img img{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+  object-position:center top !important;
+}
+.home-restore-about-card{
+  width:100% !important;
+  min-height:320px !important;
+  padding:34px 44px !important;
+  border-radius:24px !important;
+  box-sizing:border-box !important;
+}
+.home-restore-about-card h2{
+  font-size:clamp(30px,3vw,42px) !important;
+  line-height:1.12 !important;
+  margin-bottom:14px !important;
+}
+.home-restore-about-card p:not(.home-restore-label){
+  max-width:100% !important;
+  font-size:13.5px !important;
+  line-height:1.85 !important;
+}
+/* เอาคำอธิบายใต้หัวข้อ section ออก เช่น รีวิวจะแสดงตามที่ Admin เพิ่ม/ลบ */
+.home-restore-section-head > p{
+  display:none !important;
+}
+.home-restore-section-head{
+  margin-bottom:22px !important;
+}
+.home-restore-section-head h2{
+  font-size:clamp(28px,3vw,40px) !important;
+}
+@media (max-width:900px){
+  .home-restore-about .home-restore-container{
+    width:min(100% - 28px, 1180px) !important;
+  }
+  .home-restore-about-grid{
+    grid-template-columns:1fr !important;
+    gap:16px !important;
+  }
+  .home-restore-about-img{
+    width:100% !important;
+    height:340px !important;
+    max-width:360px !important;
+    min-width:0 !important;
+    margin:0 auto !important;
+  }
+  .home-restore-about-card{
+    min-height:auto !important;
+    padding:28px 24px !important;
+  }
+}
+@media (max-width:520px){
+  .home-restore-about .home-restore-container{
+    width:min(100% - 20px, 1180px) !important;
+  }
+  .home-restore-about-img{
+    height:300px !important;
+    max-width:300px !important;
+  }
+  .home-restore-about-card{
+    padding:24px 20px !important;
+  }
+  .home-restore-about-card h2{
+    font-size:28px !important;
+  }
+}
+
+
+
+/* =====================================================
+   ABOUT FINAL RESIZE - ให้ความกว้างเท่าหน้าปกด้านบน
+   แก้กล่อง About ไม่ให้ใหญ่เกินไป
+===================================================== */
+.home-restore-about{
+  width:100% !important;
+  padding:20px 0 38px !important;
+}
+.home-restore-about .home-restore-container{
+  width:min(1060px, calc(100% - 44px)) !important;
+  max-width:1060px !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+.home-restore-about-grid{
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:300px minmax(0, 1fr) !important;
+  gap:18px !important;
+  align-items:stretch !important;
+}
+.home-restore-about-img{
+  width:300px !important;
+  height:300px !important;
+  min-width:300px !important;
+  max-width:300px !important;
+  max-height:300px !important;
+  border-radius:22px !important;
+  overflow:hidden !important;
+}
+.home-restore-about-img img{
+  width:100% !important;
+  height:100% !important;
+  display:block !important;
+  object-fit:cover !important;
+  object-position:center top !important;
+}
+.home-restore-about-card{
+  width:100% !important;
+  min-height:300px !important;
+  padding:30px 36px !important;
+  border-radius:22px !important;
+  box-sizing:border-box !important;
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:center !important;
+}
+.home-restore-about-card .home-restore-label{
+  font-size:10px !important;
+  letter-spacing:0.18em !important;
+  margin-bottom:10px !important;
+}
+.home-restore-about-card h2{
+  font-size:clamp(27px, 2.6vw, 36px) !important;
+  line-height:1.14 !important;
+  margin:0 0 12px !important;
+}
+.home-restore-about-card p:not(.home-restore-label){
+  font-size:13.2px !important;
+  line-height:1.78 !important;
+  margin:0 !important;
+  max-width:100% !important;
+}
+
+/* หัวข้อ section ไม่ให้มีคำอธิบายใต้หัวข้อ */
+.home-restore-section-head > p{
+  display:none !important;
+}
+.home-restore-section-head{
+  margin-bottom:22px !important;
+}
+
+@media(max-width:900px){
+  .home-restore-about .home-restore-container{
+    width:min(100% - 28px, 1060px) !important;
+  }
+  .home-restore-about-grid{
+    grid-template-columns:1fr !important;
+    gap:16px !important;
+  }
+  .home-restore-about-img{
+    width:100% !important;
+    height:320px !important;
+    min-width:0 !important;
+    max-width:320px !important;
+    max-height:320px !important;
+    margin:0 auto !important;
+  }
+  .home-restore-about-card{
+    min-height:auto !important;
+    padding:26px 22px !important;
+  }
+}
+@media(max-width:520px){
+  .home-restore-about .home-restore-container{
+    width:min(100% - 20px, 1060px) !important;
+  }
+  .home-restore-about-img{
+    height:280px !important;
+    max-width:280px !important;
+    max-height:280px !important;
+  }
+  .home-restore-about-card h2{
+    font-size:27px !important;
+  }
+}
+
+
+
+/* =====================================================
+   GREEN CLEAN THEME - ใช้กับ class home-restore เท่านั้น
+   เพิ่มเขียว ลดชมพู และไม่ให้ CSS หลุดไปโชว์หน้าเว็บ
+===================================================== */
+.home-restore-page{
+  background:
+    radial-gradient(circle at 10% 6%, rgba(143,161,132,.24), transparent 30%),
+    radial-gradient(circle at 90% 16%, rgba(199,164,107,.10), transparent 28%),
+    linear-gradient(180deg,#f6f8f0 0%,#fffaf3 46%,#eef4ea 100%) !important;
+  color:#2f3a2b !important;
+}
+.home-restore-hero{
+  background:
+    radial-gradient(circle at 12% 12%, rgba(143,161,132,.18), transparent 34%),
+    linear-gradient(180deg,#f6f8f0 0%,#fffaf3 100%) !important;
+}
+.home-restore-hero-shell{
+  border-color:rgba(143,161,132,.38) !important;
+  background:linear-gradient(135deg,#fffaf3 0%,#f1f6ed 100%) !important;
+  box-shadow:0 18px 52px rgba(77,100,72,.12) !important;
+}
+.home-restore-hero-copy{
+  background:
+    radial-gradient(circle at 92% 12%, rgba(143,161,132,.16), transparent 34%),
+    linear-gradient(135deg,#fffaf3 0%,#f1f6ed 100%) !important;
+}
+.home-restore-label,
+.home-restore-section-head .home-restore-label,
+.home-restore-about-card .home-restore-label{
+  color:#66785f !important;
+}
+.home-restore-title,
+.home-restore-section-head h2,
+.home-restore-about-card h2,
+.home-restore-promo-info h3,
+.home-restore-channel-card h3,
+.home-restore-review-name,
+.home-restore-doctor-info h3,
+.home-restore-service-info h3{
+  color:#2f3a2b !important;
+}
+.home-restore-desc,
+.home-restore-section-head p,
+.home-restore-about-card p,
+.home-restore-promo-info p,
+.home-restore-channel-card p,
+.home-restore-review-text,
+.home-restore-doctor-info p,
+.home-restore-service-desc{
+  color:#5f6f59 !important;
+}
+.home-restore-btn{
+  background:#7f9474 !important;
+  color:#fff !important;
+  box-shadow:0 12px 28px rgba(77,100,72,.22) !important;
+}
+.home-restore-btn:hover{
+  background:#66785f !important;
+}
+.home-restore-btn-light{
+  background:#f7fbf3 !important;
+  color:#4d6448 !important;
+  border-color:rgba(143,161,132,.38) !important;
+}
+.home-restore-about,
+.home-restore-reviews,
+.home-restore-services{
+  background:linear-gradient(180deg,#eef4ea 0%,#fffaf3 100%) !important;
+}
+.home-restore-promotions,
+.home-restore-doctors{
+  background:
+    radial-gradient(circle at 88% 12%, rgba(143,161,132,.16), transparent 30%),
+    #fffaf3 !important;
+}
+.home-restore-channel{
+  background:
+    radial-gradient(circle at 12% 18%, rgba(143,161,132,.15), transparent 30%),
+    linear-gradient(180deg,#fffaf3 0%,#eef4ea 100%) !important;
+}
+.home-restore-about-img,
+.home-restore-about-card,
+.home-restore-promo-slider,
+.home-restore-promo-slide,
+.home-restore-channel-card,
+.home-restore-review-card,
+.home-restore-doctor-card,
+.home-restore-service-card{
+  background:#f7fbf3 !important;
+  border-color:rgba(143,161,132,.36) !important;
+  box-shadow:0 14px 36px rgba(77,100,72,.10) !important;
+}
+.home-restore-promo-price,
+.home-restore-review-stars,
+.home-restore-program-link{
+  color:#66785f !important;
+}
+.home-restore-program-link,
+.home-restore-badge,
+.home-restore-tag{
+  background:rgba(143,161,132,.16) !important;
+  border-color:rgba(143,161,132,.30) !important;
+  color:#4d6448 !important;
+}
+.home-restore-promo-dot.active{
+  background:#7f9474 !important;
+}
+.home-restore-service-card:hover,
+.home-restore-channel-card:hover,
+.home-restore-review-card:hover,
+.home-restore-doctor-card:hover{
+  box-shadow:0 22px 55px rgba(77,100,72,.16) !important;
+}
+
+
+
+/* =====================================================
+   FINAL FIX: REMOVE BACKGROUND LAYERS ON HOME
+   พื้นหลังหน้า Home เป็นไล่สีเดียวทั้งหน้า ไม่แยกเป็นชั้น
+===================================================== */
+
+html,
+body,
+.home-final-page,
+main,
+.main-content,
+.page-content,
+.site-main,
+#main,
+#content {
+  background:
+    radial-gradient(circle at 8% 10%, rgba(246, 204, 214, 0.36) 0%, rgba(246, 204, 214, 0.16) 22%, transparent 48%),
+    radial-gradient(circle at 92% 12%, rgba(143, 161, 132, 0.34) 0%, rgba(143, 161, 132, 0.16) 26%, transparent 54%),
+    radial-gradient(circle at 16% 58%, rgba(143, 161, 132, 0.20) 0%, transparent 46%),
+    radial-gradient(circle at 86% 74%, rgba(246, 204, 214, 0.22) 0%, transparent 46%),
+    linear-gradient(135deg, #fff1f4 0%, #fbf7ee 38%, #eef5ea 72%, #fff8ef 100%) !important;
+  background-attachment: fixed !important;
+}
+
+/* บังคับ section ทุกตัวให้ไม่มีพื้นหลังของตัวเอง เพราะตัวนี้ทำให้เห็นเป็น layer */
+.home-final-page *,
+.home-final-page section,
+.home-final-page div {
+  background-image: none;
+}
+
+.home-final-page section,
+.home-hero-final,
+.hc-hero-section,
+.home-about-final,
+.home-promo-final,
+.home-channel-final,
+.home-review-final,
+.home-doctors-final,
+.home-services-final,
+.hero-section,
+.about-section,
+.promotion-section,
+.channel-section,
+.review-section,
+.doctor-section,
+.services-section,
+section[id],
+section[class] {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* กล่องเนื้อหาให้เป็นการ์ดครีมโปร่ง ไม่เป็นแถบเต็มจอ */
+.home-hero-shell,
+.hc-hero-card,
+.home-about-image,
+.home-about-card,
+.home-promo-slider-wrap,
+.home-promo-slide,
+.home-promo-card,
+.home-channel-card,
+.homecare-channel-card,
+.home-review-card,
+.review-card-v2,
+.home-doctor-card-final,
+.hc-doctor-card,
+.home-service-card,
+.service-category-card,
+.service-card,
+.program-card {
+  background: rgba(255, 250, 243, 0.82) !important;
+  background-image: none !important;
+  border-color: rgba(143, 161, 132, 0.30) !important;
+  box-shadow: 0 16px 42px rgba(77, 100, 72, 0.10) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* เฉพาะกล่องข้อความหน้าปกให้มีไล่สีเบามาก แต่ไม่เต็มหน้าจอ */
+.home-hero-text-card,
+.hc-hero-content,
+.home-promo-content {
+  background:
+    linear-gradient(135deg, rgba(255, 250, 243, 0.88) 0%, rgba(244, 248, 240, 0.82) 100%) !important;
+}
+
+/* ลบ pseudo element ที่บางไฟล์เคยใช้ทำพื้นหลัง layer */
+.home-final-page::before,
+.home-final-page::after,
+.home-hero-final::before,
+.home-hero-final::after,
+.home-about-final::before,
+.home-about-final::after,
+.home-promo-final::before,
+.home-promo-final::after,
+.home-channel-final::before,
+.home-channel-final::after,
+.home-review-final::before,
+.home-review-final::after,
+.home-doctors-final::before,
+.home-doctors-final::after,
+.home-services-final::before,
+.home-services-final::after {
+  content: none !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+/* สีตัวหนังสือโทนเขียว */
+.home-hero-kicker,
+.hc-hero-kicker,
+.home-section-kicker,
+.home-final-kicker,
+.home-promo-kicker,
+.home-channel-kicker,
+.home-review-kicker,
+.home-doctor-kicker,
+.home-services-kicker {
+  color: #73856b !important;
+}
+
+.home-hero-title,
+.hc-hero-title,
+.home-section-title,
+.home-final-title,
+.home-promo-title,
+.home-channel-title,
+.home-review-title,
+.home-doctor-title,
+.home-services-title,
+.home-about-card h2,
+.home-promo-content h3,
+.home-channel-card h3,
+.homecare-channel-card h3,
+.home-doctor-card-final h3,
+.hc-doctor-body h3,
+.home-service-card h3,
+.service-category-card h3 {
+  color: #2f3a2b !important;
+}
+
+.home-hero-desc,
+.hc-hero-desc,
+.home-section-desc,
+.home-about-card p,
+.home-channel-card p,
+.homecare-channel-card p,
+.home-review-card p,
+.review-card-v2 p,
+.home-doctor-card-final p,
+.hc-doctor-body p,
+.home-service-card p,
+.service-category-card p {
+  color: #5f6f59 !important;
+}
+
+/* ปุ่มเขียว */
+.home-btn-primary,
+.hc-btn-main,
+.btn-primary {
+  background: #7f9474 !important;
+  border-color: #7f9474 !important;
+  color: #ffffff !important;
+  box-shadow: 0 12px 28px rgba(77, 100, 72, 0.22) !important;
+}
+
+.home-btn-primary:hover,
+.hc-btn-main:hover,
+.btn-primary:hover {
+  background: #66785f !important;
+  border-color: #66785f !important;
+}
+
+.home-btn-light,
+.hc-btn-light,
+.btn-outline {
+  background: rgba(255, 255, 255, 0.78) !important;
+  color: #4d6448 !important;
+  border-color: rgba(143, 161, 132, 0.38) !important;
+}
+
+/* เอาเส้นแบ่ง section ออก */
+.home-final-page section + section,
+.home-final-page .section-divider,
+.section-divider {
+  border-top: 0 !important;
+}
+
+/* badge/dot */
+.home-promo-dot.active,
+.swiper-pagination-bullet-active {
+  background: #7f9474 !important;
+}
+
+.tag,
+.home-badge,
+.service-program-link {
+  background: rgba(143, 161, 132, 0.16) !important;
+  color: #4d6448 !important;
+  border-color: rgba(143, 161, 132, 0.30) !important;
+}
+
 </style>
 
-<main class="home-page">
-  <section class="hero"><div class="home-container"><div class="hero-box"><div class="hero-content"><p class="label">HOME CARE CLINIC</p><h1>ดูแลสุขภาพและความงามแบบใกล้ชิด</h1><p>บริการปรึกษา ดูแลผิวพรรณ โปรแกรมความงาม และนัดหมายออนไลน์ สะดวก รวดเร็ว พร้อมแจ้งเตือนผ่าน Email และ LINE</p><div class="hero-actions"><a href="#promotions" class="btn">ดูโปรโมชั่น</a><a href="#services" class="btn btn-soft">บริการของเรา</a></div></div></div></div></section>
+<main class="home-restore-page">
+  <section class="home-restore-hero" id="home">
+    <div class="home-restore-container">
+      <div class="home-restore-hero-shell">
+        <div class="home-restore-hero-image">
+          <img src="/static/images/hero/homecare-hero-banner-clean.jpg" alt="Home Care Clinic">
+        </div>
+        <div class="home-restore-hero-text">
+          <p class="home-restore-label">HOMECARE CLINIC</p>
+          <h1>Homecare Clinic</h1>
+          <p>สวยอย่างอบอุ่นใจ ดูแลคุณด้วยความใส่ใจเหมือนคนในครอบครัว พร้อมยกระดับความงามและความมั่นใจด้วยนวัตกรรมและการดูแลที่ได้มาตรฐาน โดยทีมแพทย์และผู้เชี่ยวชาญที่พร้อมออกแบบการรักษาเฉพาะบุคคล เพื่อให้คุณสวยขึ้น มั่นใจขึ้น และเป็นเวอร์ชันที่ดีที่สุดของตัวเอง</p>
+          <div class="home-restore-hero-actions">
+            <a href="#promotions" class="home-restore-btn">ดูโปรโมชั่น</a>
+            <a href="#services" class="home-restore-btn home-restore-btn-light">บริการของเรา</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <section class="about" id="about"><div class="home-container"><div class="about-grid"><div class="about-img"></div><div class="about-text"><p class="label">ABOUT</p><h2>เกี่ยวกับ Home Care Clinic</h2><p>Home Care Clinic ให้บริการดูแลสุขภาพและความงามแบบครบวงจร เหมาะสำหรับลูกค้าที่ต้องการดูรายละเอียด โปรโมชั่น และจองคิวล่วงหน้าผ่านระบบออนไลน์</p><p>ระบบรองรับการจองคิวออนไลน์ ตรวจสอบโปรโมชั่น และแจ้งเตือนทาง Email และ LINE ให้แอดมินติดตามลูกค้าได้สะดวก</p></div></div></div></section>
+  <section class="home-restore-about" id="about">
+    <div class="home-restore-container">
+      <div class="home-restore-about-grid">
+        <div class="home-restore-about-img">
+          <img src="/static/images/about/homecare-founder.jpg" alt="เกี่ยวกับ Home Care Clinic">
+        </div>
+        <div class="home-restore-about-card">
+          <p class="home-restore-label">ABOUT</p>
+          <h2>เกี่ยวกับ Home Care Clinic</h2>
+          <p>ตลอดระยะเวลากว่า 10 ปีในวงการความงาม ผมได้มีโอกาสดูแลและเป็นส่วนหนึ่งในการสร้างความมั่นใจให้กับผู้คนมากมาย จึงเชื่อเสมอว่าความงามที่ดีที่สุดไม่ใช่การเปลี่ยนแปลงเพื่อเป็นใคร แต่คือการได้เป็นตัวเองในเวอร์ชันที่มั่นใจที่สุด</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <section class="promo" id="promotions"><div class="home-container"><div class="section-head"><p class="label">MONTHLY PROMOTION</p><h2>โปรโมชั่นประจำเดือน</h2><p>โปรโมชั่นจะเลื่อนอัตโนมัติ และเปลี่ยนตามที่ Admin เพิ่ม/ลบ</p></div>{% if promotions and promotions|length > 0 %}<div class="promo-wrap"><div class="promo-slider">{% for promo in promotions %}<article class="promo-slide {% if loop.index0 == 0 %}active{% endif %}"><div class="promo-img" {% if promo.image_url is defined and promo.image_url %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('{{ promo.image_url }}')"{% elif promo.image_file_1 is defined and promo.image_file_1 %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('/static/images/promotions/{{ promo.image_file_1 }}')"{% endif %}></div><div class="promo-content"><p class="label">Promotion</p><h3>{{ promo.title if promo.title is defined else promo.name }}</h3><div class="promo-price">{{ promo.price if promo.price is defined else 'สอบถามราคา' }}</div><p>{{ promo.description if promo.description is defined else promo.desc }}</p></div></article>{% endfor %}</div><div class="promo-dots">{% for promo in promotions %}<button type="button" class="promo-dot {% if loop.index0 == 0 %}active{% endif %}" data-slide-index="{{ loop.index0 }}" onclick="goHomePromoSlideFinal(this.dataset.slideIndex)"></button>{% endfor %}</div></div>{% else %}<div class="empty">ยังไม่มีโปรโมชั่น ให้ Admin เพิ่มโปรโมชั่นก่อน</div>{% endif %}</div></section>
+  <section class="home-restore-promo" id="promotions">
+    <div class="home-restore-container">
+      <div class="home-restore-section-head">
+        <p class="home-restore-label">MONTHLY PROMOTION</p>
+        <h2>โปรโมชั่นประจำเดือน</h2>
+        
+      </div>
+      {% if promotions and promotions|length > 0 %}
+      <div class="home-restore-promo-frame">
+        <div class="home-restore-promo-slider" id="homeRestorePromoSlider">
+          {% for promo in promotions %}
+          <article class="home-restore-promo-slide {% if loop.index0 == 0 %}active{% endif %}">
+            <div class="home-restore-promo-photo"
+              {% if promo.image_url is defined and promo.image_url %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.30)),url('{{ promo.image_url }}')"
+              {% elif promo.image_file_1 is defined and promo.image_file_1 %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.30)),url('/static/images/promotions/{{ promo.image_file_1 }}')"
+              {% endif %}></div>
+            <div class="home-restore-promo-info">
+              <small>Promotion</small>
+              <h3>{{ promo.title if promo.title is defined else promo.name }}</h3>
+              <div class="home-restore-promo-price">{{ promo.price if promo.price is defined else 'สอบถามราคา' }}</div>
+              <p class="home-restore-promo-desc">{{ promo.description if promo.description is defined else promo.desc }}</p>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+        <div class="home-restore-promo-dots">
+          {% for promo in promotions %}
+          <button type="button" class="home-restore-promo-dot {% if loop.index0 == 0 %}active{% endif %}" data-slide-index="{{ loop.index0 }}" onclick="goHomeRestorePromoSlide(this.dataset.slideIndex)"></button>
+          {% endfor %}
+        </div>
+      </div>
+      {% else %}
+      <div class="home-restore-empty">ยังไม่มีโปรโมชั่น ให้ Admin เพิ่มโปรโมชั่นก่อน</div>
+      {% endif %}
+    </div>
+  </section>
 
-  <section class="review" id="reviews"><div class="home-container"><div class="section-head"><p class="label">REVIEW</p><h2>รีวิวจากลูกค้า</h2><p>รีวิวจะแสดงตามที่ Admin เพิ่ม/ลบ</p></div>{% if reviews and reviews|length > 0 %}<div class="review-wrap"><button class="arrow" type="button" onclick="moveHomeReviewFinal(-1)">‹</button><div class="review-slider" id="homeReviewSliderFinal">{% for review in reviews %}<article class="review-card"><div class="stars">{% for i in range(review.rating or 5) %}★{% endfor %}</div><p>{{ review.review_text }}</p><b>{{ review.customer_name }}</b></article>{% endfor %}</div><button class="arrow" type="button" onclick="moveHomeReviewFinal(1)">›</button></div>{% else %}<div class="empty">ยังไม่มีรีวิว ให้ Admin เพิ่มรีวิวก่อน</div>{% endif %}</div></section>
+  <section class="homecare-channel" id="homecare-channel">
+    <div class="channel-wrap">
+      <div class="channel-head">
+        <p class="home-restore-label">HOMECARE CHANNEL</p>
+        <h2>HomeCare Channel</h2>
+        
+      </div>
+      {% if homecare_channels and homecare_channels|length > 0 %}
+      <button type="button" class="channel-arrow left" onclick="moveHomeCareChannel(-1)">‹</button>
+      <div class="channel-track" id="homeCareChannelTrack">
+        {% for item in homecare_channels %}
+        <button type="button" class="channel-card" data-video-url="{{ item.video_url }}" data-platform="{{ item.platform }}" onclick="openHomeCareVideo(this)">
+          <div class="channel-card-bg" {% if item.cover_image_url %}style="background-image:url('{{ item.cover_image_url }}')"{% else %}style="background-image:linear-gradient(135deg,#f8ece9,#fffaf5)"{% endif %}></div>
+          <div class="channel-play">▶</div>
+          <div class="channel-info">
+            <small>{{ item.platform or 'video' }}</small>
+            <h3>{{ item.title }}</h3>
+            {% if item.description %}<p>{{ item.description }}</p>{% endif %}
+          </div>
+        </button>
+        {% endfor %}
+      </div>
+      <button type="button" class="channel-arrow right" onclick="moveHomeCareChannel(1)">›</button>
+      {% else %}
+      <div class="home-restore-empty">ยังไม่มีคลิป HomeCare Channel ให้ Admin เพิ่มคลิปก่อน</div>
+      {% endif %}
+    </div>
+  </section>
 
-  <section class="doctors" id="doctors"><div class="home-container"><div class="section-head"><p class="label">DOCTORS</p><h2>คุณหมอของเรา</h2><p>ข้อมูลคุณหมอจะแสดงตามที่ Admin เพิ่ม/ลบ</p></div>{% if doctors and doctors|length > 0 %}<div class="doctor-grid">{% for doctor in doctors %}<article class="doctor-card"><div class="doctor-img" {% if doctor.image_url is defined and doctor.image_url %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('{{ doctor.image_url }}')"{% elif doctor.image_file is defined and doctor.image_file %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('/static/images/doctors/{{ doctor.image_file }}')"{% endif %}></div><div class="doctor-body"><p class="label">Doctor</p><h3>{{ doctor.name }}</h3>{% if doctor.specialty %}<b>{{ doctor.specialty }}</b>{% endif %}{% if doctor.expertise %}<p>{{ doctor.expertise }}</p>{% endif %}</div></article>{% endfor %}</div>{% else %}<div class="empty">ยังไม่มีข้อมูลคุณหมอ ให้ Admin เพิ่มคุณหมอก่อน</div>{% endif %}</div></section>
+  <section class="home-restore-review" id="reviews">
+    <div class="home-restore-container">
+      <div class="home-restore-section-head"><p class="home-restore-label">REVIEW</p><h2>รีวิวจากลูกค้า</h2></div>
+      {% if reviews and reviews|length > 0 %}
+      <div class="home-restore-review-wrap"><button class="home-restore-arrow" type="button" onclick="moveHomeReviewFinal(-1)">‹</button><div class="home-restore-review-slider" id="homeReviewSliderFinal">{% for review in reviews %}<article class="home-restore-review-card"><div class="home-restore-stars">{% for i in range(review.rating or 5) %}★{% endfor %}</div><p>{{ review.review_text }}</p><b>{{ review.customer_name }}</b></article>{% endfor %}</div><button class="home-restore-arrow" type="button" onclick="moveHomeReviewFinal(1)">›</button></div>
+      {% else %}<div class="home-restore-empty">ยังไม่มีรีวิว ให้ Admin เพิ่มรีวิวก่อน</div>{% endif %}
+    </div>
+  </section>
 
-  <section class="services" id="services"><div class="home-container"><div class="section-head"><p class="label">OUR SERVICES</p><h2>บริการของเรา</h2><p>เอาเมาส์ไปชี้ที่หมวดบริการ จะเด้งกล่องเล็กแบบในรูป แล้วเลือก Program ด้านในได้</p></div>{% if services and services|length > 0 %}<div class="service-grid">{% for service in services %}<button type="button" class="service-card js-open-program-modal" data-service-title="{{ service.title }}" data-service-desc="{{ service.description or '' }}" data-service-img="{{ service.image_url or '' }}" data-programs='{{ service.programs_json|e }}'><div class="service-img" {% if service.image_url %}style="background-image:url('{{ service.image_url }}')"{% endif %}></div><div class="service-overlay"><p class="label" style="color:#f5d49b;">Service</p><h3>{{ service.title }}</h3><p>{{ service.description }}</p></div></button>{% endfor %}</div>{% else %}<div class="empty">ยังไม่มีบริการ ให้ Admin เพิ่มบริการก่อน</div>{% endif %}</div></section>
+  <section class="home-restore-doctors" id="doctors">
+    <div class="home-restore-container">
+      <div class="home-restore-section-head"><p class="home-restore-label">DOCTORS</p><h2>คุณหมอของเรา</h2></div>
+      {% if doctors and doctors|length > 0 %}
+      <div class="home-restore-doctor-grid">{% for doctor in doctors %}<article class="home-restore-doctor-card"><div class="home-restore-doctor-img" {% if doctor.image_url is defined and doctor.image_url %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('{{ doctor.image_url }}')"{% elif doctor.image_file is defined and doctor.image_file %}style="background-image:linear-gradient(120deg,rgba(255,243,244,.15),rgba(255,243,244,.32)),url('/static/images/doctors/{{ doctor.image_file }}')"{% endif %}></div><div class="home-restore-doctor-body"><p class="home-restore-label">Doctor</p><h3>{{ doctor.name }}</h3>{% if doctor.specialty %}<b>{{ doctor.specialty }}</b>{% endif %}{% if doctor.expertise %}<p>{{ doctor.expertise }}</p>{% endif %}</div></article>{% endfor %}</div>
+      {% else %}<div class="home-restore-empty">ยังไม่มีข้อมูลคุณหมอ ให้ Admin เพิ่มคุณหมอก่อน</div>{% endif %}
+    </div>
+  </section>
+
+  <section class="home-restore-services" id="services">
+    <div class="home-restore-container">
+      <div class="home-restore-section-head"><p class="home-restore-label">OUR SERVICES</p><h2>บริการของเรา</h2></div>
+      {% if services and services|length > 0 %}
+      <div class="home-restore-service-grid">
+        {% for service in services %}
+        <div class="home-restore-service-card">
+          <div class="home-restore-service-bg" {% if service.image_url %}style="background-image:url('{{ service.image_url }}')"{% endif %}></div>
+          <div class="home-restore-service-content">
+            <h3 class="home-restore-service-title">{{ service.title }}</h3>
+            <div class="home-restore-program-menu">
+              {% if service.programs and service.programs|length > 0 %}
+                {% for program in service.programs %}
+                <a class="home-restore-program-link" href="/services/{{ program.slug }}">{{ program.title }}</a>
+                {% endfor %}
+              {% elif service.programs_json %}
+                <span class="home-restore-program-link">ดูรายละเอียด</span>
+              {% else %}
+                <span class="home-restore-program-link">ยังไม่มี Program</span>
+              {% endif %}
+            </div>
+            {% if service.description %}<p class="home-restore-service-desc">{{ service.description }}</p>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}<div class="home-restore-empty">ยังไม่มีบริการ ให้ Admin เพิ่มบริการก่อน</div>{% endif %}
+    </div>
+  </section>
 </main>
 
-<div class="program-popover" id="programPopoverFinal"><aside class="popover-sidebar"><h3 id="popoverServiceTitleFinal">บริการ</h3><p id="popoverServiceDescFinal"></p><div class="program-list" id="popoverProgramListFinal"></div></aside><main class="popover-main"><div class="popover-head"><div><small>Program Detail</small><h2 id="popoverProgramTitleFinal">Program</h2></div><button class="popover-close" type="button" onclick="closeProgramPopoverFinal()">×</button></div><p class="program-detail" id="popoverProgramDetailFinal"></p><div class="media-view" id="popoverMediaViewFinal"></div><div class="recommend-box" id="popoverRecommendFinal"></div></main></div>
+<div class="channel-video-modal" id="homeCareVideoModal">
+  <div class="channel-video-box">
+    <button type="button" class="channel-video-close" onclick="closeHomeCareVideo()">×</button>
+    <div class="channel-video-frame" id="homeCareVideoFrame"></div>
+  </div>
+</div>
 
 <script>
 (function(){
+  var promoIndex=0;
+  function promoSlides(){return Array.prototype.slice.call(document.querySelectorAll('.home-restore-promo-slide'));}
+  function promoDots(){return Array.prototype.slice.call(document.querySelectorAll('.home-restore-promo-dot'));}
+  window.goHomeRestorePromoSlide=function(index){
+    var slides=promoSlides(), dots=promoDots();
+    if(!slides.length)return;
+    var next=parseInt(index,10);
+    if(isNaN(next))next=0;
+    next=(next+slides.length)%slides.length;
+    slides.forEach(function(s,i){s.classList.remove('active','prev'); if(i===promoIndex && i!==next)s.classList.add('prev'); if(i===next)s.classList.add('active');});
+    dots.forEach(function(d,i){d.classList.toggle('active',i===next);});
+    promoIndex=next;
+  };
+  if(promoSlides().length>1){setInterval(function(){window.goHomeRestorePromoSlide(promoIndex+1);},4500);}
+
   window.moveHomeReviewFinal=function(direction){var slider=document.getElementById('homeReviewSliderFinal');if(!slider)return;slider.scrollBy({left:direction*330,behavior:'smooth'});};
-  var promoIndex=0;var promoSlides=document.querySelectorAll('.promo-slide');var promoDots=document.querySelectorAll('.promo-dot');
-  window.showHomePromoSlideFinal=function(index){if(!promoSlides.length)return;index=Number(index);promoSlides.forEach(function(slide,i){slide.classList.remove('active','prev');if(i===index){slide.classList.add('active')}else if(i===promoIndex){slide.classList.add('prev')}});promoDots.forEach(function(dot,i){dot.classList.toggle('active',i===index)});promoIndex=index;};
-  window.nextHomePromoSlideFinal=function(){if(!promoSlides.length)return;window.showHomePromoSlideFinal((promoIndex+1)%promoSlides.length);};
-  window.goHomePromoSlideFinal=function(index){window.showHomePromoSlideFinal(Number(index));}; if(promoSlides.length>1){setInterval(window.nextHomePromoSlideFinal,4500)}
+  window.moveHomeCareChannel=function(direction){var track=document.getElementById('homeCareChannelTrack');if(!track)return;track.scrollBy({left:direction*360,behavior:'smooth'});};
 
-  var popover=document.getElementById('programPopoverFinal');
-  var title=document.getElementById('popoverServiceTitleFinal');
-  var desc=document.getElementById('popoverServiceDescFinal');
-  var list=document.getElementById('popoverProgramListFinal');
-  var pTitle=document.getElementById('popoverProgramTitleFinal');
-  var pDetail=document.getElementById('popoverProgramDetailFinal');
-  var mediaView=document.getElementById('popoverMediaViewFinal');
-  var recommend=document.getElementById('popoverRecommendFinal');
-  var currentPrograms=[];
-  var closeTimer=null;
-  var locked=false;
-
-  function safeParse(value){try{return JSON.parse(value||'[]')}catch(e){return[]}}
-  function youtubeEmbed(url){if(!url)return'';var v='';if(url.indexOf('youtube.com/watch')>-1){try{v=new URL(url).searchParams.get('v')||''}catch(e){}}else if(url.indexOf('youtu.be/')>-1){v=url.split('youtu.be/')[1].split('?')[0]} if(v){return 'https://www.youtube.com/embed/'+v} return url;}
-  function clearClose(){if(closeTimer){clearTimeout(closeTimer);closeTimer=null}}
-  function scheduleClose(){if(locked)return;clearClose();closeTimer=setTimeout(function(){closeProgramPopoverFinal()},180)}
-
-  function positionPopover(card){
-    if(!popover||!card)return;
-    var rect=card.getBoundingClientRect();
-    var gap=16;
-    var w=popover.offsetWidth||920;
-    var h=popover.offsetHeight||520;
-    var left=rect.right+gap;
-    var top=rect.top;
-    if(left+w>window.innerWidth-14){left=rect.left-w-gap;}
-    if(left<14){left=14;}
-    if(top+h>window.innerHeight-14){top=window.innerHeight-h-14;}
-    if(top<14){top=14;}
-    popover.style.left=left+'px';
-    popover.style.top=top+'px';
+  function getVideoEmbedData(url){
+    if(!url)return {src:'',type:'horizontal'};
+    var clean=url.trim();
+    var lower=clean.toLowerCase();
+    try{
+      if(lower.indexOf('youtube.com/shorts/')>-1){var sid=clean.split('/shorts/')[1].split('?')[0].split('/')[0];if(sid)return {src:'https://www.youtube.com/embed/'+sid,type:'vertical'};}
+      if(lower.indexOf('youtube.com/watch')>-1){var u=new URL(clean);var v=u.searchParams.get('v');if(v)return {src:'https://www.youtube.com/embed/'+v,type:'horizontal'};}
+      if(lower.indexOf('youtu.be/')>-1){var yid=clean.split('youtu.be/')[1].split('?')[0].split('/')[0];if(yid)return {src:'https://www.youtube.com/embed/'+yid,type:'horizontal'};}
+      if(lower.indexOf('tiktok.com')>-1 || lower.indexOf('instagram.com')>-1 || lower.indexOf('facebook.com')>-1 || lower.indexOf('fb.watch')>-1){return {src:clean,type:'external'};}
+      if(lower.match(/\.(mp4|mov|webm)(\?|$)/)){return {src:clean,type:'video'};}
+    }catch(e){}
+    return {src:clean,type:'external'};
   }
-
-  function renderProgram(index){
-    var program=currentPrograms[index]; if(!program)return;
-    pTitle.textContent=program.title||'Program';
-    pDetail.textContent=program.detail||program.short_description||'';
-    document.querySelectorAll('.program-btn').forEach(function(btn,i){btn.classList.toggle('active',i===index)});
-    var media=program.media||[];
-    mediaView.innerHTML=''; recommend.innerHTML='';
-    if(!media.length && program.cover_image_url){media=[{media_type:'image',image_url:program.cover_image_url,caption:program.short_description||''}]}
-    if(!media.length){mediaView.innerHTML='<div class="no-media">ยังไม่มีรูป/วิดีโอใน Program นี้ ให้ Admin เพิ่มในหน้า Services</div>'}
-    else{media.forEach(function(m){var box=document.createElement('div');box.className='media-item';var html='';if(m.video_src||m.video_url){var src=youtubeEmbed(m.video_src||m.video_url);if(src.indexOf('youtube.com/embed')>-1){html+='<iframe src="'+src+'" allowfullscreen></iframe>'}else{html+='<video src="'+src+'" controls></video>'}}else if(m.image_url){html+='<img src="'+m.image_url+'" alt="'+(m.caption||program.title||'')+'">'}else if(program.cover_image_url){html+='<img src="'+program.cover_image_url+'" alt="'+(program.title||'')+'">'} if(m.caption){html+='<div class="media-caption">'+m.caption+'</div>'} box.innerHTML=html;mediaView.appendChild(box);});}
-    currentPrograms.slice(0,3).forEach(function(p,i){if(i===index)return;var img=p.cover_image_url||'';var card=document.createElement('button');card.type='button';card.className='recommend-card';if(img){card.style.backgroundImage='url('+img+')'}card.innerHTML='<h3>'+p.title+'</h3>';card.onclick=function(){renderProgram(currentPrograms.indexOf(p))};recommend.appendChild(card);});
-  }
-
-  function openPopover(card, makeLock){
-    clearClose();
-    locked=!!makeLock;
-    currentPrograms=safeParse(card.dataset.programs);
-    title.textContent=card.dataset.serviceTitle||'บริการ';
-    desc.textContent=card.dataset.serviceDesc||'';
-    list.innerHTML='';
-    if(!currentPrograms.length){list.innerHTML='<div class="no-media">ยังไม่มี Program ในหมวดนี้ ให้ Admin เพิ่ม Program ก่อน</div>';pTitle.textContent=card.dataset.serviceTitle||'บริการ';pDetail.textContent=card.dataset.serviceDesc||'';mediaView.innerHTML='';recommend.innerHTML='';}
-    else{currentPrograms.forEach(function(p,i){var btn=document.createElement('button');btn.type='button';btn.className='program-btn';btn.textContent=p.title||('Program '+(i+1));btn.onclick=function(e){e.stopPropagation();locked=true;renderProgram(i)};list.appendChild(btn)});renderProgram(0)}
-    popover.classList.add('show');
-    positionPopover(card);
-  }
-
-  window.closeProgramPopoverFinal=function(){if(!popover)return;locked=false;popover.classList.remove('show')};
-
-  document.querySelectorAll('.js-open-program-modal').forEach(function(card){
-    card.addEventListener('mouseenter',function(){openPopover(card,false)});
-    card.addEventListener('mousemove',function(){if(!locked)positionPopover(card)});
-    card.addEventListener('mouseleave',scheduleClose);
-    card.addEventListener('click',function(e){e.stopPropagation();openPopover(card,true)});
-  });
-  if(popover){popover.addEventListener('mouseenter',clearClose);popover.addEventListener('mouseleave',scheduleClose);popover.addEventListener('click',function(e){e.stopPropagation()});}
-  document.addEventListener('click',function(){closeProgramPopoverFinal()});
-  document.addEventListener('scroll',function(){if(!locked)closeProgramPopoverFinal()},{passive:true});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeProgramPopoverFinal()});
+  window.openHomeCareVideo=function(btn){
+    var url=btn.getAttribute('data-video-url')||'';
+    var modal=document.getElementById('homeCareVideoModal');
+    var frame=document.getElementById('homeCareVideoFrame');
+    if(!modal||!frame)return;
+    var data=getVideoEmbedData(url);
+    frame.className='channel-video-frame';
+    frame.innerHTML='';
+    if(data.type==='vertical')frame.classList.add('vertical');
+    if(data.type==='external'){
+      frame.innerHTML='<div><h3>เปิดคลิปจากแพลตฟอร์มต้นทาง</h3><p>บางแพลตฟอร์ม เช่น TikTok / Instagram / Facebook อาจไม่อนุญาตให้ฝังคลิปในเว็บโดยตรง</p><a class="channel-video-open-btn" href="'+data.src+'" target="_blank" rel="noopener">เปิดดูคลิป</a></div>';
+    }else if(data.type==='video'){
+      frame.innerHTML='<video src="'+data.src+'" controls autoplay playsinline></video>';
+    }else if(data.src){
+      frame.innerHTML='<iframe src="'+data.src+'" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+    }else{
+      frame.innerHTML='<div><h3>ไม่พบลิงก์วิดีโอ</h3></div>';
+    }
+    modal.classList.add('show');
+  };
+  window.closeHomeCareVideo=function(){var modal=document.getElementById('homeCareVideoModal');var frame=document.getElementById('homeCareVideoFrame');if(frame)frame.innerHTML='';if(modal)modal.classList.remove('show');};
 })();
 </script>
+
 {% endblock %}

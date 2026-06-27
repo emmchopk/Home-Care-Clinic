@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Popup | Home Care Clinic{% endblock %}
+
+{% block content %}
+<style>
+  .popup-admin-page {
+    width: min(1100px, calc(100% - 32px));
+    margin: 38px auto 70px;
+  }
+
+  .popup-admin-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-start;
+    margin-bottom: 22px;
+  }
+
+  .popup-admin-head h1 {
+    margin: 0 0 8px;
+    font-size: clamp(34px, 4vw, 52px);
+    line-height: 1.05;
+    color: #2f2926;
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 400;
+  }
+
+  .popup-admin-head p {
+    margin: 0;
+    color: #8a7d75;
+    line-height: 1.7;
+  }
+
+  .popup-admin-back {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: #8fa184;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .popup-alert {
+    padding: 14px 18px;
+    border-radius: 16px;
+    margin-bottom: 18px;
+    font-weight: 800;
+  }
+
+  .popup-alert.success {
+    background: #e7f5e4;
+    color: #4d6448;
+    border: 1px solid rgba(77, 100, 72, 0.18);
+  }
+
+  .popup-alert.error {
+    background: #fff0ef;
+    color: #a34134;
+    border: 1px solid rgba(163, 65, 52, 0.18);
+  }
+
+  .popup-admin-grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .popup-card {
+    background: #fffaf3;
+    border: 1px solid rgba(199, 164, 107, 0.28);
+    border-radius: 28px;
+    padding: 24px;
+    box-shadow: 0 18px 45px rgba(108, 77, 65, 0.09);
+  }
+
+  .popup-card h2 {
+    margin: 0 0 16px;
+    color: #2f2926;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 30px;
+    font-weight: 400;
+  }
+
+  .popup-preview-box {
+    min-height: 480px;
+    border-radius: 24px;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  .popup-preview-box img {
+    width: 100%;
+    max-height: 620px;
+    object-fit: contain;
+    display: block;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.28);
+  }
+
+  .popup-empty-preview {
+    text-align: center;
+    color: #fff;
+    line-height: 1.8;
+  }
+
+  .popup-form-grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  .popup-field label,
+  .popup-check label {
+    display: block;
+    margin-bottom: 8px;
+    color: #4d6448;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  .popup-field input,
+  .popup-field select {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(199, 164, 107, 0.35);
+    background: #fff;
+    color: #2f2926;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+
+  .popup-check {
+    padding: 14px;
+    border-radius: 18px;
+    background: #fff;
+    border: 1px solid rgba(199, 164, 107, 0.22);
+  }
+
+  .popup-check label {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .popup-check input {
+    width: 18px;
+    height: 18px;
+  }
+
+  .popup-help {
+    margin: 8px 0 0;
+    color: #8a7d75;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .popup-submit {
+    border: none;
+    border-radius: 999px;
+    min-height: 48px;
+    padding: 0 24px;
+    background: #8fa184;
+    color: #fff;
+    font-weight: 900;
+    cursor: pointer;
+  }
+
+  .popup-note-box {
+    margin-top: 18px;
+    padding: 18px;
+    border-radius: 20px;
+    background: #fff;
+    color: #8a7d75;
+    line-height: 1.8;
+    border: 1px solid rgba(199, 164, 107, 0.22);
+  }
+
+  .popup-note-box b {
+    color: #2f2926;
+  }
+
+  @media (max-width: 900px) {
+    .popup-admin-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .popup-admin-head {
+      flex-direction: column;
+    }
+
+    .popup-preview-box {
+      min-height: 360px;
+    }
+  }
+</style>
+
+<div class="popup-admin-page">
+  <div class="popup-admin-head">
+    <div>
+      <h1>Popup หน้าเว็บไซต์</h1>
+      <p>ให้ Admin อัปโหลดรูป Popup เองได้ รูปนี้จะเด้งขึ้นมาตอนลูกค้าเข้าเว็บไซต์</p>
+    </div>
+    <a href="/admin/dashboard" class="popup-admin-back">กลับ Dashboard</a>
+  </div>
+
+  {% if success %}
+    <div class="popup-alert success">{{ success }}</div>
+  {% endif %}
+
+  {% if error %}
+    <div class="popup-alert error">{{ error }}</div>
+  {% endif %}
+
+  <div class="popup-admin-grid">
+    <div class="popup-card">
+      <h2>ตัวอย่าง Popup ปัจจุบัน</h2>
+      <div class="popup-preview-box">
+        {% if popup.image_data_url %}
+          <img src="{{ popup.image_data_url }}" alt="Entry Popup">
+        {% else %}
+          <div class="popup-empty-preview">
+            ยังไม่มีรูป Popup<br>
+            ให้อัปโหลดรูปทางฝั่งขวา
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="popup-card">
+      <h2>ตั้งค่า Popup</h2>
+      <form method="post" action="/admin/popup" enctype="multipart/form-data" class="popup-form-grid">
+        <div class="popup-field">
+          <label>อัปโหลดรูป Popup</label>
+          <input type="file" name="image_file" accept="image/*">
+          <p class="popup-help">แนะนำรูปแนวตั้ง ขนาดประมาณ 800×1000 px หรือ 1080×1350 px ไฟล์ JPG/PNG/WebP</p>
+        </div>
+
+        <div class="popup-field">
+          <label>เวลา delay ก่อนเด้งขึ้นมา</label>
+          <select name="delay_ms">
+            <option value="0" {% if popup.delay_ms == 0 %}selected{% endif %}>เด้งทันที</option>
+            <option value="500" {% if popup.delay_ms == 500 %}selected{% endif %}>0.5 วินาที</option>
+            <option value="1000" {% if popup.delay_ms == 1000 %}selected{% endif %}>1 วินาที</option>
+            <option value="2000" {% if popup.delay_ms == 2000 %}selected{% endif %}>2 วินาที</option>
+            <option value="3000" {% if popup.delay_ms == 3000 %}selected{% endif %}>3 วินาที</option>
+          </select>
+        </div>
+
+        <div class="popup-check">
+          <label>
+            <input type="checkbox" name="is_active" value="1" {% if popup.is_active == 1 %}checked{% endif %}>
+            เปิดใช้งาน Popup
+          </label>
+        </div>
+
+        <div class="popup-check">
+          <label>
+            <input type="checkbox" name="show_once" value="1" {% if popup.show_once == 1 %}checked{% endif %}>
+            ให้เด้งแค่ครั้งเดียวต่อการเปิดเว็บ 1 รอบ
+          </label>
+        </div>
+
+        <div class="popup-check">
+          <label>
+            <input type="checkbox" name="remove_image" value="1">
+            ลบรูป Popup เดิม
+          </label>
+        </div>
+
+        <button type="submit" class="popup-submit">บันทึก Popup</button>
+      </form>
+
+      <div class="popup-note-box">
+        <b>วิธีใช้:</b><br>
+        1. อัปโหลดรูป Popup<br>
+        2. ติ๊ก “เปิดใช้งาน Popup”<br>
+        3. กดบันทึก<br>
+        4. กลับไปหน้าเว็บแล้วกด Ctrl + F5 เพื่อทดสอบ
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
