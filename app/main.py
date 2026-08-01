@@ -169,6 +169,73 @@ def safe_filename(value: str) -> str:
     return value or "file"
 
 
+def is_blob_url(value: str) -> bool:
+    value = (value or "").strip().lower()
+    return value.startswith("http://") or value.startswith("https://")
+
+
+def public_image_url(folder_name: str, image_value: str) -> str:
+    image_value = (image_value or "").strip()
+
+    if not image_value:
+        return ""
+
+    if is_blob_url(image_value):
+        return image_value
+
+    return f"/static/images/{folder_name}/{image_value}"
+
+
+def guess_image_content_type(filename: str) -> str:
+    filename = (filename or "").lower()
+
+    if filename.endswith(".jpg") or filename.endswith(".jpeg"):
+        return "image/jpeg"
+
+    if filename.endswith(".png"):
+        return "image/png"
+
+    if filename.endswith(".webp"):
+        return "image/webp"
+
+    return "application/octet-stream"
+
+
+def upload_file_to_vercel_blob(pathname: str, raw: bytes, content_type: str) -> str:
+    """
+    Upload รูปขึ้น Vercel Blob แล้วคืน public URL
+    ต้องมี BLOB_READ_WRITE_TOKEN ใน Vercel Environment Variables
+    """
+    force_load_env()
+    token = os.getenv("BLOB_READ_WRITE_TOKEN", "").strip()
+
+    if not token:
+        raise RuntimeError("ไม่พบ BLOB_READ_WRITE_TOKEN ใน Vercel Environment Variables")
+
+    pathname = pathname.strip("/")
+
+    response = requests.put(
+        f"https://blob.vercel-storage.com/{pathname}",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "access": "public",
+            "x-api-version": "7",
+            "x-content-type": content_type,
+            "x-add-random-suffix": "1",
+        },
+        data=raw,
+        timeout=60,
+    )
+
+    if response.status_code not in (200, 201):
+        raise RuntimeError(
+            f"Vercel Blob upload failed: {response.status_code} {response.text}"
+        )
+
+    data = response.json()
+    return data.get("url") or ""
+
+
 def save_uploaded_image(folder_path: str, prefix: str, image_file: UploadFile | None):
     if not image_file or not image_file.filename:
         return None
@@ -181,12 +248,35 @@ def save_uploaded_image(folder_path: str, prefix: str, image_file: UploadFile | 
 
     ext = os.path.splitext(original_name)[1].lower()
     safe_prefix = safe_filename(prefix)
-
     filename = f"{safe_prefix}-{datetime.now().strftime('%Y%m%d%H%M%S%f')}{ext}"
+
+    raw = image_file.file.read()
+
+    if not raw:
+        return None
+
+    max_size = 4 * 1024 * 1024
+    if len(raw) > max_size:
+        raise RuntimeError("ไฟล์รูปใหญ่เกินไป กรุณาใช้รูปไม่เกิน 4MB")
+
+    if IS_VERCEL:
+        folder_name = os.path.basename(folder_path).strip() or "uploads"
+        pathname = f"clinic/{folder_name}/{filename}"
+        content_type = guess_image_content_type(filename)
+
+        blob_url = upload_file_to_vercel_blob(
+            pathname=pathname,
+            raw=raw,
+            content_type=content_type,
+        )
+
+        return blob_url
+
+    os.makedirs(folder_path, exist_ok=True)
     file_path = os.path.join(folder_path, filename)
 
     with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(image_file.file, buffer)
+        buffer.write(raw)
 
     return filename
 
@@ -1193,20 +1283,22 @@ def get_active_promotions():
     conn = get_db()
     rows = conn.execute(
         """
-        SELECT
-            *,
-            CASE
-                WHEN image_file_1 IS NOT NULL AND image_file_1 != ''
-                THEN '/static/images/promotions/' || image_file_1
-                ELSE ''
-            END AS image_url
+        SELECT *
         FROM promotions
         WHERE is_active = 1
         ORDER BY id ASC
         """
     ).fetchall()
     conn.close()
-    return rows
+
+    items = []
+
+    for row in rows:
+        item = dict(row)
+        item["image_url"] = public_image_url("promotions", item.get("image_file_1") or "")
+        items.append(item)
+
+    return items
 
 
 def detect_video_platform(video_url: str):
@@ -1226,20 +1318,25 @@ def get_active_homecare_channels():
     conn = get_db()
     rows = conn.execute(
         """
-        SELECT
-            *,
-            CASE
-                WHEN cover_image_file IS NOT NULL AND cover_image_file != ''
-                THEN '/static/images/homecare_channel/' || cover_image_file
-                ELSE ''
-            END AS cover_image_url
+        SELECT *
         FROM homecare_channels
         WHERE is_active = 1
         ORDER BY sort_order ASC, id DESC
         """
     ).fetchall()
     conn.close()
-    return rows
+
+    items = []
+
+    for row in rows:
+        item = dict(row)
+        item["cover_image_url"] = public_image_url(
+            "homecare_channel",
+            item.get("cover_image_file") or "",
+        )
+        items.append(item)
+
+    return items
 
 
 def get_active_reviews():
@@ -1252,27 +1349,37 @@ def get_active_reviews():
         """
     ).fetchall()
     conn.close()
-    return rows
+
+    items = []
+
+    for row in rows:
+        item = dict(row)
+        item["image_url"] = public_image_url("reviews", item.get("image_file") or "")
+        items.append(item)
+
+    return items
 
 
 def get_active_doctors():
     conn = get_db()
     rows = conn.execute(
         """
-        SELECT
-            *,
-            CASE
-                WHEN image_file IS NOT NULL AND image_file != ''
-                THEN '/static/images/doctors/' || image_file
-                ELSE ''
-            END AS image_url
+        SELECT *
         FROM doctors
         WHERE is_active = 1
         ORDER BY id ASC
         """
     ).fetchall()
     conn.close()
-    return rows
+
+    items = []
+
+    for row in rows:
+        item = dict(row)
+        item["image_url"] = public_image_url("doctors", item.get("image_file") or "")
+        items.append(item)
+
+    return items
 
 
 
@@ -1319,10 +1426,7 @@ def get_active_services():
     media_by_program = {}
     for row in media_rows:
         item = dict(row)
-        if item.get("image_file"):
-            item["image_url"] = f"/static/images/services/{item['image_file']}"
-        else:
-            item["image_url"] = ""
+        item["image_url"] = public_image_url("services", item.get("image_file") or "")
 
         if item.get("video_file"):
             item["video_src"] = f"/static/videos/services/{item['video_file']}"
@@ -1334,10 +1438,10 @@ def get_active_services():
     programs_by_service = {}
     for row in program_rows:
         program = dict(row)
-        if program.get("cover_image_file"):
-            program["cover_image_url"] = f"/static/images/services/{program['cover_image_file']}"
-        else:
-            program["cover_image_url"] = ""
+        program["cover_image_url"] = public_image_url(
+            "services",
+            program.get("cover_image_file") or "",
+        )
 
         media_list = media_by_program.get(program["id"], [])
         if not media_list and program.get("cover_image_file"):
@@ -1363,6 +1467,7 @@ def get_active_services():
     services = []
     for row in service_rows:
         item = dict(row)
+        item["image_url"] = public_image_url("services", item.get("image_file") or "")
         item["programs"] = programs_by_service.get(item["id"], [])
         item["programs_json"] = json.dumps(item["programs"], ensure_ascii=False)
         services.append(item)
@@ -3899,10 +4004,7 @@ def admin_services(request: Request):
     media_by_program = {}
     for row in media_rows:
         item = dict(row)
-        if item.get("image_file"):
-            item["image_url"] = f"/static/images/services/{item['image_file']}"
-        else:
-            item["image_url"] = ""
+        item["image_url"] = public_image_url("services", item.get("image_file") or "")
 
         if item.get("video_file"):
             item["video_src"] = f"/static/videos/services/{item['video_file']}"
@@ -4721,6 +4823,9 @@ def get_service_program_by_slug(slug: str):
             services.description AS service_description,
             services.detail AS service_detail,
             CASE
+                WHEN service_programs.cover_image_file IS NOT NULL
+                     AND service_programs.cover_image_file LIKE 'http%'
+                THEN service_programs.cover_image_file
                 WHEN service_programs.cover_image_file IS NOT NULL
                      AND service_programs.cover_image_file != ''
                 THEN '/static/images/services/' || service_programs.cover_image_file
