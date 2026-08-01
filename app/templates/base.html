@@ -476,6 +476,219 @@
       }
     }
 
+
+    /* =========================
+       MOBILE RESPONSIVE HEADER + HAMBURGER MENU
+       Desktop คงเมนูเดิม / Mobile ใช้ปุ่ม ☰
+    ========================= */
+    .menu-toggle {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      html,
+      body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+
+      .top-bar {
+        font-size: 12px;
+      }
+
+      .top-bar-inner {
+        width: min(100%, calc(100% - 24px));
+        padding: 8px 0;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .top-bar-right {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        white-space: nowrap;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      .top-bar-right::-webkit-scrollbar {
+        display: none;
+      }
+
+      .site-header-inner {
+        width: min(100%, calc(100% - 24px));
+        min-height: auto;
+        padding: 14px 0;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .site-logo {
+        min-width: 0;
+      }
+
+      .site-logo-mark {
+        width: 52px;
+        height: 52px;
+      }
+
+      .site-logo-text strong {
+        font-size: 28px;
+      }
+
+      .site-logo-text span {
+        font-size: 10px;
+        letter-spacing: 2px;
+      }
+
+      .menu-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        border-radius: 16px;
+        border: 1px solid var(--hc-line);
+        background: #fffaf3;
+        color: var(--hc-green-dark);
+        font-size: 27px;
+        line-height: 1;
+        font-weight: 900;
+        box-shadow: 0 10px 24px rgba(100, 70, 60, 0.08);
+        cursor: pointer;
+      }
+
+      .site-actions {
+        grid-column: 1 / -1;
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 86px;
+        gap: 10px;
+      }
+
+      .line-btn {
+        width: 100%;
+        min-height: 54px;
+        padding: 0 14px;
+        font-size: 15px;
+      }
+
+      .lang-select {
+        width: 86px;
+        min-height: 54px;
+        padding: 0 12px;
+        font-size: 14px;
+      }
+
+      .site-nav {
+        grid-column: 1 / -1;
+        display: none;
+        width: 100%;
+        margin-top: 2px;
+        padding: 8px;
+        flex-direction: column;
+        gap: 0;
+        overflow: hidden;
+        border: 1px solid var(--hc-line);
+        border-radius: 22px;
+        background: rgba(255, 250, 243, 0.98);
+        box-shadow: 0 18px 44px rgba(100, 70, 60, 0.10);
+      }
+
+      .site-nav.is-open {
+        display: flex;
+      }
+
+      .site-nav a {
+        width: 100%;
+        padding: 15px 16px;
+        border-bottom: 1px solid rgba(199, 164, 107, 0.18);
+        font-size: 15px;
+        line-height: 1.25;
+        text-align: left;
+        white-space: normal;
+      }
+
+      .site-nav a:last-child {
+        border-bottom: none;
+      }
+
+      .site-nav a:hover {
+        border-bottom-color: rgba(199, 164, 107, 0.18);
+        background: rgba(143, 161, 132, 0.10);
+        border-radius: 14px;
+      }
+
+      .site-footer {
+        padding: 34px 0 22px;
+      }
+
+      .site-footer-inner {
+        width: min(100%, calc(100% - 24px));
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .footer-bottom {
+        width: min(100%, calc(100% - 24px));
+        margin-top: 24px;
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .floating-contact-hover {
+        right: 16px;
+        bottom: 16px;
+      }
+
+      .floating-contact-main {
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+      }
+
+      .floating-contact-menu {
+        right: 0;
+        bottom: 70px;
+        width: calc(100vw - 32px);
+        max-width: 330px;
+      }
+
+      .entry-popup-overlay {
+        padding: 14px;
+      }
+
+      .entry-popup-box {
+        width: min(340px, 88vw);
+        max-width: 340px;
+        max-height: 78vh;
+      }
+
+      .entry-popup-image {
+        max-height: 78vh;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .site-logo-text strong {
+        font-size: 24px;
+      }
+
+      .site-logo-mark {
+        width: 48px;
+        height: 48px;
+      }
+
+      .line-btn {
+        font-size: 14px;
+      }
+    }
+
   </style>
 
   {% block head %}{% endblock %}
@@ -508,7 +721,18 @@
         </div>
       </a>
 
-      <nav class="site-nav">
+      <button
+        type="button"
+        class="menu-toggle"
+        id="mobileMenuToggle"
+        aria-label="เปิดเมนู"
+        aria-expanded="false"
+        aria-controls="siteNav"
+      >
+        ☰
+      </button>
+
+      <nav class="site-nav" id="siteNav">
         <a href="/home">หน้าแรก</a>
         <a href="/home#promotions">โปรโมชั่น</a>
         <a href="/home#services">บริการของเรา</a>
@@ -1042,6 +1266,41 @@
       });
     })();
   </script>
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var toggle = document.getElementById("mobileMenuToggle");
+      var nav = document.getElementById("siteNav");
+
+      if (!toggle || !nav) return;
+
+      toggle.addEventListener("click", function () {
+        var isOpen = nav.classList.toggle("is-open");
+        toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        toggle.textContent = isOpen ? "×" : "☰";
+      });
+
+      nav.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+          if (window.innerWidth <= 768) {
+            nav.classList.remove("is-open");
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.textContent = "☰";
+          }
+        });
+      });
+
+      window.addEventListener("resize", function () {
+        if (window.innerWidth > 768) {
+          nav.classList.remove("is-open");
+          toggle.setAttribute("aria-expanded", "false");
+          toggle.textContent = "☰";
+        }
+      });
+    });
+  </script>
+
 
   {% block scripts %}{% endblock %}
 

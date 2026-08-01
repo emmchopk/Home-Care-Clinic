@@ -1,155 +1,260 @@
 {% extends "base.html" %}
 
-{% block title %}Manage Reviews | Home Care Clinic{% endblock %}
+{% block title %}Admin Before / After | Home Care Clinic{% endblock %}
 
 {% block content %}
 
 <section class="admin-page">
-  <div class="admin-head">
-    <div>
-      <p class="eyebrow">Admin Content</p>
-      <h1>Manage Client Reviews</h1>
-      <p>เพิ่ม/แก้ไขรีวิวลูกค้าใน Section Why Clients Choose Us</p>
+  <div class="admin-container">
+    <div class="admin-header">
+      <div>
+        <p class="blossom-kicker">ADMIN PANEL</p>
+        <h1>Manage Before / After</h1>
+        <p>
+          ใช้หน้านี้สำหรับเพิ่ม / แก้ไขรูป Before / After ที่แสดงบนหน้า Home Page
+        </p>
+      </div>
+
+      <a href="/admin/dashboard" class="blossom-btn-light">
+        ← Dashboard
+      </a>
     </div>
 
-    <div class="admin-actions">
-      <a href="/admin/dashboard" class="btn-outline">Dashboard</a>
-      <a href="/home" class="btn-primary">View Home</a>
+    {% if success %}
+      <div class="admin-alert success">{{ success }}</div>
+    {% endif %}
+
+    {% if error %}
+      <div class="admin-alert error">{{ error }}</div>
+    {% endif %}
+
+
+    <div class="admin-card">
+      <h2>Add Before / After</h2>
+
+      <form
+        action="/admin/reviews"
+        method="post"
+        enctype="multipart/form-data"
+        class="admin-form-grid"
+      >
+        <div>
+          <label>ชื่อเคส / ชื่อบริการ</label>
+          <input
+            type="text"
+            name="customer_name"
+            placeholder="เช่น Skin Booster / Acne Care / Laser Glow"
+            required
+          />
+        </div>
+
+        <div>
+          <label>ลำดับดาว / คะแนน</label>
+          <select name="rating">
+            <option value="5">5 ดาว</option>
+            <option value="4">4 ดาว</option>
+            <option value="3">3 ดาว</option>
+            <option value="2">2 ดาว</option>
+            <option value="1">1 ดาว</option>
+          </select>
+        </div>
+
+        <div class="full">
+          <label>รายละเอียดผลลัพธ์</label>
+          <textarea
+            name="review_text"
+            rows="4"
+            placeholder="เช่น หลังทำผิวดูชุ่มชื้น กระจ่างใสขึ้น รูขุมขนดูกระชับขึ้น"
+            required
+          ></textarea>
+        </div>
+
+        <div class="full">
+          <label>รูป Before / After</label>
+          <input
+            type="file"
+            name="image_file"
+            accept="image/*"
+          />
+          <small class="admin-help-text">
+            แนะนำให้อัปโหลดเป็นรูปเดียวที่รวม Before / After แล้ว เพื่อให้แสดงสวยบนหน้าเว็บ
+          </small>
+        </div>
+
+        <div>
+          <label>Status</label>
+          <select name="is_active">
+            <option value="1">แสดงบนหน้าเว็บ</option>
+            <option value="0">ซ่อน</option>
+          </select>
+        </div>
+
+        <div class="full">
+          <button type="submit" class="blossom-btn-primary">
+            Save Before / After
+          </button>
+        </div>
+      </form>
     </div>
-  </div>
 
-  {% if error %}
-    <div class="admin-alert error">{{ error }}</div>
-  {% endif %}
 
-  {% if success %}
-    <div class="admin-alert success">{{ success }}</div>
-  {% endif %}
+    <div class="admin-list">
+      <h2>Before / After List</h2>
 
-  <div class="admin-panel">
-    <div class="panel-head">
-      <h2>Add New Review</h2>
-      <span>แสดงในหน้า Home</span>
-    </div>
-
-    <form method="post" action="/admin/reviews" enctype="multipart/form-data" class="admin-form-grid">
-      <div>
-        <label>Customer / Review Title</label>
-        <input type="text" name="customer_name" placeholder="คุณแนน / Clean & Friendly" required />
-      </div>
-
-      <div>
-        <label>Rating</label>
-        <select name="rating">
-          <option value="5" selected>5 ดาว</option>
-          <option value="4">4 ดาว</option>
-          <option value="3">3 ดาว</option>
-          <option value="2">2 ดาว</option>
-          <option value="1">1 ดาว</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Status</label>
-        <select name="is_active">
-          <option value="1" selected>Active</option>
-          <option value="0">Hidden</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Review Image</label>
-        <input type="file" name="image_file" accept="image/*" />
-      </div>
-
-      <div class="full">
-        <label>Review Text</label>
-        <textarea name="review_text" rows="4" placeholder="ข้อความรีวิว" required></textarea>
-      </div>
-
-      <div class="full">
-        <button type="submit" class="btn-primary">Add Review</button>
-      </div>
-    </form>
-  </div>
-
-  <div class="admin-panel">
-    <div class="panel-head">
-      <h2>Review List</h2>
-      <span>{{ reviews|length }} รายการ</span>
-    </div>
-
-    <div class="admin-card-list">
       {% for review in reviews %}
-        <form
-          method="post"
-          action="/admin/reviews/{{ review.id }}/update"
-          enctype="multipart/form-data"
-          class="admin-edit-card review-edit-card"
-        >
-          <div class="admin-edit-preview">
-            {% if review.image_file %}
-              <div
-                class="review-admin-photo"
-                style="background-image: url('/static/images/reviews/{{ review.image_file }}');"
-              ></div>
-            {% else %}
-              <div class="review-admin-photo empty-photo">No Image</div>
-            {% endif %}
-          </div>
-
-          <div class="admin-edit-body">
-            <div class="admin-form-grid">
-              <div>
-                <label>Customer / Review Title</label>
-                <input type="text" name="customer_name" value="{{ review.customer_name }}" required />
-              </div>
-
-              <div>
-                <label>Rating</label>
-                <select name="rating">
-                  <option value="5" {% if review.rating == 5 %}selected{% endif %}>5 ดาว</option>
-                  <option value="4" {% if review.rating == 4 %}selected{% endif %}>4 ดาว</option>
-                  <option value="3" {% if review.rating == 3 %}selected{% endif %}>3 ดาว</option>
-                  <option value="2" {% if review.rating == 2 %}selected{% endif %}>2 ดาว</option>
-                  <option value="1" {% if review.rating == 1 %}selected{% endif %}>1 ดาว</option>
-                </select>
-              </div>
-
-              <div>
-                <label>Status</label>
-                <select name="is_active">
-                  <option value="1" {% if review.is_active == 1 %}selected{% endif %}>Active</option>
-                  <option value="0" {% if review.is_active == 0 %}selected{% endif %}>Hidden</option>
-                </select>
-              </div>
-
-              <div>
-                <label>Replace Review Image</label>
-                <input type="file" name="image_file" accept="image/*" />
-              </div>
-
-              <input type="hidden" name="existing_image_file" value="{{ review.image_file or '' }}" />
-
-              <div class="full">
-                <label>Review Text</label>
-                <textarea name="review_text" rows="4" required>{{ review.review_text }}</textarea>
-              </div>
-
-              <div class="full">
-                <button type="submit" class="mini-btn">Save Review</button>
-              </div>
+        <div class="admin-edit-card">
+          <div class="admin-edit-head">
+            <div>
+              <h3>{{ review.customer_name }}</h3>
+              <p>
+                Status:
+                {% if review.is_active %}
+                  แสดงบนหน้าเว็บ
+                {% else %}
+                  ซ่อน
+                {% endif %}
+              </p>
             </div>
           </div>
-        </form>
+
+          <form
+            action="/admin/reviews/{{ review.id }}/update"
+            method="post"
+            enctype="multipart/form-data"
+            class="admin-form-grid"
+          >
+            <div>
+              <label>ชื่อเคส / ชื่อบริการ</label>
+              <input
+                type="text"
+                name="customer_name"
+                value="{{ review.customer_name or '' }}"
+                required
+              />
+            </div>
+
+            <div>
+              <label>ลำดับดาว / คะแนน</label>
+              <select name="rating">
+                <option value="5" {% if (review.rating or 5) == 5 %}selected{% endif %}>5 ดาว</option>
+                <option value="4" {% if (review.rating or 5) == 4 %}selected{% endif %}>4 ดาว</option>
+                <option value="3" {% if (review.rating or 5) == 3 %}selected{% endif %}>3 ดาว</option>
+                <option value="2" {% if (review.rating or 5) == 2 %}selected{% endif %}>2 ดาว</option>
+                <option value="1" {% if (review.rating or 5) == 1 %}selected{% endif %}>1 ดาว</option>
+              </select>
+            </div>
+
+            <div class="full">
+              <label>รายละเอียดผลลัพธ์</label>
+              <textarea
+                name="review_text"
+                rows="4"
+                required
+              >{{ review.review_text or '' }}</textarea>
+            </div>
+
+            <input
+              type="hidden"
+              name="existing_image_file"
+              value="{{ review.image_file or '' }}"
+            />
+
+            <div class="full">
+              <label>รูป Before / After ปัจจุบัน</label>
+
+              {% if review.image_file %}
+                <div class="before-after-admin-preview">
+                  <img
+                    src="/static/images/reviews/{{ review.image_file }}?v={{ review.id }}"
+                    alt="Before After"
+                  />
+                </div>
+              {% else %}
+                <div class="admin-no-image">
+                  ยังไม่มีรูป
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="full">
+              <label>เปลี่ยนรูป Before / After</label>
+              <input
+                type="file"
+                name="image_file"
+                accept="image/*"
+              />
+              <small class="admin-help-text">
+                ถ้าไม่เลือกไฟล์ใหม่ ระบบจะใช้รูปเดิม
+              </small>
+            </div>
+
+            <div>
+              <label>Status</label>
+              <select name="is_active">
+                <option value="1" {% if review.is_active %}selected{% endif %}>
+                  แสดงบนหน้าเว็บ
+                </option>
+                <option value="0" {% if not review.is_active %}selected{% endif %}>
+                  ซ่อน
+                </option>
+              </select>
+            </div>
+
+            <div class="full admin-form-actions">
+              <button type="submit" class="blossom-btn-primary">
+                Update Before / After
+              </button>
+            </div>
+          </form>
+        </div>
       {% else %}
-        <div class="empty-state">
-          <h3>ยังไม่มี Review</h3>
-          <p>เพิ่มรีวิวแรกของคุณได้จากฟอร์มด้านบน</p>
+        <div class="admin-empty">
+          ยังไม่มีรูป Before / After
         </div>
       {% endfor %}
     </div>
   </div>
 </section>
+
+<style>
+  .admin-help-text {
+    display: block !important;
+    margin-top: 8px !important;
+    color: #7b716b !important;
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+  }
+
+  .before-after-admin-preview {
+    width: 100% !important;
+    max-width: 520px !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+    background: #eef4ea !important;
+    border: 1px solid rgba(143, 161, 132, 0.30) !important;
+    box-shadow: 0 12px 30px rgba(77, 100, 72, 0.10) !important;
+  }
+
+  .before-after-admin-preview img {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+  }
+
+  .admin-no-image {
+    width: 100% !important;
+    max-width: 520px !important;
+    min-height: 160px !important;
+    border-radius: 22px !important;
+    background: linear-gradient(135deg, #eef4ea, #fffaf3) !important;
+    border: 1px solid rgba(143, 161, 132, 0.30) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #66785f !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+  }
+</style>
 
 {% endblock %}

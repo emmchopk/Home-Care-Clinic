@@ -17,7 +17,7 @@ from authlib.integrations.starlette_client import OAuth
 from openai import OpenAI
 
 from fastapi import FastAPI, Request, Form, UploadFile, File
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -4700,6 +4700,119 @@ def admin_popup_update(
             "/admin/popup?error=" + urlencode({"": str(e)})[1:],
             status_code=303,
         )
+
+
+
+
+# =========================================================
+# PUBLIC SERVICE PROGRAM DETAIL
+# แก้ปัญหากด Program ย่อยแล้ว 404 / Not Found
+# รองรับทั้ง /service-program/{slug}, /services/{slug}, /program/{slug}
+# =========================================================
+
+def get_service_program_by_slug(slug: str):
+    conn = get_db()
+    row = conn.execute(
+        """
+        SELECT
+            service_programs.*,
+            services.title AS service_title,
+            services.slug AS service_slug,
+            services.description AS service_description,
+            services.detail AS service_detail,
+            CASE
+                WHEN service_programs.cover_image_file IS NOT NULL
+                     AND service_programs.cover_image_file != ''
+                THEN '/static/images/services/' || service_programs.cover_image_file
+                ELSE ''
+            END AS cover_image_url
+        FROM service_programs
+        LEFT JOIN services ON services.id = service_programs.service_id
+        WHERE service_programs.slug = ?
+          AND service_programs.is_active = 1
+        LIMIT 1
+        """,
+        (slug,),
+    ).fetchone()
+
+    if not row:
+        conn.close()
+        return None, []
+
+    media = conn.execute(
+        """
+        SELECT *
+        FROM program_media
+        WHERE program_id = ?
+          AND is_active = 1
+        ORDER BY sort_order ASC, id ASC
+        """,
+        (row["id"],),
+    ).fetchall()
+    conn.close()
+
+    media_items = []
+    for item in media:
+        media_item = dict(item)
+
+        if media_item.get("image_file"):
+            media_item["image_url"] = f"/static/images/services/{media_item['image_file']}"
+        else:
+            media_item["image_url"] = ""
+
+        if media_item.get("video_file"):
+            media_item["video_src"] = f"/static/videos/services/{media_item['video_file']}"
+        else:
+            media_item["video_src"] = media_item.get("video_url") or ""
+
+        media_items.append(media_item)
+
+    if not media_items and row["cover_image_file"]:
+        media_items.append(
+            {
+                "id": 0,
+                "program_id": row["id"],
+                "media_type": "image",
+                "image_file": row["cover_image_file"],
+                "video_file": "",
+                "video_url": "",
+                "caption": row["short_description"] or row["detail"] or "",
+                "sort_order": 0,
+                "is_active": 1,
+                "image_url": f"/static/images/services/{row['cover_image_file']}",
+                "video_src": "",
+            }
+        )
+
+    return row, media_items
+
+
+@app.get("/service-program/{slug}", response_class=HTMLResponse)
+def service_program_detail(request: Request, slug: str):
+    program, media_items = get_service_program_by_slug(slug)
+
+    if not program:
+        return RedirectResponse("/home#services", status_code=303)
+
+    return templates.TemplateResponse(
+        "service_program_detail.html",
+        {
+            "request": request,
+            "user": current_user(request),
+            "program": program,
+            "media_items": media_items,
+        },
+    )
+
+
+@app.get("/services/{slug}", response_class=HTMLResponse)
+def service_program_detail_alias(request: Request, slug: str):
+    return service_program_detail(request, slug)
+
+
+@app.get("/program/{slug}", response_class=HTMLResponse)
+def service_program_detail_alias_2(request: Request, slug: str):
+    return service_program_detail(request, slug)
 
 
 @app.get("/packages/{slug}")

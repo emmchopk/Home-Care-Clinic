@@ -5631,3 +5631,1043 @@ section.home-promo-final,
   }
 }
 
+/* ============================
+   MOBILE RESPONSIVE
+============================ */
+
+@media (max-width:768px){
+
+.container{
+    width:95%;
+    max-width:100%;
+    padding:0 14px;
+}
+
+.navbar{
+    padding:10px 0;
+}
+
+.logo img{
+    width:52px;
+}
+
+.logo h1{
+    font-size:30px;
+}
+
+.top-info{
+    display:none;
+}
+
+/* Hero */
+
+.home-hero{
+    padding:18px;
+}
+
+.home-hero h1{
+    font-size:42px;
+    line-height:1.15;
+}
+
+.home-hero p{
+    font-size:16px;
+}
+
+.hero-banner img{
+    border-radius:22px;
+}
+
+/* Buttons */
+
+.btn{
+    width:100%;
+    margin-bottom:10px;
+}
+
+/* About */
+
+.home-about{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+.home-about img{
+    width:100%;
+    height:auto;
+}
+
+/* Promotion */
+
+.promotion-grid{
+    grid-template-columns:1fr;
+}
+
+/* Services */
+
+.service-grid{
+    grid-template-columns:1fr;
+}
+
+/* Doctor */
+
+.doctor-grid{
+    grid-template-columns:1fr;
+}
+
+/* Review */
+
+.review-grid{
+    grid-template-columns:1fr;
+}
+
+/* Footer */
+
+.footer-grid{
+    grid-template-columns:1fr;
+}
+
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.site-footer{
+    background:#faf6ef;
+    border-top:1px solid rgba(199,164,107,.25);
+    margin-top:80px;
+    padding:60px 0 30px;
+}
+
+.site-footer-inner{
+    width:min(1280px,calc(100% - 48px));
+    margin:auto;
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr 1fr;
+    gap:50px;
+    align-items:start;
+}
+
+.site-footer h3,
+.site-footer h4{
+    font-size:22px;
+    font-weight:700;
+    color:#c79f5d;
+    margin-bottom:18px;
+    line-height:1.4;
+}
+
+.site-footer p,
+.site-footer a,
+.site-footer li,
+.site-footer span{
+    font-size:16px;
+    line-height:1.9;
+    font-weight:400;
+    color:#666;
+    text-decoration:none;
+    transition:.25s;
+}
+
+.site-footer ul{
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+
+.site-footer li{
+    margin-bottom:8px;
+}
+
+.site-footer a:hover{
+    color:#8fa184;
+}
+
+.footer-bottom{
+    width:min(1280px,calc(100% - 48px));
+    margin:35px auto 0;
+    padding-top:25px;
+    border-top:1px solid rgba(199,164,107,.2);
+    text-align:center;
+}
+
+.footer-bottom p{
+    font-size:15px;
+    color:#777;
+    margin:0;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width:768px){
+
+.site-footer{
+    padding:45px 0 20px;
+}
+
+.site-footer-inner{
+    width:min(100%,calc(100% - 32px));
+    grid-template-columns:1fr;
+    gap:28px;
+}
+
+.site-footer h3,
+.site-footer h4{
+    font-size:22px;
+    margin-bottom:14px;
+}
+
+.site-footer p,
+.site-footer a,
+.site-footer li,
+.site-footer span{
+    font-size:16px;
+    line-height:1.8;
+}
+
+.footer-bottom{
+    width:min(100%,calc(100% - 32px));
+    margin-top:20px;
+}
+
+.footer-bottom p{
+    font-size:15px;
+}
+
+}
+
+/* =========================
+   GLOBAL FONT SAME WHOLE WEBSITE
+   ให้ font และ size พื้นฐานเหมือนกันทั้งเว็บ
+========================= */
+
+html,
+body {
+  font-family: Arial, "Noto Sans Thai", sans-serif !important;
+  font-size: 16px !important;
+  line-height: 1.75 !important;
+  color: #2f2926;
+}
+
+/* ข้อความทั่วไป */
+p,
+a,
+span,
+li,
+label,
+input,
+textarea,
+select,
+button,
+small,
+div {
+  font-family: Arial, "Noto Sans Thai", sans-serif !important;
+  font-size: 16px !important;
+  line-height: 1.75 !important;
+}
+
+/* หัวข้อให้เป็น font เดียวกัน แต่ยังไล่ขนาดให้อ่านสวย */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Arial, "Noto Sans Thai", sans-serif !important;
+  line-height: 1.35 !important;
+  color: #2f2926;
+}
+
+h1 {
+  font-size: 34px !important;
+}
+
+h2 {
+  font-size: 28px !important;
+}
+
+h3 {
+  font-size: 22px !important;
+}
+
+h4,
+h5,
+h6 {
+  font-size: 18px !important;
+}
+
+/* เมนู / ปุ่ม / footer ให้เท่ากัน */
+.site-nav a,
+.footer-links a,
+.footer-col p,
+.line-btn,
+.lang-select,
+.btn,
+button {
+  font-size: 16px !important;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  html,
+  body,
+  p,
+  a,
+  span,
+  li,
+  label,
+  input,
+  textarea,
+  select,
+  button,
+  small,
+  div {
+    font-size: 15px !important;
+  }
+
+  h1 {
+    font-size: 30px !important;
+  }
+
+  h2 {
+    font-size: 25px !important;
+  }
+
+  h3 {
+    font-size: 21px !important;
+  }
+
+  h4,
+  h5,
+  h6 {
+    font-size: 18px !important;
+  }
+}
+
+/* =========================
+   SMALL GLOBAL FONT
+========================= */
+
+html,
+body {
+  font-family: Arial, "Noto Sans Thai", sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+}
+
+p,
+a,
+span,
+li,
+label,
+input,
+textarea,
+select,
+button,
+small,
+div {
+  font-family: Arial, "Noto Sans Thai", sans-serif !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Arial, "Noto Sans Thai", sans-serif !important;
+  line-height: 1.3 !important;
+}
+
+h1 { font-size: 26px !important; }
+h2 { font-size: 22px !important; }
+h3 { font-size: 18px !important; }
+h4,
+h5,
+h6 { font-size: 15px !important; }
+
+.site-nav a,
+.footer-links a,
+.footer-col p,
+.line-btn,
+.lang-select,
+.btn,
+button {
+  font-size: 13px !important;
+}
+
+.site-logo-text strong {
+  font-size: 24px !important;
+}
+
+.site-logo-text span {
+  font-size: 9px !important;
+}
+
+@media (max-width: 768px) {
+  html,
+  body,
+  p,
+  a,
+  span,
+  li,
+  label,
+  input,
+  textarea,
+  select,
+  button,
+  small,
+  div {
+    font-size: 12px !important;
+  }
+
+  h1 { font-size: 24px !important; }
+  h2 { font-size: 20px !important; }
+  h3 { font-size: 17px !important; }
+  h4,
+  h5,
+  h6 { font-size: 14px !important; }
+
+  .site-logo-text strong {
+    font-size: 22px !important;
+  }
+}
+
+.home-restore-review-photo{
+  width:58px !important;
+  height:58px !important;
+  border-radius:999px !important;
+  background-size:cover !important;
+  background-position:center !important;
+  background-repeat:no-repeat !important;
+  background-color:#f1f6ed !important;
+  border:3px solid #fffaf3 !important;
+  box-shadow:0 10px 24px rgba(77,100,72,.14) !important;
+  margin:0 0 14px !important;
+}
+
+.home-restore-review-photo.no-photo{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:linear-gradient(135deg,#eef4ea,#fffaf3) !important;
+  border:1px solid rgba(143,161,132,.35) !important;
+}
+
+.home-restore-review-photo.no-photo span{
+  color:#66785f !important;
+  font-size:15px !important;
+  font-weight:900 !important;
+  letter-spacing:.5px !important;
+}
+
+/* =====================================================
+   BEFORE / AFTER SECTION
+   ใช้ข้อมูลจาก reviews เดิม แต่เปลี่ยนหน้าบ้านเป็น Before / After
+===================================================== */
+
+.before-after-slider {
+  align-items: stretch !important;
+}
+
+.before-after-card {
+  min-width: 330px !important;
+  max-width: 330px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border-radius: 24px !important;
+  background: rgba(255, 250, 243, 0.90) !important;
+  border: 1px solid rgba(143, 161, 132, 0.30) !important;
+  box-shadow: 0 14px 34px rgba(77, 100, 72, 0.10) !important;
+}
+
+.before-after-photo {
+  width: 100% !important;
+  height: 230px !important;
+  display: block !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-color: #eef4ea !important;
+}
+
+.before-after-photo.no-photo {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: linear-gradient(135deg, #eef4ea, #fffaf3) !important;
+  color: #66785f !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+}
+
+.before-after-body {
+  padding: 18px 20px 22px !important;
+}
+
+.before-after-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 5px 12px !important;
+  border-radius: 999px !important;
+  background: rgba(143, 161, 132, 0.16) !important;
+  color: #4d6448 !important;
+  border: 1px solid rgba(143, 161, 132, 0.25) !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+  margin-bottom: 12px !important;
+}
+
+.before-after-body h3 {
+  margin: 0 0 10px !important;
+  color: #2f3a2b !important;
+  font-family: Georgia, "Times New Roman", serif !important;
+  font-size: 22px !important;
+  font-weight: 400 !important;
+  line-height: 1.25 !important;
+}
+
+.before-after-body p {
+  margin: 0 !important;
+  color: #5f6f59 !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+}
+
+@media (max-width: 700px) {
+  .before-after-card {
+    min-width: 260px !important;
+    max-width: 260px !important;
+  }
+
+  .before-after-photo {
+    height: 200px !important;
+  }
+
+  .before-after-body h3 {
+    font-size: 19px !important;
+  }
+}
+
+/* =========================================================
+   MOBILE RESPONSIVE FINAL - WHOLE WEBSITE
+   ใช้แก้ทั้งเว็บให้รองรับมือถือ / Tablet
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+img,
+video,
+iframe {
+  max-width: 100%;
+}
+
+/* ปุ่มเมนูมือถือ */
+.mobile-menu-btn {
+  display: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(143, 161, 132, 0.35);
+  border-radius: 14px;
+  background: #fffaf5;
+  color: #4d6448;
+  font-size: 24px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  body {
+    overflow-x: hidden !important;
+  }
+
+  .topbar {
+    padding: 10px 18px !important;
+    font-size: 11px !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .navbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9998 !important;
+    padding: 12px 18px !important;
+    background: rgba(255, 250, 245, 0.96) !important;
+    backdrop-filter: blur(14px) !important;
+  }
+
+  .logo-with-image {
+    gap: 10px !important;
+    min-width: 0 !important;
+  }
+
+  .site-logo-img {
+    width: 46px !important;
+    height: 46px !important;
+    flex: 0 0 auto !important;
+  }
+
+  .logo-text strong {
+    font-size: 17px !important;
+    white-space: nowrap !important;
+  }
+
+  .logo-text small {
+    font-size: 9px !important;
+    letter-spacing: 1.2px !important;
+    white-space: nowrap !important;
+  }
+
+  .mobile-menu-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .nav-menu {
+    position: absolute !important;
+    left: 16px !important;
+    right: 16px !important;
+    top: calc(100% + 8px) !important;
+    display: none !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 16px !important;
+    border-radius: 24px !important;
+    background: rgba(255, 250, 245, 0.98) !important;
+    border: 1px solid rgba(143, 161, 132, 0.28) !important;
+    box-shadow: 0 22px 60px rgba(78, 52, 43, 0.16) !important;
+  }
+
+  .nav-menu.show-mobile-menu {
+    display: flex !important;
+  }
+
+  .nav-menu a,
+  .nav-menu .booking-btn {
+    width: 100% !important;
+    display: block !important;
+    padding: 13px 16px !important;
+    border-radius: 16px !important;
+    text-align: left !important;
+    background: #fff !important;
+    color: #2f2926 !important;
+  }
+
+  .nav-menu .booking-btn {
+    text-align: center !important;
+    background: #7f9474 !important;
+    color: #fff !important;
+  }
+
+  .language-select {
+    width: 100% !important;
+    height: 44px !important;
+    margin-top: 4px !important;
+  }
+
+  .admin-container,
+  .home-restore-container,
+  .package-detail-container,
+  .package-detail-content,
+  .blossom-container {
+    width: calc(100% - 32px) !important;
+    max-width: 100% !important;
+  }
+
+  .admin-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+  }
+
+  .admin-header h1 {
+    font-size: 34px !important;
+    line-height: 1.15 !important;
+  }
+
+  .admin-card,
+  .admin-edit-card,
+  .admin-empty {
+    padding: 22px !important;
+    border-radius: 24px !important;
+  }
+
+  .admin-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-form-grid .full {
+    grid-column: auto !important;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px !important;
+  }
+
+  table {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+  }
+
+  .home-restore-about-grid,
+  .blossom-intro-grid,
+  .blossom-location-card,
+  .package-detail-container {
+    grid-template-columns: 1fr !important;
+  }
+
+  .home-restore-about-img {
+    margin: 0 auto !important;
+  }
+
+  .home-restore-promo-frame {
+    height: 560px !important;
+  }
+
+  .home-restore-promo-slide {
+    grid-template-columns: 1fr !important;
+  }
+
+  .home-restore-promo-photo {
+    height: 235px !important;
+  }
+
+  .home-restore-promo-info {
+    height: 325px !important;
+  }
+
+  .channel-track {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    padding-bottom: 14px !important;
+  }
+
+  .channel-card {
+    min-width: 260px !important;
+    scroll-snap-align: start !important;
+  }
+
+  .home-restore-doctor-grid,
+  .home-restore-service-grid,
+  .blossom-package-grid,
+  .blossom-promo-grid,
+  .hc-doctor-grid,
+  .blossom-review-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 24px !important;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .topbar {
+    display: none !important;
+  }
+
+  .navbar {
+    padding: 10px 14px !important;
+  }
+
+  .site-logo-img {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .logo-text strong {
+    font-size: 15px !important;
+  }
+
+  .logo-text small {
+    font-size: 8px !important;
+  }
+
+  .mobile-menu-btn {
+    width: 42px !important;
+    height: 42px !important;
+    font-size: 22px !important;
+  }
+
+  .admin-container,
+  .home-restore-container,
+  .package-detail-container,
+  .package-detail-content,
+  .blossom-container {
+    width: calc(100% - 24px) !important;
+  }
+
+  .home-restore-hero {
+    padding: 16px 0 28px !important;
+  }
+
+  .home-restore-hero-shell {
+    border-radius: 22px !important;
+  }
+
+  .home-restore-hero-image {
+    height: 180px !important;
+  }
+
+  .home-restore-hero-text {
+    padding: 24px 20px 26px !important;
+  }
+
+  .home-restore-hero-text h1 {
+    font-size: 31px !important;
+    line-height: 1.08 !important;
+  }
+
+  .home-restore-hero-text p:not(.home-restore-label) {
+    font-size: 13px !important;
+    line-height: 1.75 !important;
+  }
+
+  .home-restore-hero-actions {
+    flex-direction: column !important;
+  }
+
+  .home-restore-btn,
+  .blossom-btn-primary,
+  .blossom-btn-light {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .home-restore-about,
+  .home-restore-promo,
+  .homecare-channel,
+  .home-restore-review,
+  .home-restore-doctors,
+  .home-restore-services,
+  .admin-page,
+  .package-detail-section {
+    padding: 42px 0 !important;
+  }
+
+  .home-restore-about-img {
+    width: 100% !important;
+    max-width: 280px !important;
+    height: 280px !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+  }
+
+  .home-restore-about-card {
+    min-height: auto !important;
+    padding: 24px 20px !important;
+  }
+
+  .home-restore-about-card h2,
+  .home-restore-section-head h2,
+  .channel-head h2,
+  .admin-header h1,
+  .package-detail-content h1,
+  .package-detail-main h2 {
+    font-size: 28px !important;
+    line-height: 1.16 !important;
+  }
+
+  .home-restore-promo-frame {
+    height: 545px !important;
+    border-radius: 22px !important;
+  }
+
+  .home-restore-promo-photo {
+    height: 210px !important;
+  }
+
+  .home-restore-promo-info {
+    height: 335px !important;
+    padding: 24px 22px 54px !important;
+  }
+
+  .home-restore-promo-info h3 {
+    font-size: 27px !important;
+  }
+
+  .channel-card {
+    min-width: 72vw !important;
+    height: 310px !important;
+  }
+
+  .channel-arrow {
+    display: none !important;
+  }
+
+  .home-restore-review-wrap {
+    grid-template-columns: 1fr !important;
+  }
+
+  .home-restore-review-wrap .home-restore-arrow {
+    display: none !important;
+  }
+
+  .home-restore-review-slider {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+
+  .before-after-only-card,
+  .home-restore-review-card {
+    min-width: 230px !important;
+    max-width: 230px !important;
+  }
+
+  .before-after-only-photo {
+    height: 190px !important;
+  }
+
+  .home-restore-doctor-grid,
+  .home-restore-service-grid,
+  .blossom-package-grid,
+  .blossom-promo-grid,
+  .hc-doctor-grid,
+  .blossom-review-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .home-restore-doctor-img {
+    height: 240px !important;
+  }
+
+  .home-restore-service-card {
+    height: 280px !important;
+  }
+
+  .admin-image-preview-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .admin-image-preview {
+    height: 130px !important;
+  }
+
+  .package-detail-hero,
+  .package-detail-image {
+    min-height: 70vh !important;
+  }
+
+  .package-detail-content {
+    padding: 70px 0 !important;
+  }
+
+  .package-detail-actions {
+    flex-direction: column !important;
+  }
+
+  .package-gallery {
+    grid-template-columns: 1fr !important;
+  }
+
+  .package-gallery-item {
+    height: 210px !important;
+  }
+
+  .floating-contact {
+    right: 14px !important;
+    bottom: 14px !important;
+  }
+
+  .floating-main-btn {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .floating-contact-panel {
+    width: calc(100vw - 28px) !important;
+    right: -2px !important;
+    bottom: 70px !important;
+  }
+
+  .footer {
+    padding: 42px 14px 22px !important;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 22px !important;
+  }
+
+  .footer h4 {
+    font-size: 16px !important;
+  }
+
+  .footer p,
+  .footer li,
+  .footer a {
+    font-size: 13px !important;
+    line-height: 1.7 !important;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 420px) {
+  .logo-text strong {
+    font-size: 14px !important;
+  }
+
+  .logo-text small {
+    display: none !important;
+  }
+
+  .home-restore-hero-text h1 {
+    font-size: 28px !important;
+  }
+
+  .home-restore-section-head h2,
+  .channel-head h2,
+  .admin-header h1 {
+    font-size: 25px !important;
+  }
+
+  .home-restore-about-img {
+    height: 250px !important;
+    max-width: 250px !important;
+  }
+
+  .home-restore-promo-frame {
+    height: 520px !important;
+  }
+
+  .channel-card {
+    min-width: 78vw !important;
+  }
+
+  .admin-image-preview-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
